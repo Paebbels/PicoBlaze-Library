@@ -1,0 +1,59 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ============================================================================
+; Authors:				Patrick Lehmann
+; 
+; Summary:				PicoBlaze global register name definition
+;
+; Description:
+; ------------------------------------
+;		The default register set defines:
+;		- 4 argument registers
+;			* if more arguments are needed, REG_TMP_ can be used
+;		- 6 temporary registers
+;		- 6 special purpose registers
+;			* 1 pointer register group (high & low)
+;			* 1 next thread register
+;			* 1 loop counter register
+;			* 1 return value register - mostly used with LOAD&RETURN statements
+;			* 1 stack pointer register
+;
+; License:
+; ============================================================================
+; Copyright 2012-2015 Patrick Lehmann, Dresden, Germany
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ============================================================================
+;
+; global register names
+; ===============================================
+NAMEREG								s0,		REG_ARG_0
+NAMEREG								s1,		REG_ARG_1
+NAMEREG								s2,		REG_ARG_2
+NAMEREG								s3,		REG_ARG_3
+;
+NAMEREG								s4,		REG_TMP_0
+NAMEREG								s5,		REG_TMP_1
+NAMEREG								s6,		REG_TMP_2
+NAMEREG								s7,		REG_TMP_3
+NAMEREG								s8,		REG_TMP_4
+NAMEREG								s9,		REG_TMP_5
+;
+NAMEREG								sA,		REG_PTR_L			; pointer low
+NAMEREG								sB,		REG_PTR_H			; pointer high
+NAMEREG								sC,		REG_NT				; next thread
+NAMEREG								sD,		REG_CNT				; Counter
+NAMEREG								sE,		REG_LAR				; Load & Return
+NAMEREG								sF,		REG_SP				; Stack Pointer
