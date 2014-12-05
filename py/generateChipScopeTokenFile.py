@@ -1,7 +1,59 @@
+# EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+# vim: tabstop=2:shiftwidth=2:noexpandtab
+# kate: tab-width 2; replace-tabs off; indent-width 2;
+# 
+# ============================================================================
+# Authors:				Patrick Lehmann
+# 
+# Summary:				Token file generator for the PicoBlaze 6 instruction set.
+#
+# Description:
+# ------------------------------------
+#		The default register set defines:
+#		- 4 argument registers
+#			* if more arguments are needed, REG_TMP_ can be used
+#		- 6 temporary registers
+#		- 6 special purpose registers
+#			* 1 pointer register group (high & low)
+#			* 1 next thread register
+#			* 1 loop counter register
+#			* 1 return value register - mostly used with LOAD&RETURN statements
+#			* 1 stack pointer register
+#
+#		Requirements:
+#		=============
+#			Python 3.4+
+#
+# License:
+# ============================================================================
+# Copyright 2012-2015 Patrick Lehmann, Dresden, Germany
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#		http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ============================================================================
+#
+#
+# Configuration
+# ==================
+#
+# define your output filename
+tokenFileName = "KCPSM6.tok"
 
 # define your register names s0..sF
 regNames = ["Arg0", "Arg1", "Arg2", "Arg3", "Tmp0", "Tmp1", "Tmp2", "Tmp3", "Tmp4", "Tmp5", "PtrL", "PtrH", "NxtTh", "Cnt", "LaR", "SP"]
 
+# Format function
+# ==============================================================================
+#
 # expand **XY0 instructions
 def op_sXsY(opname, opcode):
 	lines = ""
@@ -70,11 +122,14 @@ def op_aaa(opname, opcode):
 		lines += "{:s}_{:03x}={:s}{:03x}\n".format(opname, aaa, opcode, aaa)
 	
 	return lines
-	
-	
+
+
 tokenFileContent = ""
-# Register loading
-tokenFileContent += op_sXsY2("MOVE",		"00")
+
+# Expand all instructions and append them to tokenFileContent
+# ==============================================================================
+# Register loading					Mnemonic		OpCode
+tokenFileContent += op_sXsY2("MOVE",	"00")
 tokenFileContent += op_sXkk("CONST",	"01")
 tokenFileContent += op_sXsY("STAR",		"16")
 tokenFileContent += op_sXkk("STAR",		"17")
@@ -154,8 +209,9 @@ tokenFileContent += "RETc=39000\n"
 tokenFileContent += "RETnc=3D000\n"
 tokenFileContent += op_sXkk("LaR",		"21")
 
+# Write tokenFileContent to disk
 import pathlib
-outputFilePath = pathlib.Path("kcpsm6.tok")
+outputFilePath = pathlib.Path(tokenFileName)
 print("Writing PicoBlaze Instructions to token file: %s" % outputFilePath)
 with outputFilePath.open(mode='w', encoding="utf-8") as tokenFile:
 	tokenFile.write(tokenFileContent)
