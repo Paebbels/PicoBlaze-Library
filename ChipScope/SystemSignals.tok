@@ -1,0 +1,11 @@
+# SoFPGA - System signals (Interrupt, Reboot)
+#
+#
+# ChipScope Token File Version
+@FILE_VERSION=1.0.0
+
+# Default token value
+@DEFAULT_TOKEN=Running
+#
+Interrupt=1
+Reboot=2

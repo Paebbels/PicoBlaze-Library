@@ -1,0 +1,14 @@
+/.project
+psm/*.fmt
+psm/io/*.fmt
+psm/lib/*.fmt
+netlist/
+psm/dev/*.fmt
+UARTServer/bin/
+UARTServer/obj/
+Assembler/KCPSM6_session_log.txt
+Open PicoBlaze Assembler/__pycache__/
+Open PicoBlaze Assembler/build/
+Open PicoBlaze Assembler/setuptools-5.1-py3.4.egg
+Open PicoBlaze Assembler/setuptools-5.1.zip
+Open PicoBlaze Assembler/opbasm.egg-info/
