@@ -1,0 +1,120 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		Delay functions for PicoBlaze clocked at 100 MHz
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		- __Sleep_n_cy
+;		- __Sleep_1_us
+;		- __Sleep_n_us
+;		- __Sleep_1_ms
+;		- __Sleep_n_ms
+;		- __Sleep_1_s
+;
+; private functions:
+;		- _Sleep_loop3
+;
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+; minimum n:	 6 (120 ns)
+; maximum n: 255 (5100 ns)
+;PRAGMA function _sleep_n_cy begin
+__Sleep_n_cy:				; (n instructions - (4 instructions header/footer)) / 2 instructions per loop -> (n / 2) - 2 iterations
+										SR0			REG_ARG_0										; devide by 2
+										SUB			REG_ARG_0,		2'd						; subtract 3 header and 1 footer instructions
+		_Sleep_loop1:		SUB			REG_ARG_0,		1'd
+										JUMP		NZ,						_Sleep_loop1
+										RETURN															; 6 instructions outside sleep_loop (CALL, LOAD, 2x SR*, SUB, ..., RETURN)
+;PRAGMA function end
+;
+;PRAGMA function _sleep_1_us begin
+__Sleep_1_us:				LOAD		REG_TMP_5,		23'd					; 1us -> ((100 clock cycles / 2 clock cycles/instruction) - (4 instructions for header/footer)) / 2 instructions per loop -> 23 iterations
+										LOAD		REG_TMP_5,		REG_TMP_5			; NOP
+		_Sleep_loop2:		SUB			REG_TMP_5,		1'd
+										JUMP		NZ,						_Sleep_loop2
+										RETURN															; 4 instructions outside sleep_loop (CALL, LOAD, NOP, ..., RETURN)
+;PRAGMA function end
+;
+;PRAGMA function _sleep_n_us begin
+__Sleep_n_us:				LOAD		REG_ARG_1,		50'd					; 50 instructions per microsecond
+										CALL		__DEV_Mult16_mult8					; 7 instructions (CALL, 2x OUTPUT, NOP, 2x INPUT, RETURN)
+										LOAD		REG_TMP_4,		REG_ARG_1			; copy result to tmp registers
+										LOAD		REG_TMP_3,		REG_ARG_0			;
+										SR0			REG_TMP_4										; divide by 4 (4 instructions per loop) => 2x shift right
+										SRA			REG_TMP_3										; 
+										SR0			REG_TMP_4										; 
+										SRA			REG_TMP_3										; 
+										SUB			REG_TMP_3,		5'd						; 20 instruction outside of sleep_loop (7x mult8 + 13x sleep_n_us) / 4 instructions per loop -> subtract 5 iterations
+										SUBCY		REG_TMP_4,		0'd						;
+										LOAD		REG_TMP_5,		00						;
+										JUMP		_Sleep_loop3								; 13 instructions header/footer (CALL, 4x LOAD, 4x SR*, 2x SUB*, JUMP, RETURN)
+;PRAGMA function end
+;
+;PRAGMA function _sleep_1_ms begin
+__Sleep_1_ms:				; sleep for 1 millisecond => 12.500 iterations => 0x0030D4
+										LOAD		REG_TMP_5,		00
+										LOAD		REG_TMP_4,		30
+										LOAD		REG_TMP_3,		D4
+										JUMP		_Sleep_loop3
+;PRAGMA function end
+;
+; maximal 255 ms
+;PRAGMA function _sleep_n_ms begin
+__Sleep_n_ms:				LOAD		REG_ARG_1,		00						; fill operand A -> 0x00aa
+										LOAD		REG_ARG_3,		30						; 12,500 instructions per millisecond
+										LOAD		REG_ARG_2,		D4						; 
+										CALL		__DEV_Mult16_mult						; 11 instructions (CALL, 4x OUTPUT, NOP, 4x INPUT, RETURN)
+										LOAD		REG_TMP_5,		REG_ARG_2			; copy result to tmp registers
+										LOAD		REG_TMP_4,		REG_ARG_1			; 
+										LOAD		REG_TMP_3,		REG_ARG_0			;
+										LOAD		REG_ARG_0,		REG_ARG_0			; NOP
+										SUB			REG_TMP_3,		6'd						; 20 instruction outside of sleep_loop (7x mult8 + 13x sleep_n_us) / 4 instructions per loop -> subtract 5 iterations
+										SUBCY		REG_TMP_4,		0'd						;
+										SUBCY		REG_TMP_5,		0'd						;
+										JUMP		_Sleep_loop3								; 13 instructions header/footer (CALL, 4x LOAD, 4x SR*, 2x SUB*, JUMP, RETURN)
+;PRAGMA function end
+;
+;PRAGMA function _sleep_1_s begin
+__Sleep_1_s:				; sleep for 1 second => 12.500.000 iterations => 0xBEBC20
+										LOAD		REG_TMP_5,		BE
+										LOAD		REG_TMP_4,		BC
+										LOAD		REG_TMP_3,		20
+;PRAGMA function end
+; delay loop
+;	======================================
+; delay calculation:
+;		1. each subtraction round costs 8 clock cycles (4 instruction * 2 clock cycles/instruction)
+;		2. PicoBlaze clock frequency in clock cycles per second divided by 8 => loop count
+;		3. subtract argument passing, call and return delays (not done yet)
+;		
+;		example: 1 second = 12.500.000 iterations at 100 MHz
+; ===============================================
+;PRAGMA function _sleep_loop begin
+		_Sleep_loop3:		SUB			REG_TMP_3,		1'd
+										SUBCY		REG_TMP_4,		0'd
+										SUBCY		REG_TMP_5,		0'd
+										JUMP		NZ,						_Sleep_loop3
+										RETURN
+;PRAGMA function end
+;
