@@ -26,7 +26,7 @@
 #
 # License:
 # ============================================================================
-# Copyright 2012-2015 Patrick Lehmann, Dresden, Germany
+# Copyright 2012-2015 Patrick Lehmann - Dresden, Germany
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,16 +57,16 @@ regNames = ["Arg0", "Arg1", "Arg2", "Arg3", "Tmp0", "Tmp1", "Tmp2", "Tmp3", "Tmp
 # expand **XY0 instructions
 def op_sXsY(opname, opcode):
 	lines = ""
-	for x in range(0, 15):
-		for y in range(0, 15):
+	for x in range(0, 16):
+		for y in range(0, 16):
 			lines += "{:s}_{:s}_{:s}={:s}{:1x}{:1x}0\n".format(opname, regNames[x], regNames[y], opcode, x, y)
 	return lines
 
 # expand **XY0 instructions
 def op_sXsY2(opname, opcode):
 	lines = ""
-	for x in range(0, 15):
-		for y in range(0, 15):
+	for x in range(0, 16):
+		for y in range(0, 16):
 			if (x != y):
 				lines += "{:s}_{:s}_{:s}={:s}{:1x}{:1x}0\n".format(opname, regNames[x], regNames[y], opcode, x, y)
 			else:
@@ -76,23 +76,23 @@ def op_sXsY2(opname, opcode):
 # expand **Xkk instructions
 def op_sXkk(opname, opcode):
 	lines = ""
-	for x in range(0, 15):
-		for kk in range(0, 255):
+	for x in range(0, 16):
+		for kk in range(0, 256):
 			lines += "{:s}_{:s}_0x{:02x}={:s}{:01x}{:02x}\n".format(opname, regNames[x], kk, opcode, x, kk)
 	return lines
 
 # expand **X** instructions
 def op_sX(opname, opcode1, opcode2):
 	lines = ""
-	for x in range(0, 15):
+	for x in range(0, 16):
 		lines += "{:s}_{:s}={:s}{:1x}{:s}\n".format(opname, regNames[x], opcode1, x, opcode2)
 	return lines
 
 # expand **Xpp instructions
 def op_sXpp(opname, opcode):
 	lines = ""
-	for x in range(0, 15):
-		for pp in range(0, 255):
+	for x in range(0, 16):
+		for pp in range(0, 256):
 			lines += "{:s}_{:s}_P{:d}={:s}{:01x}{:02x}\n".format(opname, regNames[x], pp, opcode, x, pp)
 	
 	return lines
@@ -100,8 +100,8 @@ def op_sXpp(opname, opcode):
 # expand **Xss instructions
 def op_sXss(opname, opcode):
 	lines = ""
-	for x in range(0, 15):
-		for pp in range(0, 255):
+	for x in range(0, 16):
+		for pp in range(0, 256):
 			lines += "{:s}_{:s}_P{:d}={:s}{:01x}{:02x}\n".format(opname, regNames[x], pp, opcode, x, pp)
 	
 	return lines
@@ -109,8 +109,8 @@ def op_sXss(opname, opcode):
 # expand **kkp instructions
 def op_kkp(opname, opcode):
 	lines = ""
-	for kk in range(0, 255):
-		for p in range(0, 15):
+	for kk in range(0, 256):
+		for p in range(0, 16):
 			lines += "{:s}_0x{:02x}_P{:d}={:s}{:02x}{:01x}\n".format(opname, kk, p, opcode, kk, p)
 	
 	return lines
@@ -118,7 +118,7 @@ def op_kkp(opname, opcode):
 # expand **aaa instructions
 def op_aaa(opname, opcode):
 	lines = ""
-	for aaa in range(0, 4095):
+	for aaa in range(0, 4096):
 		lines += "{:s}_{:03x}={:s}{:03x}\n".format(opname, aaa, opcode, aaa)
 	
 	return lines

@@ -1,0 +1,214 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		String conversion and manipulation functions
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		__Str_ByteToAscii
+;		__Str_QuadByteToDecimal
+; 
+;	private functions:
+;		
+;
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+;PRAGMA function _str_bytetoascii begin
+__Str_ByteToAscii:				LOAD			REG_ARG_1,	REG_ARG_0
+													AND				REG_ARG_1,	0F
+													COMPARE		REG_ARG_1,	10'd
+													JUMP C,		_Str_ByteToAscii_Jmp1
+													ADD				REG_ARG_1,	7'd
+	_Str_ByteToAscii_Jmp1:	ADD				REG_ARG_1,	"0"
+													SR0				REG_ARG_0
+													SR0				REG_ARG_0
+													SR0				REG_ARG_0
+													SR0				REG_ARG_0
+													COMPARE		REG_ARG_0,	10'd
+													JUMP C,		_Str_ByteToAscii_Jmp2
+													ADD				REG_ARG_0,	7'd
+	_Str_ByteToAscii_Jmp2:	ADD				REG_ARG_0,	"0"
+													RETURN
+;PRAGMA function end
+;
+;PRAGMA function _str_bytetodecimal begin
+__Str_ByteToDecimal:				LOAD			REG_TMP_0,	0'd
+														LOAD			REG_ARG_1,	0'd
+														LOAD			REG_ARG_2,	0'd
+														;
+														LOAD			REG_TMP_1,	8'd
+														;
+	_Str_ByteToDec_loop:			SL0				REG_ARG_0
+														;
+	_Str_ByteToDec_0:					SLA				REG_TMP_0
+														ADD				REG_TMP_0, F6
+														JUMP	C,	_Str_ByteToDec_1
+														SUB				REG_TMP_0, F6
+														;
+	_Str_ByteToDec_1:					SLA				REG_ARG_1
+														ADD				REG_ARG_1, F6
+														JUMP	C,	_Str_ByteToDec_2
+														SUB				REG_ARG_1, F6
+														;
+	_Str_ByteToDec_2:					SLA				REG_ARG_2
+														; at most 2 -> never overflows
+														;
+														SUB				REG_TMP_1, 1
+														JUMP NZ,	_Str_ByteToDec_loop
+														;
+														LOAD			REG_ARG_0,	REG_TMP_0
+
+														RETURN
+;PRAGMA function end
+;
+;PRAGMA function _str_doublebytetodecimal begin
+__Str_DoubleByteToDecimal:	JUMP			__Error
+;PRAGMA function end
+;
+;PRAGMA function _str_quadbytetodecimal begin
+__Str_QuadByteToDecimal:		DISABLE INTERRUPT
+														STAR			s0,					REG_ARG_0
+														STAR			s1,					REG_ARG_1
+														STAR			s2,					REG_ARG_2
+														STAR			s3,					REG_ARG_3
+														STAR			sF,					REG_SP
+														;
+														REGBANK		B
+														NAMEREG		REG_TMP_0,	REG_RES_0
+														NAMEREG		REG_TMP_1,	REG_RES_1
+														NAMEREG		REG_TMP_2,	REG_RES_2
+														NAMEREG		REG_TMP_3,	REG_RES_3
+														NAMEREG		REG_TMP_4,	REG_RES_4
+														NAMEREG		REG_TMP_5,	REG_RES_5
+														NAMEREG		REG_PTR_L,	REG_RES_6
+														NAMEREG		REG_PTR_H,	REG_RES_7
+														NAMEREG		REG_NT,			REG_RES_8
+														NAMEREG		REG_LAR,		REG_RES_9
+														
+														LOAD			REG_RES_0,	 0'd
+														LOAD			REG_RES_1,	 0'd
+														LOAD			REG_RES_2,	 0'd
+														LOAD			REG_RES_3,	 0'd
+														LOAD			REG_RES_4,	 0'd
+														LOAD			REG_RES_5,	 0'd
+														LOAD			REG_RES_6,	 0'd
+														LOAD			REG_RES_7,	 0'd
+														LOAD			REG_RES_8,	 0'd
+														LOAD			REG_RES_9,	 0'd
+														;
+														LOAD			REG_CNT,		32'd
+														;
+	_Str_QuadByteToDec_loop:	SL0				REG_ARG_0
+														SLA				REG_ARG_1
+														SLA				REG_ARG_2
+														SLA				REG_ARG_3
+														;
+	_Str_QuadByteToDec_0:			SLA				REG_RES_0
+														ADD				REG_RES_0, F6
+														JUMP	C,	_Str_QuadByteToDec_1
+														SUB				REG_RES_0, F6
+														;
+	_Str_QuadByteToDec_1:			SLA				REG_RES_1
+														ADD				REG_RES_1, F6
+														JUMP	C,	_Str_QuadByteToDec_2
+														SUB				REG_RES_1, F6
+														;
+	_Str_QuadByteToDec_2:			SLA				REG_RES_2
+														ADD				REG_RES_2, F6
+														JUMP	C,	_Str_QuadByteToDec_3
+														SUB				REG_RES_2, F6
+														;
+	_Str_QuadByteToDec_3:			SLA				REG_RES_3
+														ADD				REG_RES_3, F6
+														JUMP	C,	_Str_QuadByteToDec_4
+														SUB				REG_RES_3, F6
+														;
+	_Str_QuadByteToDec_4:			SLA				REG_RES_4
+														ADD				REG_RES_4, F6
+														JUMP	C,	_Str_QuadByteToDec_5
+														SUB				REG_RES_4, F6
+														;
+	_Str_QuadByteToDec_5:			SLA				REG_RES_5
+														ADD				REG_RES_5, F6
+														JUMP	C,	_Str_QuadByteToDec_6
+														SUB				REG_RES_5, F6
+														;
+	_Str_QuadByteToDec_6:			SLA				REG_RES_6
+														ADD				REG_RES_6, F6
+														JUMP	C,	_Str_QuadByteToDec_7
+														SUB				REG_RES_6, F6
+														;
+	_Str_QuadByteToDec_7:			SLA				REG_RES_7
+														ADD				REG_RES_7, F6
+														JUMP	C,	_Str_QuadByteToDec_8
+														SUB				REG_RES_7, F6
+														;
+	_Str_QuadByteToDec_8:			SLA				REG_RES_8
+														ADD				REG_RES_8, F6
+														JUMP	C,	_Str_QuadByteToDec_9
+														SUB				REG_RES_8, F6
+														;
+	_Str_QuadByteToDec_9:			SLA				REG_RES_9
+														; at most 4 -> never overflows
+														;
+														SUB				REG_CNT, 1
+														JUMP NZ,	_Str_QuadByteToDec_loop
+														;
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_0, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_1, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_2, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_3, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_4, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_5, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_6, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_7, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_8, (REG_SP)
+														SUB				REG_SP,			1'd
+														STORE			REG_RES_9, (REG_SP)
+														;
+														STAR			sF,					REG_SP					; copy StackPoint to RegBank A
+														NAMEREG		REG_RES_0,	REG_TMP_0
+														NAMEREG		REG_RES_1,	REG_TMP_1
+														NAMEREG		REG_RES_2,	REG_TMP_2
+														NAMEREG		REG_RES_3,	REG_TMP_3
+														NAMEREG		REG_RES_4,	REG_TMP_4
+														NAMEREG		REG_RES_5,	REG_TMP_5
+														NAMEREG		REG_RES_6,	REG_PTR_L
+														NAMEREG		REG_RES_7,	REG_PTR_H
+														NAMEREG		REG_RES_8,	REG_NT
+														NAMEREG		REG_RES_9,	REG_LAR
+														REGBANK A
+														ENABLE INTERRUPT
+														RETURN
+;PRAGMA function end
+;
