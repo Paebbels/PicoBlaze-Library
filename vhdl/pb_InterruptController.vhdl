@@ -46,7 +46,7 @@ use			L_PicoBlaze.pb.all;
 entity pb_InterruptController is
 	generic (
 		DEBUG													: BOOLEAN												:= FALSE;
-		ADDRESS_MAPPING								: T_PB_ADDRESS_MAPPING;
+		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE;
 		PORTS													: POSITIVE											:= 4
 	);
 	port (
@@ -128,7 +128,7 @@ begin
 
 	AdrDec : entity L_PicoBlaze.PicoBlaze_AddressDecoder
 		generic map (
-			ADDRESS_MAPPING						=> ADDRESS_MAPPING
+			DEVICE_INSTANCE						=> DEVICE_INSTANCE
 		)
 		port map (
 			Clock											=> Clock,

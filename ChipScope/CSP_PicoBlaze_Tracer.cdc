@@ -1,35 +1,3 @@
-# EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
-# vim: tabstop=2:shiftwidth=2:noexpandtab
-# kate: tab-width 2; replace-tabs off; indent-width 2;
-# 
-# ==============================================================================
-# Authors:					Patrick Lehmann
-#
-# CSP *.cdc file:		ChipScope Analyzer - ILA core signal names
-# 
-# Description:
-# ------------------------------------
-#		This file contains the signal names for the CSP_PicoBlaze_Tracer ILA.
-#		Import this file into ChipScope Analyzer to name all used signals and
-#		to create virtual busses.
-#		
-# License:
-# ==============================================================================
-# Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#		http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-# 
 #ChipScope Core Generator Project File Version 3.0
 #Tue Jul 22 13:50:07 Mitteleuropäische Sommerzeit 2014
 SignalExport.clockChannel=CLK
@@ -129,8 +97,11 @@ SignalExport.dataChannel<0056>=PortID[9]
 SignalExport.dataChannel<0057>=System[0]
 SignalExport.dataChannel<0058>=System[1]
 SignalExport.dataChannel<0059>=System[2]
+SignalExport.dataChannel<0060>=Page[0]
+SignalExport.dataChannel<0061>=Page[1]
+SignalExport.dataChannel<0062>=Page[2]
 SignalExport.dataEqualsTrigger=false
-SignalExport.dataPortWidth=60
+SignalExport.dataPortWidth=63
 SignalExport.triggerChannel<0000><0000>=InstAdr[0]
 SignalExport.triggerChannel<0000><0001>=InstAdr[1]
 SignalExport.triggerChannel<0000><0002>=InstAdr[2]
@@ -143,6 +114,9 @@ SignalExport.triggerChannel<0000><0008>=InstAdr[8]
 SignalExport.triggerChannel<0000><0009>=InstAdr[9]
 SignalExport.triggerChannel<0000><0010>=InstAdr[10]
 SignalExport.triggerChannel<0000><0011>=InstAdr[11]
+SignalExport.triggerChannel<0000><0012>=Page[0]
+SignalExport.triggerChannel<0000><0013>=Page[1]
+SignalExport.triggerChannel<0000><0014>=Page[2]
 SignalExport.triggerChannel<0001><0000>=PortID[0]
 SignalExport.triggerChannel<0001><0001>=PortID[1]
 SignalExport.triggerChannel<0001><0002>=PortID[2]
@@ -182,7 +156,7 @@ SignalExport.triggerPortIsData<0000>=false
 SignalExport.triggerPortIsData<0001>=false
 SignalExport.triggerPortIsData<0002>=false
 SignalExport.triggerPortIsData<0003>=false
-SignalExport.triggerPortWidth<0000>=12
+SignalExport.triggerPortWidth<0000>=15
 SignalExport.triggerPortWidth<0001>=8
 SignalExport.triggerPortWidth<0002>=6
 SignalExport.triggerPortWidth<0003>=16

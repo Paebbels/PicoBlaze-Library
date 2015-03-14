@@ -33,7 +33,10 @@
 ; limitations under the License.
 ; ==============================================================================
 ;
-;
+;; INPUT	REG_ARG_0
+;; OUTPUT	REG_ARG_0, REG_ARG_1
+;; USES		
+;; CALLS	
 ;PRAGMA function _str_bytetoascii begin
 __Str_ByteToAscii:				LOAD			REG_ARG_1,	REG_ARG_0
 													AND				REG_ARG_1,	0F
@@ -52,6 +55,10 @@ __Str_ByteToAscii:				LOAD			REG_ARG_1,	REG_ARG_0
 													RETURN
 ;PRAGMA function end
 ;
+;; INPUT	REG_ARG_0
+;; OUTPUT	REG_ARG_0, REG_ARG_1, REG_ARG_2
+;; USES		REG_TMP_0, REG_TMP_1
+;; CALLS	
 ;PRAGMA function _str_bytetodecimal begin
 __Str_ByteToDecimal:				LOAD			REG_TMP_0,	0'd
 														LOAD			REG_ARG_1,	0'd
@@ -86,6 +93,11 @@ __Str_ByteToDecimal:				LOAD			REG_TMP_0,	0'd
 __Str_DoubleByteToDecimal:	JUMP			__Error
 ;PRAGMA function end
 ;
+;; INPUT	REG_ARG_0, REG_ARG_1, REG_ARG_2, REG_ARG_3, REG_SP
+;; OUTPUT	REG_SP
+;; USES		
+;; CALLS	
+;; INTER	DISABLE, ENABLE
 ;PRAGMA function _str_quadbytetodecimal begin
 __Str_QuadByteToDecimal:		DISABLE INTERRUPT
 														STAR			s0,					REG_ARG_0
