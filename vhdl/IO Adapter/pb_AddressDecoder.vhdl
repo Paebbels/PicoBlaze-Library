@@ -44,7 +44,7 @@ use			L_PicoBlaze.pb.all;
 
 entity PicoBlaze_AddressDecoder is
 	generic (
-		ADDRESS_MAPPING								: T_PB_ADDRESS_MAPPING
+		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE
 	);
 	port (
 		Clock													: in	STD_LOGIC;
@@ -68,6 +68,19 @@ end entity;
 architecture rtl of PicoBlaze_AddressDecoder is
 	attribute KEEP								: BOOLEAN;
 
+	function filterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR is
+		variable Result				: T_PB_PORTNUMBER_MAPPING_VECTOR(0 to DeviceInstance.Mappings'length - 1);
+		variable ResultCount	: NATURAL := 0;
+	begin
+		for i in DeviceInstance.Mappings'range loop
+			if (DeviceInstance.Mappings(i).MappingKind = MappingKind) then
+				Result(ResultCount)	:= DeviceInstance.Mappings(i);
+				ResultCount					:= ResultCount + 1;
+			end if;
+		end loop;
+		return Result(0 to ResultCount - 1);
+	end function;
+
 	signal WriteAddress						: T_SLV_8;
 	signal WriteAddress_K					: T_SLV_8;
 	signal ReadAddress						: T_SLV_8;
@@ -83,6 +96,9 @@ architecture rtl of PicoBlaze_AddressDecoder is
 begin
 
 	process(In_Address, In_WriteStrobe, In_WriteStrobe_K, In_ReadStrobe)
+		constant READ_MAPPINGS		: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_READ);
+		constant WRITE_MAPPINGS		: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITE);
+		constant WRITEK_MAPPINGS	: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITEK);
 	begin
 		WriteAddress		<= x"00";
 		WriteAddress_K	<= x"00";
@@ -91,20 +107,21 @@ begin
 		WriteHit_K			<= '0';
 		ReadHit					<= '0';
 		
-		for i in 0 to ADDRESS_MAPPING.KMappingCount - 1 loop
-			IF (In_Address(3 downto 0) = to_slv(ADDRESS_MAPPING.PortID_KMappings(i).PortID, 4)) then
-				WriteAddress_K		<= to_slv(ADDRESS_MAPPING.PortID_KMappings(i).RegID, WriteAddress'length);
+		for i in WRITEK_MAPPINGS'range loop
+			IF (In_Address(3 downto 0) = to_slv(WRITEK_MAPPINGS(i).PortNumber, 4)) then
+				WriteAddress_K		<= to_slv(WRITEK_MAPPINGS(i).RegID, WriteAddress'length);
 				WriteHit_K				<= In_WriteStrobe_K;
 			end if;
 		end loop;
-		for i in 0 to ADDRESS_MAPPING.MappingCount - 1 loop
-			if (In_Address = to_slv(ADDRESS_MAPPING.PortID_Mappings(i).PortID, In_Address'length)) then
-				WriteAddress			<= to_slv(ADDRESS_MAPPING.PortID_Mappings(i).RegID, WriteAddress'length);
+		for i in WRITE_MAPPINGS'range loop
+			if (In_Address = to_slv(WRITE_MAPPINGS(i).PortNumber, In_Address'length)) then
+				WriteAddress			<= to_slv(WRITE_MAPPINGS(i).RegID, WriteAddress'length);
 				WriteHit					<= In_WriteStrobe;
 			end if;
-
-			if (In_Address = to_slv(ADDRESS_MAPPING.PortID_Mappings(i).PortID, In_Address'length)) then
-				ReadAddress			<= to_slv(ADDRESS_MAPPING.PortID_Mappings(i).RegID, ReadAddress'length);
+		end loop;
+		for i in READ_MAPPINGS'range loop
+			if (In_Address = to_slv(READ_MAPPINGS(i).PortNumber, In_Address'length)) then
+				ReadAddress			<= to_slv(READ_MAPPINGS(i).RegID, ReadAddress'length);
 				ReadHit					<= In_ReadStrobe;
 			end if;
 		end loop;
