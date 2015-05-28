@@ -82,21 +82,28 @@ __UART_DisableRaw:						INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writechar begin
-__UART_WriteChar:							CALL			_UART_CheckBufferHalfFree
+;PRAGMA function __UART_WriteChar begin
+__UART_WriteChar:							CALL			_UART_WaitBufferNotFull
 															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writedoublechar begin
-__UART_WriteDoubleChar:				CALL			_UART_CheckBufferHalfFree
+;PRAGMA function __UART_WriteDoubleChar begin
+__UART_WriteDoubleChar:				CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writequadchar begin
-__UART_WriteQuadChar:					CALL			_UART_CheckBufferHalfFree
+;PRAGMA function __UART_WriteTripleChar begin
+__UART_WriteTripleChar:				CALL			_UART_WaitBufferHalfFree
+															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteQuadChar begin
+__UART_WriteQuadChar:					CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															OUTPUT		REG_ARG_2,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
@@ -105,13 +112,13 @@ __UART_WriteQuadChar:					CALL			_UART_CheckBufferHalfFree
 ;PRAGMA function end
 ;
 ;PRAGMA function _uart_writereglar begin
-__UART_WriteRegLaR:						CALL			_UART_CheckBufferHalfFree
+__UART_WriteRegLaR:						CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_LAR,		OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
 ;PRAGMA function _uart_writenewline begin
-__UART_WriteNewline:					CALL			_UART_CheckBufferNotFull
+__UART_WriteNewline:					CALL			_UART_WaitBufferNotFull
 															OUTPUTK		LF,		KPORT_UART_DATAOUT								; write CR to UART TX buffer
 															RETURN
 ;PRAGMA function end
@@ -119,7 +126,7 @@ __UART_WriteNewline:					CALL			_UART_CheckBufferNotFull
 ;PRAGMA function _uart_writeline begin
 STRING _UART_WRITELINE$,			"================"
 __UART_WriteLine:							LOAD			REG_CNT,	5'd
-	__UART_WriteLine_Loop:			CALL			_UART_CheckBufferEmpty
+	__UART_WriteLine_Loop:			CALL			_UART_WaitBufferEmpty
 															OUTPUTK		_UART_WRITELINE$,		KPORT_UART_DATAOUT	; write '=' to UART TX buffer
 															SUB				REG_CNT,	1'd
 															RETURN Z
@@ -178,28 +185,28 @@ __UART_ReadChar_block:				INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART sta
 ;
 ; Private functions
 ; ===============================================
-;PRAGMA function _uart_checkbuffernotfull begin
-_UART_CheckBufferNotFull:			INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+;PRAGMA function _UART_WaitBufferNotFull begin
+	_UART_WaitBufferNotFull:		INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
 															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
 															TEST			REG_TMP_0,	UART_TX_Full					; Check UART status: is TX buffer full?
 															RETURN		Z																	; return to write routine
-															JUMP			_UART_CheckBufferNotFull					; Poll UART status again, if buffer is full -> wait until !full
+															JUMP			_UART_WaitBufferNotFull					; Poll UART status again, if buffer is full -> wait until !full
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_checkbufferhalffree begin
-_UART_CheckBufferHalfFree:		INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+;PRAGMA function _UART_WaitBufferHalfFree begin
+	_UART_WaitBufferHalfFree:	INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
 															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
 															TEST			REG_TMP_0,	UART_TX_HalfFull			; Check UART status: is TX buffer halffull?
 															RETURN		Z																	; return to write routine
-															JUMP			_UART_CheckBufferHalfFree					; Poll UART status again, if buffer is full -> wait until !full
+															JUMP			_UART_WaitBufferHalfFree					; Poll UART status again, if buffer is full -> wait until !full
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_checkbufferempty begin
-_UART_CheckBufferEmpty:				INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+;PRAGMA function _UART_WaitBufferEmpty begin
+	_UART_WaitBufferEmpty:			INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
 															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
 															TEST			REG_TMP_0,	UART_TX_DataPresent		; Check UART status: is TX buffer halffull?
 															RETURN		Z																	; return to write routine
-															JUMP			_UART_CheckBufferEmpty						; Poll UART status again, if buffer is full -> wait until !full
+															JUMP			_UART_WaitBufferEmpty						; Poll UART status again, if buffer is full -> wait until !full
 ;PRAGMA function end
 ;
 ;

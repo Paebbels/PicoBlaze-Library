@@ -389,6 +389,11 @@ __put_arg03:	ADD			REG_SP,			4'd
 							JUMP		__push_arg03
 ;PRAGMA function end
 ;
+;PRAGMA function __put_arg30 begin
+__put_arg30:	ADD			REG_SP,			4'd
+							JUMP		__push_arg30
+;PRAGMA function end
+;
 ;PRAGMA function __get0_tmp0 begin
 __get0_tmp0:	FETCH		REG_TMP_0, (REG_SP)
 							RETURN
