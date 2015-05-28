@@ -54,30 +54,48 @@ entity pb_InterruptController is
 		Reset													: in	STD_LOGIC;
 		
 		-- PicoBlaze interface
-		PB_Address										: in	T_SLV_8;
-		PB_WriteStrobe								: in	STD_LOGIC;
-		PB_WriteStrobe_K							: in	STD_LOGIC;
-		PB_ReadStrobe									: in	STD_LOGIC;
-		PB_DataIn											: in	T_SLV_8;
-		PB_DataOut										: out	T_SLV_8;
+		Address												: in	T_SLV_8;
+		WriteStrobe										: in	STD_LOGIC;
+		WriteStrobe_K									: in	STD_LOGIC;
+		ReadStrobe										: in	STD_LOGIC;
+		DataIn												: in	T_SLV_8;
+		DataOut												: out	T_SLV_8;
+		
+		Interrupt											: out	STD_LOGIC;
+		Interrupt_Ack									: in	STD_LOGIC;
+		Message												: out T_SLV_8;
+		
+		-- PicoBlaze interrupt interface (direct coupled)
 		PB_Interrupt									: out	STD_LOGIC;
 		PB_Interrupt_Ack							: in	STD_LOGIC;
-		
+				
 		-- Interrupt source interface
-		Interrupt											: in	STD_LOGIC_VECTOR(PORTS - 1 downto 0);
-		Interrupt_Ack									: out	STD_LOGIC_VECTOR(PORTS - 1 downto 0);
-		Interrupt_Message							: in	T_SLVV_8(PORTS - 1 downto 0)
+		Dev_Interrupt									: in	STD_LOGIC_VECTOR(PORTS - 1 downto 0);
+		Dev_Interrupt_Ack							: out	STD_LOGIC_VECTOR(PORTS - 1 downto 0);
+		Dev_Interrupt_Message					: in	T_SLVV_8(PORTS - 1 downto 0)
 	);
 end entity;
 
 
 architecture rtl of pb_InterruptController is
-	attribute KEEP											: BOOLEAN;
+	attribute KEEP													: BOOLEAN;
 	
-	constant REQUIRED_REGISTER_BYTES		: POSITIVE		:= div_ceil(PORTS, 8);
-	constant ENABLE_DISABLE_POSITIONS		: T_NATVEC		:= (1 => 0, 2 => 1, 3 => 2, 4 => 2);
-	constant ENABLE_DISABLE_BIT					: NATURAL			:= ENABLE_DISABLE_POSITIONS(REQUIRED_REGISTER_BYTES);
-	constant VECTOR_MESSAGE_BIT					: NATURAL			:= ENABLE_DISABLE_POSITIONS(REQUIRED_REGISTER_BYTES);
+	constant REQUIRED_REGISTER_BYTES				: POSITIVE		:= div_ceil(PORTS, 8);
+	
+	-- Regarding REQUIRED_REGISTER_BYTES, the position of the enable/disable marker bit is moved from LSB to MSB
+	-- Example 1:
+	--	REQUIRED_REGISTER_BYTES = 1
+	--	-> no bit is required to addess the register in the field, because it's only one byte
+	--	=> enable/disable bit is located at bit 0
+	--
+	-- Example 2:
+	--	REQUIRED_REGISTER_BYTES = 3
+	--	-> 2 bits are required to addess 3 registers in the field [23:0]
+	--	-> [1:0] is used to adress the correct byte/register
+	--	=> enable/disable bit is located at bit 2
+	constant ENABLE_DISABLE_BIT_POSITIONS		: T_NATVEC		:= (1 => 0, 2 => 1, 3 => 2, 4 => 2);
+	constant ENABLE_DISABLE_BIT							: NATURAL			:= ENABLE_DISABLE_BIT_POSITIONS(REQUIRED_REGISTER_BYTES);
+	constant VECTOR_MESSAGE_BIT							: NATURAL			:= ENABLE_DISABLE_BIT_POSITIONS(REQUIRED_REGISTER_BYTES);
 	
 	constant REG_WO_ENABLE_BIT_VALUE		: STD_LOGIC		:= '0';
 	constant REG_WO_DISABLE_BIT_VALUE		: STD_LOGIC		:= '1';
@@ -105,7 +123,6 @@ architecture rtl of pb_InterruptController is
 	signal Interrupt_re									: STD_LOGIC_VECTOR(PORTS - 1 downto 0);
 	signal InterruptPending_r						: STD_LOGIC_VECTOR(PORTS - 1 downto 0)				:= (others => '0');
 	signal InterruptMessages_d					: T_SLVV_8(PORTS - 1 downto 0)								:= (others => (others => '0'));
---	signal NewInterrupt									: STD_LOGIC;
 	signal InterruptRequestsOpen				: STD_LOGIC;
 	
 	signal InterruptRequestVector				: STD_LOGIC_VECTOR(PORTS - 1 downto 0);
@@ -135,11 +152,11 @@ begin
 			Reset											=> Reset,
 
 			-- PicoBlaze interface
-			In_Address								=> PB_Address,
-			In_WriteStrobe						=> PB_WriteStrobe,
-			In_WriteStrobe_K					=> PB_WriteStrobe_K,
-			In_ReadStrobe							=> PB_ReadStrobe,
-			In_Data										=> PB_DataIn,
+			In_Address								=> Address,
+			In_WriteStrobe						=> WriteStrobe,
+			In_WriteStrobe_K					=> WriteStrobe_K,
+			In_ReadStrobe							=> ReadStrobe,
+			In_Data										=> DataIn,
 			Out_WriteAddress					=> AdrDec_WriteAddress,
 			Out_ReadAddress						=> AdrDec_ReadAddress,
 			Out_WriteStrobe						=> AdrDec_we,
@@ -147,7 +164,7 @@ begin
 			Out_Data									=> AdrDec_Data
 		);
 
-	process(Clock)
+	process(Clock, AdrDec_WriteAddress)
 		variable index	: NATURAL;
 	begin
 		index := to_index(AdrDec_WriteAddress(ENABLE_DISABLE_BIT - 1 downto 0));
@@ -168,28 +185,30 @@ begin
 	process(AdrDec_re, AdrDec_ReadAddress, Reg_InterruptEnable_slvv, FSM_DataOut)
 		variable index	: NATURAL;
 	begin
-		index := to_index(AdrDec_WriteAddress(VECTOR_MESSAGE_BIT - 1 downto 0));
-		
-		PB_DataOut				<= FSM_DataOut;
+		index			:= to_index(AdrDec_ReadAddress(VECTOR_MESSAGE_BIT - 1 downto 0));
+		DataOut		<= FSM_DataOut;
 	
 		case AdrDec_ReadAddress(VECTOR_MESSAGE_BIT) is
-			when REG_RO_VECTOR_BIT_VALUE =>		PB_DataOut		<= Reg_InterruptEnable_slvv(index);
-			when REG_RO_MESSAGE_BIT_VALUE =>	PB_DataOut		<= FSM_DataOut;
-			when others =>										PB_DataOut		<= (others => 'X');
+			when REG_RO_VECTOR_BIT_VALUE =>		DataOut		<= Reg_InterruptEnable_slvv(index);
+			when REG_RO_MESSAGE_BIT_VALUE =>	DataOut		<= FSM_DataOut;
+			when others =>										DataOut		<= (others => 'X');
 		end case;
 		
 		InterruptSource_Read	<= AdrDec_re and to_sl(AdrDec_ReadAddress(VECTOR_MESSAGE_BIT) = REG_RO_MESSAGE_BIT_VALUE);
 	end process;
 
+	Interrupt		<= '0';
+	Message			<= x"00";
+
 	genPort : for i in 0 to PORTS - 1 generate
 		signal Interrupt_d			: STD_LOGIC				:= '0';
 	begin
-		Interrupt_d							<= Interrupt(i) when rising_edge(Clock);
-		Interrupt_re(i)					<= not Interrupt_d and Interrupt(i);
+		Interrupt_d							<= Dev_Interrupt(i) when rising_edge(Clock);
+		Interrupt_re(i)					<= not Interrupt_d and Dev_Interrupt(i);
 
 		-- RS-FFs to latch the interrupt signal and the message
-		InterruptPending_r(i)		<= ffrs(q => InterruptPending_r(i),															 rst => (Reset or FSM_InterruptClearVector(i)), set => Interrupt_re(i))	when rising_edge(Clock);
-		InterruptMessages_d(i)	<= ffdre(q => InterruptMessages_d(i), d => Interrupt_Message(i), rst => (Reset or FSM_InterruptClearVector(i)), en => Interrupt_re(i))	when rising_edge(Clock);
+		InterruptPending_r(i)		<= ffrs(q => InterruptPending_r(i),															 			rst => (Reset or FSM_InterruptClearVector(i)), set => Interrupt_re(i))	when rising_edge(Clock);
+		InterruptMessages_d(i)	<= ffdre(q => InterruptMessages_d(i), d => Dev_Interrupt_Message(i),	rst => (Reset or FSM_InterruptClearVector(i)), en => Interrupt_re(i))		when rising_edge(Clock);
 	end generate;
 
 	Reg_InterruptEnable			<= to_slv(Reg_InterruptEnable_slvv);
@@ -231,9 +250,9 @@ begin
 		NextState												<= State;
 				
 		PB_Interrupt										<= InterruptRequestsOpen;
-		FSM_DataOut											<= resize(Arb_GrantVector_bin, PB_DataOut'length);
+		FSM_DataOut											<= resize(Arb_GrantVector_bin, FSM_DataOut'length);
 		
-		Interrupt_Ack										<= (others => '0');
+		Dev_Interrupt_Ack								<= (others => '0');
 			
 		FSM_Arbitrate										<= '0';
 		FSM_InterruptClearVector				<= (others => '0');
@@ -246,7 +265,7 @@ begin
 				end if;
 				
 			when ST_INTERRUPT_PENDING =>
-				FSM_DataOut									<= resize(Arb_GrantVector_bin, PB_DataOut'length);
+				FSM_DataOut									<= resize(Arb_GrantVector_bin, FSM_DataOut'length);
 		
 				if (InterruptSource_Read = '1') then
 					NextState									<= ST_INTERRUPT_MESSAGE;
@@ -257,7 +276,7 @@ begin
 			
 				if (PB_Interrupt_Ack = '1') then
 					FSM_InterruptClearVector	<= Arb_GrantVector;
-					Interrupt_Ack							<= Arb_GrantVector;
+					Dev_Interrupt_Ack					<= Arb_GrantVector;
 					
 					if (InterruptRequestsOpen = '1') then
 						FSM_Arbitrate						<= '1';

@@ -70,6 +70,10 @@ entity pb_ROM_paged is
 		DataIn							: in	T_SLV_8;
 		DataOut							: out	T_SLV_8;
 		
+		Interrupt						: out	STD_LOGIC;
+		Interrupt_Ack				: in	STD_LOGIC;
+		Message							: out T_SLV_8;
+		
 		PageNumber					: out	STD_LOGIC_VECTOR(2 downto 0)
 	);
 end;
@@ -78,27 +82,39 @@ end;
 architecture rtl of pb_ROM_paged is
 	type T_PB_INSTRUCTION_VECTOR	is array (NATURAL range <>) of T_PB_INSTRUCTION;
 
-	constant REG_RW_PAGE_NUMBER	: STD_LOGIC_VECTOR(0 downto 0)			:= "0";
+	function reverse(vec : T_PB_INSTRUCTION_VECTOR) return T_PB_INSTRUCTION_VECTOR is
+		variable res : T_PB_INSTRUCTION_VECTOR(vec'range);
+	begin
+		for i in vec'low to vec'high loop
+			res(vec'low + (vec'high - i)) := vec(i);
+		end loop;
+		return	res;
+	end function;
 
-	signal AdrDec_we						: STD_LOGIC;
-	signal AdrDec_re						: STD_LOGIC;
-	signal AdrDec_WriteAddress	: T_SLV_8;
-	signal AdrDec_ReadAddress		: T_SLV_8;
-	signal AdrDec_Data					: T_SLV_8;
+	constant REG_RW_PAGE_NUMBER		: STD_LOGIC_VECTOR(0 downto 0)			:= "0";
 
-	signal Reg_PageNumber					: T_SLV_8																:= (others => '0');
-	signal Reg_PageNumber_us			: UNSIGNED(log2ceilnz(PAGES) downto 0)	:= (others => '0');
+	signal AdrDec_we							: STD_LOGIC;
+	signal AdrDec_re							: STD_LOGIC;
+	signal AdrDec_WriteAddress		: T_SLV_8;
+	signal AdrDec_ReadAddress			: T_SLV_8;
+	signal AdrDec_Data						: T_SLV_8;
+
+	signal Reg_PageNumber					: T_SLV_8																		:= (others => '0');
+	signal Reg_PageNumber_us			: UNSIGNED(log2ceilnz(PAGES) - 1 downto 0)	:= (others => '0');
 	
 	signal Page_Instructions			: T_PB_INSTRUCTION_VECTOR(PAGES - 1 downto 0);
-	signal Page_JTAGLoader_Data		: T_PB_INSTRUCTION_VECTOR(PAGES - 1 downto 0);
+	signal Pages_DataOut					: T_PB_INSTRUCTION_VECTOR(PAGES - 1 downto 0);
 	
 	signal JTAGLoader_Clock				: STD_LOGIC;
 	signal JTAGLoader_Enable			: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
 	signal JTAGLoader_Address			: T_PB_ADDRESS;
 	signal JTAGLoader_WriteEnable	: STD_LOGIC;
 	signal JTAGLoader_DataOut			: T_PB_INSTRUCTION;
+	signal JTAGLoader_PB_Reset		: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
 	
-	signal PB_Reset								: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
+	signal WorkAround_Enable			: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
+	signal WorkAround_DataIn			: T_PB_INSTRUCTION_VECTOR(PAGES - 1 downto 0);
+	
 	signal Page_n_rst							: STD_LOGIC;
 	signal Page_0_rst							: STD_LOGIC;
 	signal Page_n_rst_d						: STD_LOGIC		:= '0';
@@ -154,6 +170,9 @@ begin
 		end case;
 	end process;
 	
+	Interrupt		<= '0';
+	Message			<= x"00";
+	
 	-- 
 	PageNumber				<= Reg_PageNumber(PageNumber'range);
 	Reg_PageNumber_us	<= unsigned(Reg_PageNumber(Reg_PageNumber_us'range));
@@ -161,8 +180,8 @@ begin
 	Instruction		<= Page_Instructions(to_index(Reg_PageNumber_us, Page_Instructions'length));
 	
 	-- Reset control: keep PB in reset while programming, release after last ROM is written => reboot
-	Page_n_rst		<= PB_Reset(PAGES - 1);
-	Page_0_rst		<= PB_Reset(0);
+	Page_n_rst		<= JTAGLoader_PB_Reset(PAGES - 1);
+	Page_0_rst		<= JTAGLoader_PB_Reset(0);
 	Page_n_rst_d	<= Page_n_rst	when rising_edge(Clock);
 	Page_0_rst_d	<= Page_0_rst	when rising_edge(Clock);
 	Page_n_rst_re	<= not Page_n_rst_d and Page_n_rst;
@@ -173,177 +192,187 @@ begin
 
 	genPage0 : if (TRUE) generate
 		constant PAGE_NUMBER		: NATURAL := 0;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page0
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage1 : if (PAGES > 1) generate
 		constant PAGE_NUMBER		: NATURAL := 1;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page1
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(PAGE_NUMBER),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage2 : if (PAGES > 2) generate
 		constant PAGE_NUMBER		: NATURAL := 2;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page2
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage3 : if (PAGES > 3) generate
 		constant PAGE_NUMBER		: NATURAL := 3;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page3
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage4 : if (PAGES > 4) generate
 		constant PAGE_NUMBER		: NATURAL := 4;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page4
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage5 : if (PAGES > 5) generate
 		constant PAGE_NUMBER		: NATURAL := 5;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page5
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage6 : if (PAGES > 6) generate
 		constant PAGE_NUMBER		: NATURAL := 6;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page6
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
 	genPage7 : if (PAGES > 7) generate
 		constant PAGE_NUMBER		: NATURAL := 7;
+		constant PAGE_INDEX			: NATURAL	:= imin(PAGES - 1, PAGE_NUMBER);
 	begin
 		page : main_Page7
 			port map (
 				Clock										=> Clock,
 				Fetch										=> Fetch,
 				Address									=> InstructionPointer,
-				Instruction							=> Page_Instructions(imin(PAGES - 1, PAGE_NUMBER)),
+				Instruction							=> Page_Instructions(PAGE_INDEX),
 				
 				JTAGLoader_Clock				=> JTAGLoader_Clock,
-				JTAGLoader_Enable				=> JTAGLoader_Enable(imax(0, PAGES - PAGE_NUMBER - 1)),			-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_Enable				=> JTAGLoader_Enable(PAGE_INDEX),
 				JTAGLoader_Address			=> JTAGLoader_Address,
 				JTAGLoader_WriteEnable	=> JTAGLoader_WriteEnable,
-				JTAGLoader_DataOut			=> Page_JTAGLoader_Data(imax(0, PAGES - PAGE_NUMBER - 1)),		-- work around for a bug in JTAGLoader.exe
+				JTAGLoader_DataOut			=> Pages_DataOut(PAGE_INDEX),
 				JTAGLoader_DataIn				=> JTAGLoader_DataOut
 			);
 	end generate;
 	
-	
 	JTAGLoader : entity L_PicoBlaze.JTAGLoader6
 		generic map (
 			C_NUM_PICOBLAZE		=> PAGES,
-			C_ADDR_WIDTH			=> (others => 12)
+			C_ADDR_WIDTH			=> (others => T_PB_ADDRESS'length)
 		)
 		port map (
-			picoblaze_reset	=> PB_Reset,
 			jtag_clk				=> JTAGLoader_Clock,
-			jtag_en					=> JTAGLoader_Enable,
+			jtag_en					=> WorkAround_Enable,
 			jtag_din				=> JTAGLoader_DataOut,
 			jtag_addr				=> JTAGLoader_Address,
 			jtag_we					=> JTAGLoader_WriteEnable,
-			jtag_dout_0			=> Page_JTAGLoader_Data(imin(PAGES - 1, 0)),
-			jtag_dout_1			=> Page_JTAGLoader_Data(imin(PAGES - 1, 1)),
-			jtag_dout_2			=> Page_JTAGLoader_Data(imin(PAGES - 1, 2)),
-			jtag_dout_3			=> Page_JTAGLoader_Data(imin(PAGES - 1, 3)),
-			jtag_dout_4			=> Page_JTAGLoader_Data(imin(PAGES - 1, 4)),
-			jtag_dout_5			=> Page_JTAGLoader_Data(imin(PAGES - 1, 5)),
-			jtag_dout_6			=> Page_JTAGLoader_Data(imin(PAGES - 1, 6)),
-			jtag_dout_7			=> Page_JTAGLoader_Data(imin(PAGES - 1, 7))
+			jtag_dout_0			=> WorkAround_DataIn(imin(PAGES - 1, 0)),
+			jtag_dout_1			=> WorkAround_DataIn(imin(PAGES - 1, 1)),
+			jtag_dout_2			=> WorkAround_DataIn(imin(PAGES - 1, 2)),
+			jtag_dout_3			=> WorkAround_DataIn(imin(PAGES - 1, 3)),
+			jtag_dout_4			=> WorkAround_DataIn(imin(PAGES - 1, 4)),
+			jtag_dout_5			=> WorkAround_DataIn(imin(PAGES - 1, 5)),
+			jtag_dout_6			=> WorkAround_DataIn(imin(PAGES - 1, 6)),
+			jtag_dout_7			=> WorkAround_DataIn(imin(PAGES - 1, 7)),
+			picoblaze_reset	=> JTAGLoader_PB_Reset
 		);
-
+		
+	-- work around for a bug in JTAGLoader.exe
+	WorkAround_DataIn		<= reverse(Pages_DataOut);
+	JTAGLoader_Enable		<= reverse(WorkAround_Enable);
 end;

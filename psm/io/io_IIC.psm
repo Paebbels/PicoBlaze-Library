@@ -1,0 +1,344 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Assembler-Code:		Common IIC communication functions
+; 
+; Authors:					Patrick Lehmann
+;
+; Description:
+; ------------------------------------
+;	public functions:
+;		__IO_IIC_TestAddress
+;		__IO_IIC_WriteByte
+;		__IO_IIC_ReadByte
+;		__IO_IIC_WriteRegister
+;		__IO_IIC_ReadRegister
+;		__IO_IIC_Dump_RegMap
+;		__IO_IIC_Scan_DeviceMap
+; 
+;	private functions:
+;   
+; License:
+; ==============================================================================
+; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
+;										 Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+; IIC macros
+; ===============================================
+;PRAGMA function _io_iic_checkaddress begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;		Returns:
+;;			C :	Error
+;;			
+__IO_IIC_CheckAddress:				CALL			__BB_IIC_SendStartCond
+															;
+															SL0				REG_ARG_0																		; I2C opcode = 0 -> write
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_writebyte begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;			Arg1 : Data
+;;		Returns:
+;;			C :	Error
+;;			
+__IO_IIC_WriteByte:						CALL			__BB_IIC_SendStartCond
+															;
+															SL0				REG_ARG_0																		; I2C opcode = 0 -> write
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_1
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_readbyte begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;		Returns:
+;;			Arg0 : Data
+;;			C :	Error
+;;			
+__IO_IIC_ReadByte:						CALL			__BB_IIC_SendStartCond
+															;
+															SL1				REG_ARG_0																		; I2C opcode = 1 -> read
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															CALL			__BB_IIC_ReceiveByte
+															CALL			__BB_IIC_SendNAck
+															;
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_writeregister begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;			Arg1 : RegisterAddress
+;;			Arg2 : Data
+;;		Returns:
+;;			C :	Error
+;;			
+__IO_IIC_WriteRegister:				CALL			__BB_IIC_SendStartCond
+															;
+															SL0				REG_ARG_0																		; I2C opcode = 0 -> write
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_1
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_2
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_writedoubleregister begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;			Arg1 : RegisterAddress
+;;			Arg2 : Data0
+;;			Arg3 : Data1
+;;		Returns:
+;;			C :	Error
+;;			
+__IO_IIC_WriteDoubleRegister:	CALL			__BB_IIC_SendStartCond
+															;
+															SL0				REG_ARG_0																		; I2C opcode = 0 -> write
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_1
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_2
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_3
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_readregister begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;			Arg1 : RegisterAddress
+;;		Returns:
+;;			Arg0 : Data
+;;			C :	Error
+;;			
+__IO_IIC_ReadRegister:				LOAD			REG_TMP_4,	REG_ARG_0
+															;
+															CALL			__BB_IIC_SendStartCond
+															;
+															SL0				REG_ARG_0																		; I2C opcode = 0 -> write
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_1
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															CALL			__BB_IIC_SendRestartCond
+															;
+															LOAD			REG_ARG_0,	REG_TMP_4
+															SL1				REG_ARG_0																		; I2C opcode = 1 -> read
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															CALL			__BB_IIC_ReceiveByte
+															CALL			__BB_IIC_SendNAck
+															;
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_readdoubleregister begin
+;;		Requires:
+;;			Arg0 : DeviceAddress
+;;			Arg1 : RegisterAddress
+;;		Returns:
+;;			Arg0 : Data0
+;;			Arg1 : Data1
+;;			C :	Error
+;;			
+__IO_IIC_ReadDoubleRegister:	LOAD			REG_TMP_4,	REG_ARG_0
+															;
+															CALL			__BB_IIC_SendStartCond
+															;
+															SL0				REG_ARG_0																		; I2C opcode = 0 -> write
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															LOAD			REG_ARG_0,	REG_ARG_1
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															CALL			__BB_IIC_SendRestartCond
+															;
+															LOAD			REG_ARG_0,	REG_TMP_4
+															SL1				REG_ARG_0																		; I2C opcode = 1 -> read
+															CALL			__BB_IIC_SendByte
+															CALL			__BB_IIC_ReceiveAck
+															JUMP C,		__BB_IIC_Abort															; tail call elimination
+															;
+															CALL			__BB_IIC_ReceiveByte
+															CALL			__BB_IIC_SendAck
+															LOAD			REG_TMP_2,	REG_ARG_0
+															;
+															CALL			__BB_IIC_ReceiveByte
+															CALL			__BB_IIC_SendNAck
+															;
+															LOAD			REG_ARG_1,	REG_TMP_2
+															JUMP			__BB_IIC_SendStopCond												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_dump_regmap begin
+__IO_IIC_Dump_RegMap:					LOAD			REG_CNT,		00
+															LOAD			REG_LAR,		REG_ARG_0
+															CALL			__UART_DoubleIdent
+															LOAD			REG_ARG_0,	"0"
+															LOAD			REG_ARG_1,	"x"
+															LOAD			REG_ARG_2,	" "
+															LOAD			REG_ARG_3,	" "
+															CALL			__UART_WriteQuadChar
+															;
+															; read device register
+	_IO_IIC_Dump_RegMap_Loop:		LOAD			REG_ARG_0,	REG_LAR
+															LOAD			REG_ARG_1,	REG_CNT
+															CALL			__IO_IIC_ReadRegister
+															JUMP NC,	_IO_IIC_Dump_RegMap_Jmp1
+															;
+															; communication error
+															LOAD			REG_ARG_0,	"-"
+															LOAD			REG_ARG_1,	"-"
+															CALL			__UART_WriteDoubleChar
+															JUMP			_IO_IIC_Dump_RegMap_Jmp2
+															;
+															; register read OK -> convert current return value to ascii and write to UART
+	_IO_IIC_Dump_RegMap_Jmp1:		CALL			__Str_ByteToAscii
+															CALL			__UART_WriteDoubleChar
+															;
+	_IO_IIC_Dump_RegMap_Jmp2:		ADD				REG_CNT,		1'd
+															RETURN Z
+															;
+															TEST			REG_CNT,		0F
+															JUMP Z,		_IO_IIC_Dump_RegMap_Fmt2
+															;
+															TEST			REG_CNT,		03
+															JUMP Z,		_IO_IIC_Dump_RegMap_Fmt3
+															;
+		_IO_IIC_Dump_RegMap_Fmt1:	LOAD			REG_ARG_0,	" "
+															CALL			__UART_WriteChar
+															JUMP			_IO_IIC_Dump_RegMap_Loop
+															;
+		_IO_IIC_Dump_RegMap_Fmt2:	CALL			__UART_WriteNewline
+															CALL			__UART_DoubleIdent
+															LOAD			REG_ARG_0,	REG_CNT
+															CALL			__Str_ByteToAscii
+															LOAD			REG_ARG_1,	"x"
+															CALL			__UART_WriteDoubleChar
+															CALL			__UART_DoubleIdent
+															JUMP 			_IO_IIC_Dump_RegMap_Loop
+															;
+		_IO_IIC_Dump_RegMap_Fmt3:	CALL			__UART_DoubleIdent
+															JUMP			_IO_IIC_Dump_RegMap_Loop
+;PRAGMA function end
+;
+;PRAGMA function _io_iic_scan_devicemap begin
+__IO_IIC_Scan_DeviceMap:			LOAD			REG_CNT,		00
+															CALL			__UART_DoubleIdent
+															LOAD			REG_ARG_0,	"0"
+															LOAD			REG_ARG_1,	"x"
+															LOAD			REG_ARG_2,	" "
+															LOAD			REG_ARG_3,	" "
+															CALL			__UART_WriteQuadChar
+															;
+															; test I2C address
+	_IO_IIC_Scan_DevMap_Loop:		LOAD			REG_ARG_0,	REG_CNT
+															CALL			__IO_IIC_CheckAddress
+															JUMP NC,	_IO_IIC_Scan_DevMap_Jmp1
+															;
+															; device does not respond
+															LOAD			REG_ARG_0,	"-"
+															LOAD			REG_ARG_1,	"-"
+															CALL			__UART_WriteDoubleChar
+															JUMP			_IO_IIC_Scan_DevMap_Jmp2
+															;
+															; device has responded -> convert current device address to ascii and write to UART
+	_IO_IIC_Scan_DevMap_Jmp1:		LOAD			REG_ARG_0,	REG_CNT
+															CALL			__Str_ByteToAscii
+															CALL			__UART_WriteDoubleChar
+															;
+	_IO_IIC_Scan_DevMap_Jmp2:		ADD				REG_CNT,		1'd
+															RETURN Z
+															;
+															TEST			REG_CNT,		0F
+															JUMP Z,		_IO_IIC_Scan_DevMap_Fmt2
+															;
+															TEST			REG_CNT,		03
+															JUMP Z,		_IO_IIC_Scan_DevMap_Fmt3
+															;
+		_IO_IIC_Scan_DevMap_Fmt1:	LOAD			REG_ARG_0,	" "
+															CALL			__UART_WriteChar
+															JUMP			_IO_IIC_Scan_DevMap_Loop
+															;
+		_IO_IIC_Scan_DevMap_Fmt2:	CALL			__UART_WriteNewline
+															CALL			__UART_DoubleIdent
+															LOAD			REG_ARG_0,	REG_CNT
+															CALL			__Str_ByteToAscii
+															LOAD			REG_ARG_1,	"x"
+															CALL			__UART_WriteDoubleChar
+															CALL			__UART_DoubleIdent
+															JUMP 			_IO_IIC_Scan_DevMap_Loop
+															;
+		_IO_IIC_Scan_DevMap_Fmt3:	CALL			__UART_DoubleIdent
+															JUMP			_IO_IIC_Scan_DevMap_Loop
+;PRAGMA function end
+;

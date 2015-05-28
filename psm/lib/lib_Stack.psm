@@ -15,12 +15,14 @@
 ;		- _push_arg2,		_pop_arg2
 ;		- _push_arg3,		_pop_arg3
 ;		- _push_arg03,	_pop_arg03
+;		- _push_arg30,	_pop_arg30
 ;
 ;		- _push_tmp0,		_pop_tmp0
 ;		- _push_tmp1,		_pop_tmp1
 ;		- _push_tmp2,		_pop_tmp2
 ;		- _push_tmp3,		_pop_tmp3
 ;		- _push_tmp03,	_pop_tmp03
+;		- _push_tmp30,	_pop_tmp30
 ;
 ;		- _get0_arg0,		_put0_arg0
 ;		- _get1_arg0,		_put1_arg0
@@ -63,55 +65,55 @@
 ; ==============================================================================
 ;
 ;
-;PRAGMA function _push_arg0 begin
+;PRAGMA function __push_arg0 begin
 __push_arg0:	SUB			REG_SP,			1'd
 							STORE		REG_ARG_0, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_arg0 begin
+;PRAGMA function __pop_arg0 begin
 __pop_arg0:		FETCH		REG_ARG_0, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_arg1 begin
+;PRAGMA function __push_arg1 begin
 __push_arg1:	SUB			REG_SP,			1'd
 							STORE		REG_ARG_1, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_arg1 begin
+;PRAGMA function __pop_arg1 begin
 __pop_arg1:		FETCH		REG_ARG_1, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_arg2 begin
+;PRAGMA function __push_arg2 begin
 __push_arg2:	SUB			REG_SP,			1'd
 							STORE		REG_ARG_2, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_arg2 begin
+;PRAGMA function __pop_arg2 begin
 __pop_arg2:		FETCH		REG_ARG_2, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_arg3 begin
+;PRAGMA function __push_arg3 begin
 __push_arg3:	SUB			REG_SP,			1'd
 							STORE		REG_ARG_3, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_arg3 begin
+;PRAGMA function __pop_arg3 begin
 __pop_arg3:		FETCH		REG_ARG_3, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_arg03 begin
+;PRAGMA function __push_arg03 begin
 __push_arg03:	; stack operations for registers s0 to s3
 							SUB			REG_SP,			1'd
 							STORE		REG_ARG_0, (REG_SP)
@@ -124,8 +126,33 @@ __push_arg03:	; stack operations for registers s0 to s3
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_arg03 begin
-__pop_arg03:	FETCH		REG_ARG_3, (REG_SP)
+;PRAGMA function __push_arg30 begin
+__push_arg30:	; stack operations for registers s0 to s3
+							SUB			REG_SP,			1'd
+							STORE		REG_ARG_3, (REG_SP)
+							SUB			REG_SP,			1'd
+							STORE		REG_ARG_2, (REG_SP)
+							SUB			REG_SP,			1'd
+							STORE		REG_ARG_1, (REG_SP)
+							SUB			REG_SP,			1'd
+							STORE		REG_ARG_0, (REG_SP)
+							RETURN
+;PRAGMA function end
+;
+;PRAGMA function __pop_arg03 begin
+__pop_arg03:	FETCH		REG_ARG_0, (REG_SP)
+							ADD			REG_SP,			1'd
+							FETCH		REG_ARG_1, (REG_SP)
+							ADD			REG_SP,			1'd
+							FETCH		REG_ARG_2, (REG_SP)
+							ADD			REG_SP,			1'd
+							FETCH		REG_ARG_3, (REG_SP)
+							ADD			REG_SP,			1'd
+							RETURN
+;PRAGMA function end
+;
+;PRAGMA function __pop_arg30 begin
+__pop_arg30:	FETCH		REG_ARG_3, (REG_SP)
 							ADD			REG_SP,			1'd
 							FETCH		REG_ARG_2, (REG_SP)
 							ADD			REG_SP,			1'd
@@ -136,55 +163,55 @@ __pop_arg03:	FETCH		REG_ARG_3, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_tmp0 begin
+;PRAGMA function __push_tmp0 begin
 __push_tmp0:	SUB			REG_SP,			1'd
 							STORE		REG_TMP_0, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_tmp0 begin
+;PRAGMA function __pop_tmp0 begin
 __pop_tmp0:		FETCH		REG_TMP_0, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_tmp1 begin
+;PRAGMA function __push_tmp1 begin
 __push_tmp1:	SUB			REG_SP,			1'd
 							STORE		REG_TMP_1, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_tmp1 begin
+;PRAGMA function __pop_tmp1 begin
 __pop_tmp1:		FETCH		REG_TMP_1, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_tmp2 begin
+;PRAGMA function __push_tmp2 begin
 __push_tmp2:	SUB			REG_SP,			1'd
 							STORE		REG_TMP_2, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_tmp2 begin
+;PRAGMA function __pop_tmp2 begin
 __pop_tmp2:		FETCH		REG_TMP_2, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_tmp3 begin
+;PRAGMA function __push_tmp3 begin
 __push_tmp3:	SUB			REG_SP,			1'd
 							STORE		REG_TMP_3, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_tmp3 begin
+;PRAGMA function __pop_tmp3 begin
 __pop_tmp3:		FETCH		REG_TMP_3, (REG_SP)
 							ADD			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _push_tmp03 begin
+;PRAGMA function __push_tmp03 begin
 __push_tmp03:	; stack operations for registers s0 to s3
 							SUB			REG_SP,			1'd
 							STORE		REG_TMP_0, (REG_SP)
@@ -197,8 +224,33 @@ __push_tmp03:	; stack operations for registers s0 to s3
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _pop_tmp03 begin
-__pop_tmp03:	FETCH		REG_TMP_3, (REG_SP)
+;PRAGMA function __push_tmp30 begin
+__push_tmp30:	; stack operations for registers s3 to s0
+							SUB			REG_SP,			1'd
+							STORE		REG_TMP_3, (REG_SP)
+							SUB			REG_SP,			1'd
+							STORE		REG_TMP_2, (REG_SP)
+							SUB			REG_SP,			1'd
+							STORE		REG_TMP_1, (REG_SP)
+							SUB			REG_SP,			1'd
+							STORE		REG_TMP_0, (REG_SP)
+							RETURN
+;PRAGMA function end
+;
+;PRAGMA function __pop_tmp03 begin
+__pop_tmp03:	FETCH		REG_TMP_0, (REG_SP)
+							ADD			REG_SP,			1'd
+							FETCH		REG_TMP_1, (REG_SP)
+							ADD			REG_SP,			1'd
+							FETCH		REG_TMP_2, (REG_SP)
+							ADD			REG_SP,			1'd
+							FETCH		REG_TMP_3, (REG_SP)
+							ADD			REG_SP,			1'd
+							RETURN
+;PRAGMA function end
+;
+;PRAGMA function __pop_tmp30 begin
+__pop_tmp30:	FETCH		REG_TMP_3, (REG_SP)
 							ADD			REG_SP,			1'd
 							FETCH		REG_TMP_2, (REG_SP)
 							ADD			REG_SP,			1'd
@@ -232,212 +284,212 @@ __pop_tmp03:	FETCH		REG_TMP_3, (REG_SP)
 
 
 
-;PRAGMA function _get0_arg0 begin
+;PRAGMA function __get0_arg0 begin
 __get0_arg0:	FETCH		REG_ARG_0, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put0_arg0 begin
+;PRAGMA function __put0_arg0 begin
 __put0_arg0:	STORE		REG_ARG_0, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get1_arg0 begin
+;PRAGMA function __get1_arg0 begin
 __get1_arg0:	ADD			REG_SP,			1'd
 							FETCH		REG_ARG_0, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put1_arg0 begin
+;PRAGMA function __put1_arg0 begin
 __put1_arg0:	ADD			REG_SP,			1'd
 							STORE		REG_ARG_0, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get2_arg0 begin
+;PRAGMA function __get2_arg0 begin
 __get2_arg0:	ADD			REG_SP,			2'd
 							FETCH		REG_ARG_0, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put2_arg0 begin
+;PRAGMA function __put2_arg0 begin
 __put2_arg0:	ADD			REG_SP,			2'd
 							STORE		REG_ARG_0, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get3_arg0 begin
+;PRAGMA function __get3_arg0 begin
 __get3_arg0:	ADD			REG_SP,			3'd
 							FETCH		REG_ARG_0, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put3_arg0 begin
+;PRAGMA function __put3_arg0 begin
 __put3_arg0:	ADD			REG_SP,			3'd
 							STORE		REG_ARG_0, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get1_arg1 begin
+;PRAGMA function __get1_arg1 begin
 __get1_arg1:	ADD			REG_SP,			1'd
 							FETCH		REG_ARG_1, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put1_arg1 begin
+;PRAGMA function __put1_arg1 begin
 __put1_arg1:	ADD			REG_SP,			1'd
 							STORE		REG_ARG_1, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get2_arg2 begin
+;PRAGMA function __get2_arg2 begin
 __get2_arg2:	ADD			REG_SP,			2'd
 							FETCH		REG_ARG_2, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put2_arg2 begin
+;PRAGMA function __put2_arg2 begin
 __put2_arg2:	ADD			REG_SP,			2'd
 							STORE		REG_ARG_2, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get3_arg3 begin
+;PRAGMA function __get3_arg3 begin
 __get3_arg3:	ADD			REG_SP,			3'd
 							FETCH		REG_ARG_3, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put3_arg3 begin
+;PRAGMA function __put3_arg3 begin
 __put3_arg3:	ADD			REG_SP,			3'd
 							STORE		REG_ARG_3, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get_arg03 begin
+;PRAGMA function __get_arg03 begin
 __get_arg03:	CALL		__pop_arg03
 							SUB			REG_SP,			4'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put_arg03 begin
+;PRAGMA function __put_arg03 begin
 __put_arg03:	ADD			REG_SP,			4'd
 							JUMP		__push_arg03
 ;PRAGMA function end
 ;
-;PRAGMA function _get0_tmp0 begin
+;PRAGMA function __get0_tmp0 begin
 __get0_tmp0:	FETCH		REG_TMP_0, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put0_tmp0 begin
+;PRAGMA function __put0_tmp0 begin
 __put0_tmp0:	STORE		REG_TMP_0, (REG_SP)
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get1_tmp0 begin
+;PRAGMA function __get1_tmp0 begin
 __get1_tmp0:	ADD			REG_SP,			1'd
 							FETCH		REG_TMP_0, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put1_tmp0 begin
+;PRAGMA function __put1_tmp0 begin
 __put1_tmp0:	ADD			REG_SP,			1'd
 							STORE		REG_TMP_0, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get2_tmp0 begin
+;PRAGMA function __get2_tmp0 begin
 __get2_tmp0:	ADD			REG_SP,			2'd
 							FETCH		REG_TMP_0, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put2_tmp0 begin
+;PRAGMA function __put2_tmp0 begin
 __put2_tmp0:	ADD			REG_SP,			2'd
 							STORE		REG_TMP_0, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get3_tmp0 begin
+;PRAGMA function __get3_tmp0 begin
 __get3_tmp0:	ADD			REG_SP,			3'd
 							FETCH		REG_TMP_0, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put3_tmp0 begin
+;PRAGMA function __put3_tmp0 begin
 __put3_tmp0:	ADD			REG_SP,			3'd
 							STORE		REG_TMP_0, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get1_tmp1 begin
+;PRAGMA function __get1_tmp1 begin
 __get1_tmp1:	ADD			REG_SP,			5'd
 							FETCH		REG_TMP_1, (REG_SP)
 							SUB			REG_SP,			5'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put1_tmp1 begin
+;PRAGMA function __put1_tmp1 begin
 __put1_tmp1:	ADD			REG_SP,			1'd
 							STORE		REG_TMP_1, (REG_SP)
 							SUB			REG_SP,			1'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get2_tmp2 begin
+;PRAGMA function __get2_tmp2 begin
 __get2_tmp2:	ADD			REG_SP,			2'd
 							FETCH		REG_TMP_2, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put2_tmp2 begin
+;PRAGMA function __put2_tmp2 begin
 __put2_tmp2:	ADD			REG_SP,			2'd
 							STORE		REG_TMP_2, (REG_SP)
 							SUB			REG_SP,			2'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get3_tmp3 begin
+;PRAGMA function __get3_tmp3 begin
 __get3_tmp3:	ADD			REG_SP,			3'd
 							FETCH		REG_TMP_3, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put3_tmp3 begin
+;PRAGMA function __put3_tmp3 begin
 __put3_tmp3:	ADD			REG_SP,			3'd
 							STORE		REG_TMP_3, (REG_SP)
 							SUB			REG_SP,			3'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _get_tmp03 begin
+;PRAGMA function __get_tmp03 begin
 __get_tmp03:	CALL		__pop_tmp03
 							SUB			REG_SP,			4'd
 							RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _put_tmp03 begin
+;PRAGMA function __put_tmp03 begin
 __put_tmp03:	ADD			REG_SP,			4'd
 							JUMP		__push_tmp03
 ;PRAGMA function end

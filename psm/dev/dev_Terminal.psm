@@ -1,0 +1,169 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabsget=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Assembler-Code:		Terminal routines for PicoBlaze UART
+; 
+; Authors:					Patrick Lehmann
+;
+; Description:
+; ------------------------------------
+;	public functions:
+;		__DEV_Term_CLS
+;		__DEV_Term_HOME
+; 
+;	private functions:
+;		__DEV_Term_EscapeSequence
+;   
+; License:
+; ==============================================================================
+; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
+;										 Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+; Constants
+CONSTANT DEV_TERM_TEXTCOLOR_BLACK,		30		; Black
+CONSTANT DEV_TERM_TEXTCOLOR_RED,			31		; Red
+CONSTANT DEV_TERM_TEXTCOLOR_GREEN,		32		; Green
+CONSTANT DEV_TERM_TEXTCOLOR_YELLOW,		33		; Yellow
+CONSTANT DEV_TERM_TEXTCOLOR_BLUE,			34		; Blue
+CONSTANT DEV_TERM_TEXTCOLOR_MAGENTA,	35		; Magenta
+CONSTANT DEV_TERM_TEXTCOLOR_CYAN,			36		; Cyan
+CONSTANT DEV_TERM_TEXTCOLOR_GREY,			37		; Grey
+CONSTANT DEV_TERM_TEXTCOLOR_WHITE,		38		; White
+;
+; DEV_Term macros
+; ===============================================
+;PRAGMA function _dev_term_cls begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+__DEV_Term_CLS:								CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"2"
+															LOAD			REG_ARG_1,	"J"
+															JUMP			__UART_WriteDoubleChar 						; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_home begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+__DEV_Term_HOME:							CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"H"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_reset begin
+__DEV_Term_TextColor_Reset:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"0"
+															LOAD			REG_ARG_1,	"m"
+															JUMP			__UART_WriteDoubleChar						; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_black begin
+__DEV_Term_TextColor_Black:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_BLACK
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_red begin
+__DEV_Term_TextColor_Red:			CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_RED
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_green begin
+__DEV_Term_TextColor_Green:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_GREEN
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_yellow begin
+__DEV_Term_TextColor_Yellow:	CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_YELLOW
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_blue begin
+__DEV_Term_TextColor_Blue:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_BLUE
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_magenta begin
+__DEV_Term_TextColor_Magenta:	CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_MAGENTA
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_cyan begin
+__DEV_Term_TextColor_Cyan:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_CYAN
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_grey begin
+__DEV_Term_TextColor_Grey:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_GREY
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_term_textcolor_white begin
+__DEV_Term_TextColor_White:		CALL			__DEV_Term_EscapeSequence
+															LOAD			REG_ARG_0,	"3"
+															LOAD			REG_ARG_1,	DEV_TERM_TEXTCOLOR_WHITE
+															CALL			__UART_WriteDoubleChar
+															LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
+;PRAGMA function end
+;
+; private functions
+; ==============================================================================
+;
+;PRAGMA function _dev_term_escapesequence begin
+__DEV_Term_EscapeSequence:		LOAD			REG_ARG_0,	ESC
+															LOAD			REG_ARG_1,	"["
+															JUMP			__UART_WriteDoubleChar 						; tail call elimination
+;PRAGMA function end
+;
+
+

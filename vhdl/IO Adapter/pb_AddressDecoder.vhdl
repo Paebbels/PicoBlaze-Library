@@ -35,6 +35,7 @@ use			IEEE.NUMERIC_STD.all;
 
 library PoC;
 use			PoC.utils.all;
+use			PoC.strings.all;
 use			PoC.vectors.all;
 use			PoC.io.all;
 
@@ -81,18 +82,18 @@ architecture rtl of PicoBlaze_AddressDecoder is
 		return Result(0 to ResultCount - 1);
 	end function;
 
-	signal WriteAddress						: T_SLV_8;
-	signal WriteAddress_K					: T_SLV_8;
-	signal ReadAddress						: T_SLV_8;
-	signal WriteHit								: STD_LOGIC;
-	signal WriteHit_K							: STD_LOGIC;
-	signal ReadHit								: STD_LOGIC;
+	signal WriteAddress				: T_SLV_8;
+	signal WriteAddress_K			: T_SLV_8;
+	signal ReadAddress				: T_SLV_8;
+	signal WriteHit						: STD_LOGIC;
+	signal WriteHit_K					: STD_LOGIC;
+	signal ReadHit						: STD_LOGIC;
 
-	signal Out_WriteStrobe_i			: STD_LOGIC			:= '0';
-	signal Out_ReadStrobe_i				: STD_LOGIC;
-	signal Out_WriteAddress_i			: T_SLV_8				:= (others => '0');
-	signal Out_ReadAddress_i			: T_SLV_8;
-	signal Out_Data_i							: T_SLV_8				:= (others => '0');
+	signal Out_WriteStrobe_i	: STD_LOGIC			:= '0';
+	signal Out_ReadStrobe_i		: STD_LOGIC;
+	signal Out_WriteAddress_i	: T_SLV_8				:= (others => '0');
+	signal Out_ReadAddress_i	: T_SLV_8;
+	signal Out_Data_i					: T_SLV_8				:= (others => '0');
 begin
 
 	process(In_Address, In_WriteStrobe, In_WriteStrobe_K, In_ReadStrobe)
@@ -100,38 +101,73 @@ begin
 		constant WRITE_MAPPINGS		: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITE);
 		constant WRITEK_MAPPINGS	: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITEK);
 	begin
-		WriteAddress		<= x"00";
-		WriteAddress_K	<= x"00";
-		ReadAddress			<= x"00";
+		WriteAddress		<= (others => '0');
+		WriteAddress_K	<= (others => '0');
+		ReadAddress			<= (others => '0');
 		WriteHit				<= '0';
 		WriteHit_K			<= '0';
 		ReadHit					<= '0';
+
+		assert PB_VERBOSE
+			report "PicoBlaze_AddressDecoder: Report PortNumber mappings for device " & str_trim(DEVICE_INSTANCE.DeviceShort) &
+						 " on bus " & str_trim(DEVICE_INSTANCE.BusShort)
+			severity NOTE;
 		
 		for i in WRITEK_MAPPINGS'range loop
-			IF (In_Address(3 downto 0) = to_slv(WRITEK_MAPPINGS(i).PortNumber, 4)) then
-				WriteAddress_K		<= to_slv(WRITEK_MAPPINGS(i).RegID, WriteAddress'length);
-				WriteHit_K				<= In_WriteStrobe_K;
+			assert PB_VERBOSE
+				report "  Map PortNumber " & INTEGER'image(WRITEK_MAPPINGS(i).PortNumber) &
+							 " to register number " & INTEGER'image(WRITEK_MAPPINGS(i).RegNumber) &
+							 " as K-writeable"
+				severity NOTE;
+			
+			if (In_Address(3 downto 0) = to_slv(WRITEK_MAPPINGS(i).PortNumber, 4)) then
+				WriteAddress_K	<= to_slv(WRITEK_MAPPINGS(i).RegNumber, WriteAddress_K'length);
+				WriteHit_K			<= In_WriteStrobe_K;
 			end if;
 		end loop;
 		for i in WRITE_MAPPINGS'range loop
+			assert PB_VERBOSE
+				report "  Map PortNumber " & INTEGER'image(WRITE_MAPPINGS(i).PortNumber) &
+							 " to register number " & INTEGER'image(WRITE_MAPPINGS(i).RegNumber) &
+							 " as writeable"
+				severity NOTE;
+			
 			if (In_Address = to_slv(WRITE_MAPPINGS(i).PortNumber, In_Address'length)) then
-				WriteAddress			<= to_slv(WRITE_MAPPINGS(i).RegID, WriteAddress'length);
-				WriteHit					<= In_WriteStrobe;
+				WriteAddress		<= to_slv(WRITE_MAPPINGS(i).RegNumber, WriteAddress'length);
+				WriteHit				<= In_WriteStrobe;
 			end if;
 		end loop;
 		for i in READ_MAPPINGS'range loop
+			assert PB_VERBOSE
+				report "  Map PortNumber " & INTEGER'image(READ_MAPPINGS(i).PortNumber) &
+							 " to register number " & INTEGER'image(READ_MAPPINGS(i).RegNumber) &
+							 " as readable"
+				severity NOTE;
+			
 			if (In_Address = to_slv(READ_MAPPINGS(i).PortNumber, In_Address'length)) then
-				ReadAddress			<= to_slv(READ_MAPPINGS(i).RegID, ReadAddress'length);
+				ReadAddress			<= to_slv(READ_MAPPINGS(i).RegNumber, ReadAddress'length);
 				ReadHit					<= In_ReadStrobe;
 			end if;
 		end loop;
 	end process;
 	
-	Out_WriteStrobe_i		<= WriteHit OR WriteHit_K																				when rising_edge(Clock);
-	Out_ReadStrobe_i		<= ReadHit;
-	Out_WriteAddress_i	<= ite((In_WriteStrobe_K = '1'), WriteAddress_K, WriteAddress)	when rising_edge(Clock);
-	Out_ReadAddress_i		<= ReadAddress;
-	Out_Data_i					<= In_Data																											when rising_edge(Clock);
+	process(Clock, ReadHit, ReadAddress)
+	begin
+		if rising_edge(Clock) then
+			if (WriteHit_K = '1') then
+				Out_WriteStrobe_i		<= WriteHit_K;
+				Out_WriteAddress_i	<= WriteAddress_K;
+			else
+				Out_WriteStrobe_i		<= WriteHit;
+				Out_WriteAddress_i	<= WriteAddress;
+			end if;
+			
+			Out_Data_i						<= In_Data;
+		end if;
+		
+		Out_ReadStrobe_i				<= ReadHit;
+		Out_ReadAddress_i				<= ReadAddress;
+	end process;
 	
 	Out_WriteStrobe			<= Out_WriteStrobe_i;
 	Out_ReadStrobe			<= Out_ReadStrobe_i;

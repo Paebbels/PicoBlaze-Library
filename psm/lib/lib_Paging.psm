@@ -1,0 +1,34 @@
+;
+;PRAGMA function __Pager_Page1_Call_Table1 begin
+__Pager_Page1_Call_Table1:			DISABLE INTERRUPT
+																OUTPUTK		1'd,				KPORT_INSTROM_PAGENUMBER
+																LOAD			REG_PTR_H,	0'd
+																ADD				REG_PTR_L,	__FunctionTable1'lower
+																ADDCY			REG_PTR_H,	__FunctionTable1'upper
+																CALL@			(REG_PTR_H, REG_PTR_L)
+																;
+																OUTPUTK		0'd,				KPORT_INSTROM_PAGENUMBER
+																ENABLE INTERRUPT
+																RETURN
+;PRAGMA function end
+;
+;PRAGMA function __Pager_Page1_Call_Table2 begin
+__Pager_Page1_Call_Table2:			DISABLE INTERRUPT
+																OUTPUTK		1'd,				KPORT_INSTROM_PAGENUMBER
+																LOAD			REG_PTR_H,	0'd
+																ADD				REG_PTR_L,	__FunctionTable2'lower
+																ADDCY			REG_PTR_H,	__FunctionTable2'upper
+																CALL@			(REG_PTR_H, REG_PTR_L)
+																;
+																OUTPUTK		0'd,				KPORT_INSTROM_PAGENUMBER
+																ENABLE INTERRUPT
+																RETURN
+;PRAGMA function end
+;
+;PRAGMA function __Pager_Page0_HandleInterrupt begin
+__Pager_Page0_HandleInterrupt:	OUTPUTK		0'd,				KPORT_INSTROM_PAGENUMBER
+																CALL@			(REG_PTR_H, REG_PTR_L)
+																;
+																OUTPUTK		1'd,				KPORT_INSTROM_PAGENUMBER
+																RETURNI	ENABLE
+;PRAGMA function end
