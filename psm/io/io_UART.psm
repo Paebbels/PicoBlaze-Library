@@ -3,10 +3,10 @@
 ; kate: tab-width 2; replace-tabs off; indent-width 2;
 ; 
 ; ==============================================================================
-; Assembler-Code:		UART (Universal Asynchronous Receiver Transmitter) functions for PicoBlaze
-; 
 ; Authors:					Patrick Lehmann
 ;
+; Assembler-Code:		UART (Universal Asynchronous Receiver Transmitter) functions for PicoBlaze
+; 
 ; Description:
 ; ------------------------------------
 ;	public functions:
@@ -15,6 +15,7 @@
 ;		__UART_DisableRaw
 ;		__UART_WriteChar
 ;		__UART_WriteDoubleChar
+;		__UART_WriteTripleChar
 ;		__UART_WriteQuadChar
 ;		__UART_WriteRegLaR
 ;		__UART_WriteString
@@ -29,7 +30,7 @@
 ;
 ; License:
 ; ==============================================================================
-; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
 ;										 Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,23 +92,24 @@ __UART_WriteChar:							CALL			_UART_WaitBufferNotFull
 ;PRAGMA function __UART_WriteDoubleChar begin
 __UART_WriteDoubleChar:				CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
-															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg1 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
 ;PRAGMA function __UART_WriteTripleChar begin
 __UART_WriteTripleChar:				CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
-															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg1 to UART TX buffer
+															OUTPUT		REG_ARG_2,	OPORT_UART_DATAOUT					; write Arg2 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
 ;PRAGMA function __UART_WriteQuadChar begin
 __UART_WriteQuadChar:					CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
-															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
-															OUTPUT		REG_ARG_2,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
-															OUTPUT		REG_ARG_3,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg1 to UART TX buffer
+															OUTPUT		REG_ARG_2,	OPORT_UART_DATAOUT					; write Arg2 to UART TX buffer
+															OUTPUT		REG_ARG_3,	OPORT_UART_DATAOUT					; write Arg3 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
@@ -123,17 +125,18 @@ __UART_WriteNewline:					CALL			_UART_WaitBufferNotFull
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writeline begin
-STRING _UART_WRITELINE$,			"================"
-__UART_WriteLine:							LOAD			REG_CNT,	5'd
-	__UART_WriteLine_Loop:			CALL			_UART_WaitBufferEmpty
-															OUTPUTK		_UART_WRITELINE$,		KPORT_UART_DATAOUT	; write '=' to UART TX buffer
-															SUB				REG_CNT,	1'd
-															RETURN Z
-															JUMP 			__UART_WriteLine_Loop
+;PRAGMA function __UART_WriteHorizontalLine begin
+STRING _UART_WRITELINE$,					"================"
+;
+__UART_WriteHorizontalLine:				LOAD			REG_LAR,	5'd
+	_UART_WriteHorizontalLine_Loop:	CALL			_UART_WaitBufferEmpty
+																	OUTPUTK		_UART_WRITELINE$,		KPORT_UART_DATAOUT	; write '=' to UART TX buffer
+																	SUB				REG_LAR,	1'd
+																	RETURN		Z
+																	JUMP 			_UART_WriteHorizontalLine_Loop
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writestring begin
+;PRAGMA function __UART_WriteString begin
 __UART_WriteString:						CALL@			(REG_PTR_H, REG_PTR_L)						; load character from pointer address
 															COMPARE		REG_LAR,		NUL										; terminate on NUL character
 															RETURN		Z
@@ -141,6 +144,18 @@ __UART_WriteString:						CALL@			(REG_PTR_H, REG_PTR_L)						; load character fr
 															ADD				REG_PTR_L,	1'd										; increment pointer
 															ADDCY			REG_PTR_H,	0'd
 															JUMP			__UART_WriteString								; goto next character
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteLine begin
+__UART_WriteLine:							CALL@			(REG_PTR_H, REG_PTR_L)						; load character from pointer address
+															COMPARE		REG_LAR,		NUL										; terminate on NUL character
+															JUMP	Z,	_UART_WriteLine_Exit
+															CALL			__UART_WriteRegLaR								; send character to UART
+															ADD				REG_PTR_L,	1'd										; increment pointer
+															ADDCY			REG_PTR_H,	0'd
+															JUMP			__UART_WriteLine									; goto next character
+	_UART_WriteLine_Exit:				LOAD			REG_ARG_0,	LF
+															JUMP			__UART_WriteChar									; tail call elimination
 ;PRAGMA function end
 ;
 ;PRAGMA function _uart_doubleident begin
