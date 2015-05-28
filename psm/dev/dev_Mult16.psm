@@ -3,19 +3,24 @@
 ; kate: tab-width 2; replace-tabs off; indent-width 2;
 ; 
 ; ==============================================================================
-; Assembler-Code:		Common IIC communication functions
-; 
 ; Authors:					Patrick Lehmann
 ;
+; Assembler-Code:		Multiplier 16 bit
+; 
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__DEV_Mult16_mult8
-;		__DEV_Mult16_mult
-;   
+;		__dev_Mult16_Mult8
+;		__dev_Mult16_Mult16
+;
+; Aliases:
+;		__dev_Mult_Mult8
+;		__dev_Mult_Mult16
+;
+; 
 ; License:
 ; ==============================================================================
-; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
 ;										 Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +39,7 @@
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function _dev_mult16_mult8 begin
+;PRAGMA function __dev_Mult16_Mult8 begin
 ;;		Requires:
 ;;			Arg0 : Factor A
 ;;			Arg1 : Factor B
@@ -42,7 +47,8 @@
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			
-__DEV_Mult16_mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
+__dev_Mult_Mult8:
+__dev_Mult16_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_MULT16_OPERANDB0	;	Write arg1 to Reg B0
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT16_RESULT0		;	Write Reg R0 to arg0
@@ -50,7 +56,7 @@ __DEV_Mult16_mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_mult16_mult begin
+;PRAGMA function __dev_Mult16_Mult16 begin
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
@@ -62,7 +68,8 @@ __DEV_Mult16_mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 
 ;;			Arg2 : Product R(23:16)
 ;;			Arg3 : Product R(31:24)
 ;;			
-__DEV_Mult16_mult:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
+__dev_Mult_Mult16:
+__dev_Mult16_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_2,		OPORT_MULT16_OPERANDB0	;	Write arg2 to Reg B0
 															OUTPUT	REG_ARG_1,		OPORT_MULT16_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_3,		OPORT_MULT16_OPERANDB1	;	Write arg3 to Reg B1

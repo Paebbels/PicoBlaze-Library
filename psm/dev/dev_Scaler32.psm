@@ -1,0 +1,98 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		Scaler 32-bit functions
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		__dev_Scaler32_Wait
+;		__dev_Scaler32_Begin
+;		__dev_Scaler32_End
+;
+; Interrupt Handlers:
+;		__ISR_Scaler32
+;   
+;	private functions:
+;   
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;											Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+; Constants
+; ===============================================
+CONSTANT SCALER32_STATUS_DONE,						01		;
+;
+; Co-Processor macros
+; ===============================================
+;PRAGMA function __dev_Scaler32_Wait begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+__dev_Scaler32_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER32_REG_STATUS	; Read computation status
+															TEST		REG_TMP_0,		SCALER32_STATUS_DONE
+															RETURN	NZ
+															JUMP 		__dev_Scaler32_Wait
+;PRAGMA function end
+;
+;PRAGMA function __dev_Scaler32_Begin begin
+;;		Requires:
+;;			Arg0 : Input value(7:0)
+;;			Arg1 : Input value(15:8)
+;;			Arg2 : Input value(23:16)
+;;			Arg3 : Input value(31:24)
+;;			Tmp0 : Mult(7:0)
+;;			Tmp1 : Div(7:0)
+;;		Returns:
+;;			
+__dev_Scaler32_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER32_REG_A0			;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_1,		OPORT_SCALER32_REG_A1			;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_2,		OPORT_SCALER32_REG_A2			;	Write arg2 to Reg A2
+															OUTPUT	REG_ARG_3,		OPORT_SCALER32_REG_A3			;	Write arg3 to Reg A3
+															OUTPUT	REG_TMP_0,		OPORT_SCALER32_REG_MULT		;	Write arg5 to Reg MULT
+															OUTPUT	REG_TMP_1,		OPORT_SCALER32_REG_DIV		;	Write arg6 to Reg DIV; start calculation
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Scaler32_End begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			Arg0 : Scaled value(7:0)
+;;			Arg1 : Scaled value(15:8)
+;;			Arg2 : Scaled value(23:16)
+;;			Arg3 : Scaled value(31:24)
+;;		
+__dev_Scaler32_End:						INPUT		REG_ARG_0,		IPORT_SCALER32_REG_R0			;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_SCALER32_REG_R1			;	Write Reg R1 to arg1
+															INPUT		REG_ARG_2,		IPORT_SCALER32_REG_R2			;	Write Reg R2 to arg2
+															INPUT		REG_ARG_3,		IPORT_SCALER32_REG_R3			;	Write Reg R3 to arg3
+															RETURN
+;PRAGMA function end
+;
+;
+; Interrupt Handler
+; ===============================================
+;PRAGMA function __ISR_Scaler32 begin
+__ISR_Scaler32:			JUMP __ISR_Error
+
+;PRAGMA function end

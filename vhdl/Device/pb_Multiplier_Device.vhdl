@@ -1,0 +1,134 @@
+-- EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+-- vim: tabstop=2:shiftwidth=2:noexpandtab
+-- kate: tab-width 2; replace-tabs off; indent-width 2;
+-- 
+-- ============================================================================
+-- Authors:					Patrick Lehmann
+-- 
+-- Module:					Multiplier 8/16/24/32 bit Device for PicoBlaze
+--
+-- Description:
+-- ------------------------------------
+--		TODO
+--		
+--
+-- License:
+-- ============================================================================
+-- Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+--										 Chair for VLSI-Design, Diagnostics and Architecture
+-- 
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+-- 
+--		http://www.apache.org/licenses/LICENSE-2.0
+-- 
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+-- ============================================================================
+
+library IEEE;
+use			IEEE.STD_LOGIC_1164.all;
+use			IEEE.NUMERIC_STD.all;
+
+library PoC;
+use			PoC.utils.all;
+use			PoC.vectors.all;
+
+library	L_PicoBlaze;
+use			L_PicoBlaze.pb.all;
+
+
+entity pb_Multiplier_Device is
+	generic (
+		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE;
+		BITS													: POSITIVE
+	);
+	port (
+		Clock													: in	STD_LOGIC;
+		Reset													: in	STD_LOGIC;
+
+		-- PicoBlaze interface
+		Address												: in	T_SLV_8;
+		WriteStrobe										: in	STD_LOGIC;
+		WriteStrobe_K									: in	STD_LOGIC;
+		ReadStrobe										: in	STD_LOGIC;
+		DataIn												: in	T_SLV_8;
+		DataOut												: out	T_SLV_8;
+		
+		Interrupt											: out	STD_LOGIC;
+		Interrupt_Ack									: in	STD_LOGIC;
+		Message												: out T_SLV_8
+	);
+end entity;
+
+
+architecture rtl of pb_Multiplier_Device is
+	signal AdrDec_we						: STD_LOGIC;
+	signal AdrDec_re						: STD_LOGIC;
+	signal AdrDec_WriteAddress	: T_SLV_8;
+	signal AdrDec_ReadAddress		: T_SLV_8;
+	signal AdrDec_Data					: T_SLV_8;
+	
+	constant BYTES							: POSITIVE		:= div_ceil(BITS, 8);
+	constant BIT_AB							: NATURAL			:= log2ceil(BYTES);
+	
+	signal Reg_Operand_A				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
+	signal Reg_Operand_B				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
+	signal Reg_Result						: T_SLVV_8((2 * BYTES) - 1 downto 0)	:= (others => (others => '0'));
+	
+begin
+	assert ((BITS = 8) or (BITS = 16) or (BITS = 24) or (BITS = 32))
+		report "Multiplier size is not supported. Supported sizes: 8, 16, 24, 32. BITS=" & INTEGER'image(BITS)
+		severity failure;
+
+	AdrDec : entity L_PicoBlaze.PicoBlaze_AddressDecoder
+		generic map (
+			DEVICE_INSTANCE						=> DEVICE_INSTANCE
+		)
+		port map (
+			Clock											=> Clock,
+			Reset											=> Reset,
+
+			-- PicoBlaze interface
+			In_WriteStrobe						=> WriteStrobe,
+			In_WriteStrobe_K					=> WriteStrobe_K,
+			In_ReadStrobe							=> ReadStrobe,
+			In_Address								=> Address,
+			In_Data										=> DataIn,
+			Out_WriteStrobe						=> AdrDec_we,
+			Out_ReadStrobe						=> AdrDec_re,
+			Out_WriteAddress					=> AdrDec_WriteAddress,
+			Out_ReadAddress						=> AdrDec_ReadAddress,
+			Out_Data									=> AdrDec_Data
+		);
+
+	process(Clock)
+	begin
+		if rising_edge(Clock) then
+			if (Reset = '1') then
+				Reg_Operand_A						<= (others => (others => '0'));
+				Reg_Operand_B						<= (others => (others => '0'));
+				Reg_Result							<= (others => (others => '0'));
+			else
+				if (AdrDec_we = '1') then
+					if (AdrDec_WriteAddress(BIT_AB) = '0') then
+						Reg_Operand_A(to_index(AdrDec_WriteAddress(BIT_AB - 1 downto 0)))	<= AdrDec_Data;
+					else
+						Reg_Operand_B(to_index(AdrDec_WriteAddress(BIT_AB - 1 downto 0)))	<= AdrDec_Data;
+					end if;
+				end if;
+				
+				Reg_Result	<= to_slvv_8(std_logic_vector(unsigned(to_slv(Reg_Operand_A)) * unsigned(to_slv(Reg_Operand_B))));
+			end if;
+		end if;
+	end process;
+	
+	DataOut					<= Reg_Result(to_index(AdrDec_ReadAddress(BIT_AB downto 0)));
+	
+	Interrupt		<= '0';
+	Message			<= x"00";
+end;

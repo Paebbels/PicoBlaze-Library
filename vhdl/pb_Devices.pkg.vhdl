@@ -66,7 +66,9 @@ package pb_Devices is
 	constant PB_DEV_INTERRUPT				: T_PB_DEVICE;
 	constant PB_DEV_TIMER						: T_PB_DEVICE;
 	constant PB_DEV_MULTIPLIER16		: T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER32		: T_PB_DEVICE;
 	constant PB_DEV_ACCUMULATOR16		: T_PB_DEVICE;
+	constant PB_DEV_DIVIDER16				: T_PB_DEVICE;
 	constant PB_DEV_DIVIDER32				: T_PB_DEVICE;
 	constant PB_DEV_SCALER40				: T_PB_DEVICE;
 	constant PB_DEV_CONVERTER_BCD24	: T_PB_DEVICE;
@@ -182,6 +184,37 @@ package body pb_Devices is
 			pb_CreateRegisterRO("Result3",		3, PB_DEV_MULTIPLIER16_FIELDS, "Result",		24)),
 		RegisterFields =>			PB_DEV_MULTIPLIER16_FIELDS
 	);
+	
+	-- Multiplier (32 bit)
+	-- ---------------------------------------------------------------------------
+	constant PB_DEV_MULTIPLIER32_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	32) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	32) &
+		pb_CreateReadOnlyField("Result R",		"Result",		64)
+	);
+	
+	constant PB_DEV_MULTIPLIER32 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Multiplier (32 bit)",
+		DeviceShort =>				"Mult32",
+		Registers =>					(
+			pb_CreateRegisterWO("OperandA0",	0, PB_DEV_MULTIPLIER32_FIELDS, "OperandA",	 0) &
+			pb_CreateRegisterWO("OperandA1",	1, PB_DEV_MULTIPLIER32_FIELDS, "OperandA",	 8) &
+			pb_CreateRegisterWO("OperandA2",	2, PB_DEV_MULTIPLIER32_FIELDS, "OperandA",	16) &
+			pb_CreateRegisterWO("OperandA3",	3, PB_DEV_MULTIPLIER32_FIELDS, "OperandA",	24) &
+			pb_CreateRegisterWO("OperandB0",	4, PB_DEV_MULTIPLIER32_FIELDS, "OperandB",	 0) &
+			pb_CreateRegisterWO("OperandB1",	5, PB_DEV_MULTIPLIER32_FIELDS, "OperandB",	 8) &
+			pb_CreateRegisterWO("OperandB2",	6, PB_DEV_MULTIPLIER32_FIELDS, "OperandB",	16) &
+			pb_CreateRegisterWO("OperandB3",	7, PB_DEV_MULTIPLIER32_FIELDS, "OperandB",	24) &
+			pb_CreateRegisterRO("Result0",		0, PB_DEV_MULTIPLIER32_FIELDS, "Result",		 0) &
+			pb_CreateRegisterRO("Result1",		1, PB_DEV_MULTIPLIER32_FIELDS, "Result",		 8) &
+			pb_CreateRegisterRO("Result2",		2, PB_DEV_MULTIPLIER32_FIELDS, "Result",		16) &
+			pb_CreateRegisterRO("Result3",		3, PB_DEV_MULTIPLIER32_FIELDS, "Result",		24) &
+			pb_CreateRegisterRO("Result4",		4, PB_DEV_MULTIPLIER32_FIELDS, "Result",		32) &
+			pb_CreateRegisterRO("Result5",		5, PB_DEV_MULTIPLIER32_FIELDS, "Result",		40) &
+			pb_CreateRegisterRO("Result6",		6, PB_DEV_MULTIPLIER32_FIELDS, "Result",		48) &
+			pb_CreateRegisterRO("Result7",		7, PB_DEV_MULTIPLIER32_FIELDS, "Result",		56)),
+		RegisterFields =>			PB_DEV_MULTIPLIER32_FIELDS
+	);
 
 	-- Accumulator (16 bit)
 	-- ---------------------------------------------------------------------------
@@ -208,6 +241,30 @@ package body pb_Devices is
 		RegisterFields =>			PB_DEV_ACCUMULATOR16_FIELDS
 	);
 
+	-- Divider (16 bit)
+	-- ---------------------------------------------------------------------------
+	constant PB_DEV_DIVIDER16_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	16) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	16) &
+		pb_CreateReadOnlyField("Result R",		"Result",		16) &
+		pb_CreateReadOnlyField("Status",			"Status",		 8)
+	);
+
+	constant PB_DEV_DIVIDER16 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Divider (16 bit)",
+		DeviceShort =>				"Div16",
+		Registers =>					(
+			pb_CreateRegisterWO("OperandA0",	0, PB_DEV_DIVIDER16_FIELDS, "OperandA",	 0) &
+			pb_CreateRegisterWO("OperandA1",	1, PB_DEV_DIVIDER16_FIELDS, "OperandA",  8) &
+			pb_CreateRegisterWO("OperandB0",	2, PB_DEV_DIVIDER16_FIELDS, "OperandB",	 0) &
+			pb_CreateRegisterWO("OperandB1",	3, PB_DEV_DIVIDER16_FIELDS, "OperandB",	 8) &
+			pb_CreateRegisterRO("Result0",		0, PB_DEV_DIVIDER16_FIELDS, "Result",		 0) &
+			pb_CreateRegisterRO("Result1",		1, PB_DEV_DIVIDER16_FIELDS, "Result",		 8) &
+			pb_CreateRegisterRO("Status",			3, PB_DEV_DIVIDER16_FIELDS, "Result",		 0)),
+		RegisterFields =>			PB_DEV_DIVIDER16_FIELDS,
+		CreatesInterrupt =>		TRUE
+	);
+	
 	-- Divider (32 bit)
 	-- ---------------------------------------------------------------------------
 	constant PB_DEV_DIVIDER32_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (

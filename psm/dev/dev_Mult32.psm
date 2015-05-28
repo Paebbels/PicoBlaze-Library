@@ -1,0 +1,139 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		Multiplier 32 bit
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		__dev_Mult32_Mult8
+;		__dev_Mult32_Mult16
+;		__dev_Mult32_Mult24
+;		__dev_Mult32_Mult32
+;   
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;										 Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+; Co-Processor macros
+; ===============================================
+;PRAGMA function __dev_Mult32_Mult8 begin
+;;		Requires:
+;;			Arg0 : Factor A
+;;			Arg1 : Factor B
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			
+__dev_Mult_Mult8:
+__dev_Mult32_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDB0	;	Write arg1 to Reg B0
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Mult32_Mult16 begin
+;;		Requires:
+;;			Arg0 : Factor A(7:0)
+;;			Arg1 : Factor A(15:8)
+;;			Arg2 : Factor B(7:0)
+;;			Arg3 : Factor B(15:8)
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			Arg2 : Product R(23:32)
+;;			Arg3 : Product R(31:24)
+;;			
+__dev_Mult_Mult16:
+__dev_Mult32_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_2,		OPORT_MULT32_OPERANDB0	;	Write arg2 to Reg B0
+															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDA1	;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDB1	;	Write arg3 to Reg B1
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
+															INPUT		REG_ARG_2,		IPORT_MULT32_RESULT2		;	Write Reg R2 to arg2
+															INPUT		REG_ARG_3,		IPORT_MULT32_RESULT3		;	Write Reg R3 to arg3
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Mult32_Mult24 begin
+;;		Requires:
+;;			Arg0 : Factor A(7:0)
+;;			Arg1 : Factor A(15:8)
+;;			Arg2 : Factor B(7:0)
+;;			Arg3 : Factor B(15:8)
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			Arg2 : Product R(23:32)
+;;			Arg3 : Product R(31:24)
+;;			
+__dev_Mult32_Mult24:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_2,		OPORT_MULT32_OPERANDB0	;	Write arg2 to Reg B0
+															OUTPUT	REG_TMP_0,		OPORT_MULT32_OPERANDA1	;	Write tmp0 to Reg A1
+															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDB1	;	Write arg1 to Reg B1
+															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDA2	;	Write arg3 to Reg A2
+															OUTPUT	REG_TMP_1,		OPORT_MULT32_OPERANDB2	;	Write tmp1 to Reg B2
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
+															INPUT		REG_ARG_2,		IPORT_MULT32_RESULT2		;	Write Reg R2 to arg2
+															INPUT		REG_ARG_3,		IPORT_MULT32_RESULT3		;	Write Reg R3 to arg3
+															INPUT		REG_TMP_0,		IPORT_MULT32_RESULT3		;	Write Reg R4 to tmp0
+															INPUT		REG_TMP_1,		IPORT_MULT32_RESULT3		;	Write Reg R5 to tmp1
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Mult32_Mult32 begin
+;;		Requires:
+;;			Arg0 : Factor A(7:0)
+;;			Arg1 : Factor A(15:8)
+;;			Arg2 : Factor B(7:0)
+;;			Arg3 : Factor B(15:8)
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			Arg2 : Product R(23:32)
+;;			Arg3 : Product R(31:24)
+;;			
+__dev_Mult32_Mult32:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_TMP_0,		OPORT_MULT32_OPERANDB0	;	Write tmp0 to Reg B0
+															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDA1	;	Write arg1 to Reg A1
+															OUTPUT	REG_TMP_1,		OPORT_MULT32_OPERANDB1	;	Write tmp1 to Reg B1
+															OUTPUT	REG_ARG_2,		OPORT_MULT32_OPERANDA2	;	Write arg2 to Reg A2
+															OUTPUT	REG_TMP_2,		OPORT_MULT32_OPERANDB2	;	Write tmp2 to Reg B2
+															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDA3	;	Write arg3 to Reg A3
+															OUTPUT	REG_TMP_3,		OPORT_MULT32_OPERANDB3	;	Write tmp3 to Reg B3
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
+															INPUT		REG_ARG_2,		IPORT_MULT32_RESULT2		;	Write Reg R2 to arg2
+															INPUT		REG_ARG_3,		IPORT_MULT32_RESULT3		;	Write Reg R3 to arg3
+															INPUT		REG_TMP_0,		IPORT_MULT32_RESULT4		;	Write Reg R4 to tmp0
+															INPUT		REG_TMP_1,		IPORT_MULT32_RESULT5		;	Write Reg R5 to tmp1
+															INPUT		REG_TMP_2,		IPORT_MULT32_RESULT6		;	Write Reg R6 to tmp2
+															INPUT		REG_TMP_3,		IPORT_MULT32_RESULT7		;	Write Reg R7 to tmp3
+															RETURN
+;PRAGMA function end

@@ -60,10 +60,11 @@ __Sleep_1_us:				LOAD		REG_TMP_5,		23'd					; 1us -> ((100 clock cycles / 2 cloc
 ;
 ;; INPUT	REG_ARG_0
 ;; USES		REG_ARG_1, REG_TMP_3, REG_TMP_4, REG_TMP_5
+;; CALLS	__dev_Mult_Mult8
 ;; JUMPS	_Sleep_loop3
 ;PRAGMA function _sleep_n_us begin
 __Sleep_n_us:				LOAD		REG_ARG_1,		50'd					; 50 instructions per microsecond
-										CALL		__DEV_Mult16_mult8					; 7 instructions (CALL, 2x OUTPUT, NOP, 2x INPUT, RETURN)
+										CALL		__dev_Mult_Mult8						; 7 instructions (CALL, 2x OUTPUT, NOP, 2x INPUT, RETURN)
 										LOAD		REG_TMP_4,		REG_ARG_1			; copy result to tmp registers
 										LOAD		REG_TMP_3,		REG_ARG_0			;
 										SR0			REG_TMP_4										; divide by 4 (4 instructions per loop) => 2x shift right
@@ -89,13 +90,13 @@ __Sleep_1_ms:				; sleep for 1 millisecond => 12.500 iterations => 0x0030D4
 ; maximal 255 ms
 ;; INPUT	REG_ARG_0
 ;; USES		REG_ARG_1, REG_ARG_2, REG_ARG_3, REG_TMP_3, REG_TMP_4, REG_TMP_5
-;; CALLS	__DEV_Mult16_mult
+;; CALLS	__dev_Mult_Mult16
 ;; JUMPS	_Sleep_loop3
 ;PRAGMA function _sleep_n_ms begin
 __Sleep_n_ms:				LOAD		REG_ARG_1,		00						; fill operand A -> 0x00aa
 										LOAD		REG_ARG_3,		30						; 12,500 instructions per millisecond
 										LOAD		REG_ARG_2,		D4						; 
-										CALL		__DEV_Mult16_mult						; 11 instructions (CALL, 4x OUTPUT, NOP, 4x INPUT, RETURN)
+										CALL		__dev_Mult_Mult16						; 11 instructions (CALL, 4x OUTPUT, NOP, 4x INPUT, RETURN)
 										LOAD		REG_TMP_5,		REG_ARG_2			; copy result to tmp registers
 										LOAD		REG_TMP_4,		REG_ARG_1			; 
 										LOAD		REG_TMP_3,		REG_ARG_0			;

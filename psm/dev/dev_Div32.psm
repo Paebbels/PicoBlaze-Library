@@ -10,7 +10,24 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__DEV_Div32_
+;		__dev_Div32_Wait
+;		__dev_Div32_Div8_Begin
+;		__dev_Div32_Div8_End
+;		__dev_Div32_Div16_Begin
+;		__dev_Div32_Div16_End
+;		__dev_Div32_Div32_Begin
+;		__dev_Div32_Div32_End
+;
+; Aliases
+;		__dev_Div_Wait
+;		__dev_Div_Div8_Begin
+;		__dev_Div_Div8_End
+;		__dev_Div_Div16_Begin
+;		__dev_Div_Div16_End
+;		__dev_Div_Div32_Begin
+;		__dev_Div_Div32_End
+;
+; Interrupt Handlers
 ;		__ISR_Div32
 ;   
 ;	private functions:
@@ -18,7 +35,7 @@
 ; License:
 ; ==============================================================================
 ; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
-;										 Chair for VLSI-Design, Diagnostics and Architecture
+;											Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -35,11 +52,101 @@
 ;
 ; Constants
 ; ===============================================
-;CONSTANT Div32_STATUS_DONE,						01		;
+CONSTANT DIV32_STATUS_DONE,						01		;
 ;
 ; Co-Processor macros
 ; ===============================================
+;PRAGMA function __dev_Div32_Wait begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+__dev_Div_Wait:
+__dev_Div32_Wait:							INPUT		REG_TMP_0,		IPORT_DIV32_STATUS			; Read computation status
+															TEST		REG_TMP_0,		DIV32_STATUS_DONE
+															RETURN	C
+															JUMP 		__dev_Div32_Wait
+;PRAGMA function end
 
+;PRAGMA function __dev_Div32_Div8_Begin begin
+;;		Requires:
+;;			Arg0 : Factor A
+;;			Arg1 : Factor B
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			
+__dev_Div_Div8_Begin:
+__dev_Div32_Div8_Begin:				OUTPUT	REG_ARG_0,		OPORT_DIV32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_1,		OPORT_DIV32_OPERANDB0	;	Write arg1 to Reg B0
+															LOAD		REG_ARG_0,		00											; 
+															OUTPUT	REG_ARG_0,		OPORT_DIV32_OPERANDA1	;
+															OUTPUT	REG_ARG_0,		OPORT_DIV32_OPERANDB1	;
+;PRAGMA function end						
+;		
+;PRAGMA function __dev_Div32_Div8_End begin
+__dev_Div_Div8_End:
+__dev_Div32_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV32_RESULT0		;	Write Reg R0 to arg0
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Div32_Div16 begin
+;;		Requires:
+;;			Arg0 : Factor A(7:0)
+;;			Arg1 : Factor A(15:8)
+;;			Arg2 : Factor B(7:0)
+;;			Arg3 : Factor B(15:8)
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			Arg2 : Product R(23:16)
+;;			Arg3 : Product R(31:24)
+;;			
+__dev_Div_Div16_Begin:
+__dev_Div32_Div16_Begin:			OUTPUT	REG_ARG_0,		OPORT_DIV32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_1,		OPORT_DIV32_OPERANDA1	;	Write arg2 to Reg B0
+															OUTPUT	REG_ARG_2,		OPORT_DIV32_OPERANDB0	;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_3,		OPORT_DIV32_OPERANDB1	;	Write arg3 to Reg B1
+;PRAGMA function end						
+;		
+;PRAGMA function __dev_Div32_Div16_End begin
+__dev_Div_Div16_End:
+__dev_Div32_Div16_End:				INPUT		REG_ARG_0,		IPORT_DIV32_RESULT0		;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_DIV32_RESULT1		;	Write Reg R1 to arg1
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Div32_Div32 begin
+;;		Requires:
+;;			Arg0 : Factor A(7:0)
+;;			Arg1 : Factor A(15:8)
+;;			Arg2 : Factor B(7:0)
+;;			Arg3 : Factor B(15:8)
+;;		Returns:
+;;			Arg0 : Product R(7:0)
+;;			Arg1 : Product R(15:8)
+;;			Arg2 : Product R(23:16)
+;;			Arg3 : Product R(31:24)
+;;			
+__dev_Div_Div32_Begin:
+__dev_Div32_Div32_Begin:			OUTPUT	REG_ARG_0,		OPORT_DIV32_OPERANDA0	;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_1,		OPORT_DIV32_OPERANDA1	;	Write arg2 to Reg B0
+															OUTPUT	REG_ARG_2,		OPORT_DIV32_OPERANDA2	;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_3,		OPORT_DIV32_OPERANDA3	;	Write arg3 to Reg B1
+															OUTPUT	REG_TMP_0,		OPORT_DIV32_OPERANDB0	;	Write arg3 to Reg B1
+															OUTPUT	REG_TMP_1,		OPORT_DIV32_OPERANDB1	;	Write arg3 to Reg B1
+															OUTPUT	REG_TMP_2,		OPORT_DIV32_OPERANDB2	;	Write arg3 to Reg B1
+															OUTPUT	REG_TMP_3,		OPORT_DIV32_OPERANDB3	;	Write arg3 to Reg B1
+;PRAGMA function end						
+;		
+;PRAGMA function __dev_Div32_Div32_End begin
+__dev_Div_Div32_End:
+__dev_Div32_Div32_End:				INPUT		REG_ARG_0,		IPORT_DIV32_RESULT0		;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_DIV32_RESULT1		;	Write Reg R1 to arg1
+															INPUT		REG_ARG_2,		IPORT_DIV32_RESULT2		;	Write Reg R1 to arg1
+															INPUT		REG_ARG_3,		IPORT_DIV32_RESULT3		;	Write Reg R1 to arg1
+															RETURN
+;PRAGMA function end
 ;
 ;
 ; Interrupt Handler

@@ -5,7 +5,7 @@
 -- ============================================================================
 -- Authors:					Patrick Lehmann
 -- 
--- Module:					Multiplier Wrapper for PicoBlaze
+-- Module:					Divider 8/16/24/32 bit) Device for PicoBlaze
 --
 -- Description:
 -- ------------------------------------
@@ -42,9 +42,10 @@ library	L_PicoBlaze;
 use			L_PicoBlaze.pb.all;
 
 
-entity pb_Multiplier_Wrapper is
+entity pb_Divider_Device is
 	generic (
-		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE
+		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE;
+		BITS													: POSITIVE
 	);
 	port (
 		Clock													: in	STD_LOGIC;
@@ -65,29 +66,30 @@ entity pb_Multiplier_Wrapper is
 end entity;
 
 
-architecture rtl of pb_Multiplier_Wrapper is
-	constant REG_WO_A0					: STD_LOGIC_VECTOR(1 downto 0)			:= "00";
-	constant REG_WO_A1					: STD_LOGIC_VECTOR(1 downto 0)			:= "01";
-	constant REG_WO_B0					: STD_LOGIC_VECTOR(1 downto 0)			:= "10";
-	constant REG_WO_B1					: STD_LOGIC_VECTOR(1 downto 0)			:= "11";
-	constant REG_RO_R0					: STD_LOGIC_VECTOR(1 downto 0)			:= "00";
-	constant REG_RO_R1					: STD_LOGIC_VECTOR(1 downto 0)			:= "01";
-	constant REG_RO_R2					: STD_LOGIC_VECTOR(1 downto 0)			:= "10";
-	constant REG_RO_R3					: STD_LOGIC_VECTOR(1 downto 0)			:= "11";
-	
+architecture rtl of pb_Divider_Device is
 	signal AdrDec_we						: STD_LOGIC;
 	signal AdrDec_re						: STD_LOGIC;
 	signal AdrDec_WriteAddress	: T_SLV_8;
 	signal AdrDec_ReadAddress		: T_SLV_8;
 	signal AdrDec_Data					: T_SLV_8;
 	
-	signal Reg_Operand_a				: T_SLV_16							:= (others => '0');
-	signal Reg_Operand_b				: T_SLV_16							:= (others => '0');
-	signal Reg_Result						: T_SLV_32							:= (others => '0');
+	constant BYTES							: POSITIVE		:= div_ceil(BITS, 8);
+	constant BIT_AB							: NATURAL			:= log2ceil(BYTES);
 	
-	signal Reg_Result_slvv			: T_SLVV_8(3 downto 0);
+	signal Reg_Start						: STD_LOGIC							:= '0';
+	signal Reg_Operand_A				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
+	signal Reg_Operand_B				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
+	signal Reg_Result						: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
+	
+	signal Div_Result						: STD_LOGIC_VECTOR(BITS - 1 downto 0);
+	signal Div_Done_d						: STD_LOGIC														:= '0';
+	signal Div_Done_re					: STD_LOGIC;
 	
 begin
+	assert ((BITS = 8) or (BITS = 16) or (BITS = 24) or (BITS = 32))
+		report "Divider size is not supported. Supported sizes: 8, 16, 24, 32. BITS=" & INTEGER'image(BITS)
+		severity failure;
+
 	AdrDec : entity L_PicoBlaze.PicoBlaze_AddressDecoder
 		generic map (
 			DEVICE_INSTANCE						=> DEVICE_INSTANCE
@@ -112,29 +114,73 @@ begin
 	process(Clock)
 	begin
 		if rising_edge(Clock) then
+			Reg_Start									<= '0';
+			
 			if (Reset = '1') then
-				Reg_Operand_A						<= (others => '0');
-				Reg_Operand_B						<= (others => '0');
-				Reg_Result							<= (others => '0');
+				Reg_Operand_A						<= (others => (others => '0'));
+				Reg_Operand_B						<= (others => (others => '0'));
+				Reg_Result							<= (others => (others => '0'));
 			else
 				if (AdrDec_we = '1') then
-					case AdrDec_WriteAddress(1 downto 0) is
-						when REG_WO_A0 =>		Reg_Operand_A(7 downto 0)		<= AdrDec_Data;
-						when REG_WO_A1 =>		Reg_Operand_A(15 downto 8)	<= AdrDec_Data;
-						when REG_WO_B0 =>		Reg_Operand_B(7 downto 0)		<= AdrDec_Data;
-						when reg_wo_b1 =>		reg_operand_b(15 downto 8)	<= adrdec_data;
-						when others =>			null;
-					end case;
+					if (AdrDec_WriteAddress(BIT_AB) = '0') then
+						Reg_Operand_A(to_index(AdrDec_WriteAddress(BIT_AB - 1 downto 0)))	<= AdrDec_Data;
+					else
+						Reg_Operand_B(to_index(AdrDec_WriteAddress(BIT_AB - 1 downto 0)))	<= AdrDec_Data;
+					end if;
 				end if;
 				
-				Reg_Result	<= std_logic_vector(unsigned(Reg_Operand_A) * unsigned(Reg_Operand_B));
+				if (slv_and(AdrDec_WriteAddress(BIT_AB downto 0)) = '1') then
+					Reg_Start										<= '1';
+				end if;
+				
+				if (Div_Done_re = '1') then
+					Reg_Result		<= to_slvv_8(Div_Result);
+				end if;
 			end if;
 		end if;
 	end process;
 	
-	Reg_Result_slvv	<= to_slvv_8(Reg_Result);
-	DataOut					<= Reg_Result_slvv(to_index(AdrDec_ReadAddress(1 downto 0)));
+	blkDiv : block
+		signal Operand_A_slv		: STD_LOGIC_VECTOR(BITS - 1 downto 0);
+		signal Operand_B_slv		: STD_LOGIC_VECTOR(BITS - 1 downto 0);
+		
+		signal Div_Done					: STD_LOGIC;
+	begin
+		Operand_A_slv		<= to_slv(Reg_Operand_A);
+		Operand_B_slv		<= to_slv(Reg_Operand_B);
 	
-	Interrupt		<= '0';
+		Div : entity PoC.arith_div
+			generic map (
+				N							=> BITS,			-- Operand /Result bit widths
+				RAPOW					=> 2,					-- Power of Radix used (2**RAPOW)
+				REGISTERED		=> FALSE
+			)
+			port map (
+				clk				=> Clock,
+				rst				=> Reset,
+
+				start			=> Reg_Start,
+				arg1			=> Operand_A_slv,
+				arg2			=> Operand_A_slv,
+
+				rdy				=> Div_Done,
+				res				=> Div_Result
+			);
+
+		Div_Done_d	<= Div_Done		when rising_edge(Clock);
+		Div_Done_re	<= not Div_Done_d and Div_Done;
+	end block;
+	
+	process(AdrDec_re, AdrDec_ReadAddress, Reg_Result, Div_Done_d)
+	begin
+		DataOut					<= Reg_Result(to_index(AdrDec_ReadAddress(BIT_AB - 1 downto 0), Reg_Result'length - 1));
+		
+		if (slv_and(AdrDec_ReadAddress(BIT_AB downto 0)) = '1') then
+			DataOut				<= "0000000" & Div_Done_d;
+		end if;
+	end process;
+
+	Interrupt		<= Div_Done_re;
 	Message			<= x"00";
+
 end;
