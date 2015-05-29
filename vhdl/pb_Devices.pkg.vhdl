@@ -61,27 +61,30 @@ package pb_Devices is
 	-- ===========================================================================
 	-- PicoBlaze device descriptions
 	-- ===========================================================================
-	constant PB_DEV_RESET						: T_PB_DEVICE;
-	constant PB_DEV_ROM							: T_PB_DEVICE;
-	constant PB_DEV_INTERRUPT				: T_PB_DEVICE;
-	constant PB_DEV_TIMER						: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER16		: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER32		: T_PB_DEVICE;
-	constant PB_DEV_ACCUMULATOR16		: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER16				: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER32				: T_PB_DEVICE;
-	constant PB_DEV_SCALER40				: T_PB_DEVICE;
-	constant PB_DEV_CONVERTER_BCD24	: T_PB_DEVICE;
-	constant PB_DEV_GPIO						: T_PB_DEVICE;
-	constant PB_DEV_BITBANGING			: T_PB_DEVICE;
-	constant PB_DEV_LCDISPLAY				: T_PB_DEVICE;
-	constant PB_DEV_UART						: T_PB_DEVICE;
---	constant PB_DEV_UARTSTREAM			: T_PB_DEVICE;
-	constant PB_DEV_IICCONTROLLER		: T_PB_DEVICE;
---	constant PB_DEV_MDIOCONTROLLER	: T_PB_DEVICE;
-	constant PB_DEV_DRP							: T_PB_DEVICE;
-	constant PB_DEV_FREQM						: T_PB_DEVICE;
-	constant PB_DEV_BCDCOUNTER			: T_PB_DEVICE;
+	constant PB_DEV_RESET							: T_PB_DEVICE;
+	constant PB_DEV_ROM								: T_PB_DEVICE;
+	constant PB_DEV_INTERRUPT					: T_PB_DEVICE;
+	constant PB_DEV_TIMER							: T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER16			: T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER32			: T_PB_DEVICE;
+	constant PB_DEV_ACCUMULATOR16			: T_PB_DEVICE;
+	constant PB_DEV_DIVIDER16					: T_PB_DEVICE;
+	constant PB_DEV_DIVIDER32					: T_PB_DEVICE;
+--	constant PB_DEV_SCALER16					: T_PB_DEVICE;
+--	constant PB_DEV_SCALER32					: T_PB_DEVICE;
+	constant PB_DEV_SCALER40					: T_PB_DEVICE;
+	constant PB_DEV_CONVERTER_BCD24		: T_PB_DEVICE;
+	constant PB_DEV_GPIO							: T_PB_DEVICE;
+	constant PB_DEV_BIT_BANGING_IO8		: T_PB_DEVICE;
+	constant PB_DEV_BIT_BANGING_IO16	: T_PB_DEVICE;
+	constant PB_DEV_LCDISPLAY					: T_PB_DEVICE;
+	constant PB_DEV_UART							: T_PB_DEVICE;
+--	constant PB_DEV_UARTSTREAM				: T_PB_DEVICE;
+	constant PB_DEV_IICCONTROLLER			: T_PB_DEVICE;
+--	constant PB_DEV_MDIOCONTROLLER		: T_PB_DEVICE;
+	constant PB_DEV_DRP								: T_PB_DEVICE;
+	constant PB_DEV_FREQM							: T_PB_DEVICE;
+	constant PB_DEV_BCDCOUNTER				: T_PB_DEVICE;
 	
 end package;
 
@@ -371,23 +374,48 @@ package body pb_Devices is
 		CreatesInterrupt =>		TRUE
 	);
 
-	-- Bit Banging I/O
+	-- Bit Banging I/O (8 bit)
 	-- ---------------------------------------------------------------------------
-	constant PB_DEV_BITBANGING_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
-		pb_CreateRegisterField("BBIO DataOut",			"DataOut",		8) &
-		pb_CreateReadOnlyField("BBIO DataIn",				"DataIn",			8) &
-		pb_CreateWriteOnlyField("Interrupt Enable",	"IntEnable",	8)
+	constant PB_DEV_BIT_BANGING_IO8_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("BBIO Set",			"Set",			8) &
+		pb_CreateWriteOnlyField("BBIO Clear",		"Clear",		8) &
+		pb_CreateReadOnlyField("BBIO DataOut",	"DataOut",	8) &
+		pb_CreateReadOnlyField("BBIO DataIn",		"DataIn",		8)
 	);
 
-	constant PB_DEV_BITBANGING : T_PB_DEVICE := pb_CreateDevice(
+	constant PB_DEV_BIT_BANGING_IO8 : T_PB_DEVICE := pb_CreateDevice(
 		DeviceName =>					"Bit Banging I/O",
-		DeviceShort =>				"BBIO",
+		DeviceShort =>				"BBIO8",
 		Registers =>					(
-			pb_CreateRegisterRWK("DataOut",		0, PB_DEV_GPIO_FIELDS, "DataOut",		0) &
-			pb_CreateRegisterRO("DataIn",			1, PB_DEV_GPIO_FIELDS, "DataIn",		0) &
-			pb_CreateRegisterWO("IntEnable",	1, PB_DEV_GPIO_FIELDS, "IntEnable",	0)),
-		RegisterFields =>			PB_DEV_BITBANGING_FIELDS,
-		CreatesInterrupt =>		TRUE
+			pb_CreateRegisterWK("Set",			0, PB_DEV_BIT_BANGING_IO8_FIELDS, "Set",			0) &
+			pb_CreateRegisterWK("Clear",		1, PB_DEV_BIT_BANGING_IO8_FIELDS, "Clear",		0) &
+			pb_CreateRegisterRO("DataOut",	0, PB_DEV_BIT_BANGING_IO8_FIELDS, "DataOut",	0) &
+			pb_CreateRegisterRO("DataIn",		1, PB_DEV_BIT_BANGING_IO8_FIELDS, "DataIn",		0)),
+		RegisterFields =>			PB_DEV_BIT_BANGING_IO8_FIELDS
+	);
+
+	-- Bit Banging I/O (16 bit)
+	-- ---------------------------------------------------------------------------
+	constant PB_DEV_BIT_BANGING_IO16_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("BBIO Set",			"Set",			16) &
+		pb_CreateWriteOnlyField("BBIO Clear",		"Clear",		16) &
+		pb_CreateReadOnlyField("BBIO DataOut",	"DataOut",	16) &
+		pb_CreateReadOnlyField("BBIO DataIn",		"DataIn",		16)
+	);
+
+	constant PB_DEV_BIT_BANGING_IO16 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Bit Banging I/O",
+		DeviceShort =>				"BBIO16",
+		Registers =>					(
+			pb_CreateRegisterWK("Set0",			0, PB_DEV_BIT_BANGING_IO16_FIELDS, "Set",			0) &
+			pb_CreateRegisterWK("Set1",			1, PB_DEV_BIT_BANGING_IO16_FIELDS, "Set",			8) &
+			pb_CreateRegisterWK("Clear0",		2, PB_DEV_BIT_BANGING_IO16_FIELDS, "Clear",		0) &
+			pb_CreateRegisterWK("Clear1",		3, PB_DEV_BIT_BANGING_IO16_FIELDS, "Clear",		8) &
+			pb_CreateRegisterRO("DataOut0",	0, PB_DEV_BIT_BANGING_IO16_FIELDS, "DataOut",	0) &
+			pb_CreateRegisterRO("DataOut1",	1, PB_DEV_BIT_BANGING_IO16_FIELDS, "DataOut",	8) &
+			pb_CreateRegisterRO("DataIn0",	2, PB_DEV_BIT_BANGING_IO16_FIELDS, "DataIn",	0) &
+			pb_CreateRegisterRO("DataIn1",	3, PB_DEV_BIT_BANGING_IO16_FIELDS, "DataIn",	8)),
+		RegisterFields =>			PB_DEV_BIT_BANGING_IO16_FIELDS
 	);
 
 	-- LC-Display

@@ -19,21 +19,21 @@
 ;		__dev_Term_SetColumn
 ;		__dev_Term_GoToHome
 ;		__dev_Term_SetPosition
-;		__dev_Term_ClearScreen_Up
-;		__dev_Term_ClearScreen_Down
-;		__dev_Term_ClearScreen_All
-;		__dev_Term_ClearLine_Before
-;		__dev_Term_ClearLine_After
-;		__dev_Term_ClearLine_All
+;		__dev_Term_ClearScreen_[Up|Down|All]
+;		__dev_Term_ClearLine_[Before|After|All]
 ;		__dev_Term_GoToHome
+;		__dev_Term_TextColor_Reset
+;		__dev_Term_TextColor_Default
+;		__dev_Term_TextColor_[Black|Red|Green|Yellow|Blue|Magenta|Cyan|Gray|White]
 ; 
 ;	private functions:
+;		_dev_Term_LoadEscSequence
 ;		_dev_Term_WriteEscSequence
 ;   
 ; License:
 ; ==============================================================================
-; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
-;										 Chair for VLSI-Design, Diagnostics and Architecture
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;											Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -56,8 +56,15 @@ CONSTANT DEV_TERM_TEXTCOLOR_YELLOW,		33		; Yellow
 CONSTANT DEV_TERM_TEXTCOLOR_BLUE,			34		; Blue
 CONSTANT DEV_TERM_TEXTCOLOR_MAGENTA,	35		; Magenta
 CONSTANT DEV_TERM_TEXTCOLOR_CYAN,			36		; Cyan
-CONSTANT DEV_TERM_TEXTCOLOR_GREY,			37		; Grey
-CONSTANT DEV_TERM_TEXTCOLOR_WHITE,		38		; White
+CONSTANT DEV_TERM_TEXTCOLOR_GRAY,			37		; Gray
+;CONSTANT DEV_TERM_TEXTCOLOR_
+;CONSTANT DEV_TERM_TEXTCOLOR_
+;CONSTANT DEV_TERM_TEXTCOLOR_
+;CONSTANT DEV_TERM_TEXTCOLOR_
+;CONSTANT DEV_TERM_TEXTCOLOR_
+;CONSTANT DEV_TERM_TEXTCOLOR_
+;CONSTANT DEV_TERM_TEXTCOLOR_
+CONSTANT DEV_TERM_TEXTCOLOR_WHITE,		37		; White
 ;
 ; Terminal macros
 ; ===============================================
@@ -215,94 +222,109 @@ __dev_Term_ScrollDown:				CALL			__Str_ByteToDecimal
 															JUMP			__UART_WriteChar 									; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_reset begin
+;PRAGMA function __dev_Term_TextColor_Reset begin
 __dev_Term_TextColor_Reset:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"0"
 															LOAD			REG_ARG_3,	"m"
 															JUMP			__UART_WriteQuadChar							; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_black begin
+;PRAGMA function __dev_Term_TextColor_Default begin
+__dev_Term_TextColor_Default:	CALL			_dev_Term_LoadEscSequence
+															LOAD			REG_ARG_2,	"3"
+															LOAD			REG_ARG_3,	"9"
+															CALL			__UART_WriteQuadChar
+															LOAD			REG_ARG_0,	";"
+															LOAD			REG_ARG_1,	"4"
+															LOAD			REG_ARG_2,	"9"
+															LOAD			REG_ARG_3,	"m"
+															JUMP			__UART_WriteQuadChar							; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Term_TextColor_Black begin
 __dev_Term_TextColor_Black:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_BLACK
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_red begin
+;PRAGMA function __dev_Term_TextColor_Red begin
 __dev_Term_TextColor_Red:			CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_RED
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_green begin
+;PRAGMA function __dev_Term_TextColor_Green begin
 __dev_Term_TextColor_Green:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_GREEN
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_yellow begin
+;PRAGMA function __dev_Term_TextColor_Yellow begin
 __dev_Term_TextColor_Yellow:	CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_YELLOW
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_blue begin
+;PRAGMA function __dev_Term_TextColor_Blue begin
 __dev_Term_TextColor_Blue:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_BLUE
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_magenta begin
+;PRAGMA function __dev_Term_TextColor_Magenta begin
 __dev_Term_TextColor_Magenta:	CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_MAGENTA
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_cyan begin
+;PRAGMA function __dev_Term_TextColor_Cyan begin
 __dev_Term_TextColor_Cyan:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_CYAN
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+															JUMP			_dev_Term_TextColor_Gray					; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_grey begin
-__dev_Term_TextColor_Grey:		CALL			_dev_Term_LoadEscSequence
+;PRAGMA function __dev_Term_TextColor_Gray begin
+__dev_Term_TextColor_Gray:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
-															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_GREY
+															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_GRAY
 															CALL			__UART_WriteQuadChar
-															JUMP			_dev_Term_TextColor_White					; tail call elimination
+	_dev_Term_TextColor_Gray:		LOAD			REG_ARG_0,	"m"
+															JUMP			__UART_WriteChar 									; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _dev_term_textcolor_white begin
+;PRAGMA function __dev_Term_TextColor_White begin
 __dev_Term_TextColor_White:		CALL			_dev_Term_LoadEscSequence
 															LOAD			REG_ARG_2,	"3"
 															LOAD			REG_ARG_3,	DEV_TERM_TEXTCOLOR_WHITE
 															CALL			__UART_WriteQuadChar
-	_dev_Term_TextColor_White:	LOAD			REG_ARG_0,	"m"
-															JUMP			__UART_WriteChar 									; tail call elimination
+	_dev_Term_TextColor_White:	LOAD			REG_ARG_0,	";"
+															LOAD			REG_ARG_1,	"1"
+															LOAD			REG_ARG_2,	"m"
+															JUMP			__UART_WriteTripleChar 									; tail call elimination
 ;PRAGMA function end
 ;
 ; private functions
 ; ==============================================================================
 ;
 ;PRAGMA function _dev_Term_EscSequence begin
-	_dev_Term_LoadEscSequence:			LOAD			REG_ARG_0,	ESC
+_dev_Term_LoadEscSequence:				LOAD			REG_ARG_0,	ESC
 																	LOAD			REG_ARG_1,	"["
 																	RETURN
-	_dev_Term_WriteEscSequence:			LOAD			REG_ARG_0,	ESC
+_dev_Term_WriteEscSequence:				LOAD			REG_ARG_0,	ESC
 																	LOAD			REG_ARG_1,	"["
 																	JUMP			__UART_WriteDoubleChar 						; tail call elimination
 ;PRAGMA function end

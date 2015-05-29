@@ -73,16 +73,16 @@ architecture rtl of pb_Divider_Device is
 	signal AdrDec_ReadAddress		: T_SLV_8;
 	signal AdrDec_Data					: T_SLV_8;
 	
-	constant BYTES							: POSITIVE		:= div_ceil(BITS, 8);
-	constant BIT_AB							: NATURAL			:= log2ceil(BYTES);
+	constant REQUIRED_REG_BYTES	: POSITIVE																			:= div_ceil(BITS, 8);
+	constant BIT_AB							: NATURAL																				:= log2ceil(REQUIRED_REG_BYTES);
 	
-	signal Reg_Start						: STD_LOGIC							:= '0';
-	signal Reg_Operand_A				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
-	signal Reg_Operand_B				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
-	signal Reg_Result						: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
+	signal Reg_Start						: STD_LOGIC																			:= '0';
+	signal Reg_Operand_A				: T_SLVV_8(REQUIRED_REG_BYTES - 1 downto 0)			:= (others => (others => '0'));
+	signal Reg_Operand_B				: T_SLVV_8(REQUIRED_REG_BYTES - 1 downto 0)			:= (others => (others => '0'));
+	signal Reg_Result						: T_SLVV_8(REQUIRED_REG_BYTES - 1 downto 0)			:= (others => (others => '0'));
 	
 	signal Div_Result						: STD_LOGIC_VECTOR(BITS - 1 downto 0);
-	signal Div_Done_d						: STD_LOGIC														:= '0';
+	signal Div_Done_d						: STD_LOGIC																			:= '0';
 	signal Div_Done_re					: STD_LOGIC;
 	
 begin
@@ -127,10 +127,10 @@ begin
 					else
 						Reg_Operand_B(to_index(AdrDec_WriteAddress(BIT_AB - 1 downto 0)))	<= AdrDec_Data;
 					end if;
-				end if;
-				
-				if (slv_and(AdrDec_WriteAddress(BIT_AB downto 0)) = '1') then
-					Reg_Start										<= '1';
+
+					if (slv_and(AdrDec_WriteAddress(BIT_AB downto 0)) = '1') then
+						Reg_Start										<= '1';
+					end if;					
 				end if;
 				
 				if (Div_Done_re = '1') then
@@ -139,6 +139,18 @@ begin
 			end if;
 		end if;
 	end process;
+
+	process(AdrDec_re, AdrDec_ReadAddress, Reg_Result, Div_Done_d)
+	begin
+		DataOut					<= Reg_Result(to_index(AdrDec_ReadAddress(BIT_AB - 1 downto 0), Reg_Result'length - 1));
+		
+		if (slv_and(AdrDec_ReadAddress(BIT_AB downto 0)) = '1') then
+			DataOut				<= "0000000" & Div_Done_d;
+		end if;
+	end process;
+
+	Interrupt		<= Div_Done_re;
+	Message			<= x"00";
 	
 	blkDiv : block
 		signal Operand_A_slv		: STD_LOGIC_VECTOR(BITS - 1 downto 0);
@@ -170,17 +182,4 @@ begin
 		Div_Done_d	<= Div_Done		when rising_edge(Clock);
 		Div_Done_re	<= not Div_Done_d and Div_Done;
 	end block;
-	
-	process(AdrDec_re, AdrDec_ReadAddress, Reg_Result, Div_Done_d)
-	begin
-		DataOut					<= Reg_Result(to_index(AdrDec_ReadAddress(BIT_AB - 1 downto 0), Reg_Result'length - 1));
-		
-		if (slv_and(AdrDec_ReadAddress(BIT_AB downto 0)) = '1') then
-			DataOut				<= "0000000" & Div_Done_d;
-		end if;
-	end process;
-
-	Interrupt		<= Div_Done_re;
-	Message			<= x"00";
-
 end;

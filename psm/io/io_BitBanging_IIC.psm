@@ -3,41 +3,41 @@
 ; kate: tab-width 2; replace-tabs off; indent-width 2;
 ; 
 ; ==============================================================================
-; Assembler-Code:		Bit-Banging IIC (Inter-Integrated Circuit, I2C) functions for PicoBlaze
-; 
 ; Authors:					Patrick Lehmann
 ;
+; Assembler-Code:		Bit-Banging IIC (Inter-Integrated Circuit, I2C) functions for PicoBlaze
+; 
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__BB_IIC_EnableRaw
-;		__BB_IIC_DisableRaw
-;		__BB_IIC_Initialise
-;		__BB_IIC_SendStartCond
-;		__BB_IIC_SendRestartCond
-;		__BB_IIC_SendStopCond
-;		__BB_IIC_SendByte
-;		__BB_IIC_SendAck
-;		__BB_IIC_SendNAck
-;		__BB_IIC_ReceiveByte
-;		__BB_IIC_ReceiveAck
-;		__BB_IIC_Abort
+;		__io_BBIO_IIC_EnableRaw
+;		__io_BBIO_IIC_DisableRaw
+;		__io_BBIO_IIC_Initialise
+;		__io_BBIO_IIC_SendStartCond
+;		__io_BBIO_IIC_SendRestartCond
+;		__io_BBIO_IIC_SendStopCond
+;		__io_BBIO_IIC_SendByte
+;		__io_BBIO_IIC_SendAck
+;		__io_BBIO_IIC_SendNAck
+;		__io_BBIO_IIC_ReceiveByte
+;		__io_BBIO_IIC_ReceiveAck
+;		__io_BBIO_IIC_Abort
 ; 
 ;	private functions:
-;		_BB_IIC_ClockToZ
-;		_BB_IIC_DataToZ
-;		_BB_IIC_ClockToLow
-;		_BB_IIC_DataToLow
-;		_BB_IIC_ReceiveBit
-;		_BB_IIC_ClockPulse
-;		_BB_IIC_Delay_5us
-;		_BB_IIC_Delay_4us
-;		_BB_IIC_Delay_2us
+;		_BBIO_IIC_ClockToZ
+;		_BBIO_IIC_DataToZ
+;		_BBIO_IIC_ClockToLow
+;		_BBIO_IIC_DataToLow
+;		_BBIO_IIC_ReceiveBit
+;		_BBIO_IIC_ClockPulse
+;		_BBIO_IIC_Delay_5us
+;		_BBIO_IIC_Delay_4us
+;		_BBIO_IIC_Delay_2us
 ;   
 ; License:
 ; ==============================================================================
-; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
-;										 Chair for VLSI-Design, Diagnostics and Architecture
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;											Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -53,150 +53,141 @@
 ; ==============================================================================
 ;
 ;
-; BB_IIC macros
+; __io_BBIO_IIC macros
 ; ===============================================
-;PRAGMA function _bb_iic_enableraw begin
-__BB_IIC_EnableRaw:						INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
-															OR				REG_TMP_0,	GPIO_OPIN_RAW_BB_IIC
-															OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
-															RETURN
+;PRAGMA function __io_BBIO_IIC_EnableRaw begin
+__io_BBIO_IIC_EnableRaw:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
+																	OR				REG_TMP_0,	GPIO_OPIN_RAW_BBIO_IIC
+																	OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_disableraw begin
-__BB_IIC_DisableRaw:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
-															AND				REG_TMP_0,	~GPIO_OPIN_RAW_BB_IIC
-															OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
-															RETURN
+;PRAGMA function __io_BBIO_IIC_DisableRaw begin
+__io_BBIO_IIC_DisableRaw:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
+																	AND				REG_TMP_0,	~GPIO_OPIN_RAW_BBIO_IIC
+																	OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_initialise begin
-__BB_IIC_Initialise:					LOAD			REG_TMP_0,	BBIO_IOPIN_IIC_CLOCK
-															OR				REG_TMP_0,	BBIO_IOPIN_IIC_DATA
-															OUTPUT		REG_TMP_0,	OPORT_BBIO_DATAOUT
-															RETURN
+;PRAGMA function __io_BBIO_IIC_Initialise begin
+__io_BBIO_IIC_Initialise:					OUTPUTK		BBIO_IOPIN_IIC_CLOCK,	KPORT_BBIO8_SET
+																	OUTPUTK		BBIO_IOPIN_IIC_DATA,	KPORT_BBIO8_SET
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_sendstartcond begin
-__BB_IIC_SendStartCond:				;
-__BB_IIC_SendRestartCond:			CALL			_BB_IIC_DataToZ
-															CALL			_BB_IIC_ClockToZ
-															CALL			_BB_IIC_Delay_5us
-															CALL			_BB_IIC_DataToLow
-															CALL			_BB_IIC_Delay_4us
-															JUMP			_BB_IIC_ClockToLow				; tail call elimination
+;PRAGMA function __io_BBIO_IIC_SendStartCond begin
+__io_BBIO_IIC_SendStartCond:			;
+__io_BBIO_IIC_SendRestartCond:		CALL			_BBIO_IIC_DataToZ
+																	CALL			_BBIO_IIC_ClockToZ
+																	CALL			_BBIO_IIC_Delay_5us
+																	CALL			_BBIO_IIC_DataToLow
+																	CALL			_BBIO_IIC_Delay_4us
+																	JUMP			_BBIO_IIC_ClockToLow				; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_sendstopcond begin
-__BB_IIC_SendStopCond:				CALL			_BB_IIC_DataToLow
-															CALL			_BB_IIC_Delay_5us
-															CALL			_BB_IIC_ClockToZ
-															CALL			_BB_IIC_Delay_4us
-															JUMP			_BB_IIC_DataToZ						; tail call elimination
+;PRAGMA function __io_BBIO_IIC_SendStopCond begin
+__io_BBIO_IIC_SendStopCond:				CALL			_BBIO_IIC_DataToLow
+																	CALL			_BBIO_IIC_Delay_5us
+																	CALL			_BBIO_IIC_ClockToZ
+																	CALL			_BBIO_IIC_Delay_4us
+																	JUMP			_BBIO_IIC_DataToZ						; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_sendbyte begin
-__BB_IIC_SendByte:						LOAD			REG_TMP_0,	10000000'b
-	_BB_IIC_SendByte_Loop:			TEST			REG_ARG_0,	REG_TMP_0
-															JUMP NZ,	_BB_IIC_Transmit_1
-	_BB_IIC_Transmit_0:					CALL			_BB_IIC_DataToLow
-															JUMP			_BB_IIC_Transmit_Clock
-	_BB_IIC_Transmit_1:					CALL			_BB_IIC_DataToZ
-	_BB_IIC_Transmit_Clock:			CALL			_BB_IIC_ClockPulse
-															SR0				REG_TMP_0
-															JUMP NC,	_BB_IIC_SendByte_Loop
-															RETURN
+;PRAGMA function __io_BBIO_IIC_SendByte begin
+__io_BBIO_IIC_SendByte:						LOAD			REG_TMP_0,	10000000'b
+	_BBIO_IIC_SendByte_Loop:				TEST			REG_ARG_0,	REG_TMP_0
+																	JUMP NZ,	_BBIO_IIC_Transmit_1
+	_BBIO_IIC_Transmit_0:						CALL			_BBIO_IIC_DataToLow
+																	JUMP			_BBIO_IIC_Transmit_Clock
+	_BBIO_IIC_Transmit_1:						CALL			_BBIO_IIC_DataToZ
+	_BBIO_IIC_Transmit_Clock:				CALL			_BBIO_IIC_ClockPulse
+																	SR0				REG_TMP_0
+																	JUMP NC,	_BBIO_IIC_SendByte_Loop
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_sendack begin
-__BB_IIC_SendAck:							CALL			_BB_IIC_DataToLow
-															JUMP			_BB_IIC_ClockPulse			; tail call elimination
+;PRAGMA function __io_BBIO_IIC_SendAck begin
+__io_BBIO_IIC_SendAck:						CALL			_BBIO_IIC_DataToLow
+																	JUMP			_BBIO_IIC_ClockPulse			; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_sendnack begin
-__BB_IIC_SendNAck:						CALL			_BB_IIC_DataToZ
-															JUMP			_BB_IIC_ClockPulse			; tail call elimination
+;PRAGMA function __io_BBIO_IIC_SendNAck begin
+__io_BBIO_IIC_SendNAck:						CALL			_BBIO_IIC_DataToZ
+																	JUMP			_BBIO_IIC_ClockPulse			; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_receivebyte begin
-__BB_IIC_ReceiveByte:					LOAD			REG_TMP_0,	8'd
-	_BB_IIC_ReceiveByte_Loop:		CALL			_BB_IIC_ReceiveBit
-															SUB				REG_TMP_0,	1'd
-															JUMP NZ,	_BB_IIC_ReceiveByte_Loop
-															RETURN
+;PRAGMA function __io_BBIO_IIC_ReceiveByte begin
+__io_BBIO_IIC_ReceiveByte:				LOAD			REG_TMP_0,	8'd
+	_BBIO_IIC_ReceiveByte_Loop:			CALL			_BBIO_IIC_ReceiveBit
+																	SUB				REG_TMP_0,	1'd
+																	JUMP NZ,	_BBIO_IIC_ReceiveByte_Loop
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_receiveack begin
-__BB_IIC_ReceiveAck:					CALL			_BB_IIC_ReceiveBit
-															TEST			REG_ARG_0,	00000001'b
-															RETURN
+;PRAGMA function __io_BBIO_IIC_ReceiveAck begin
+__io_BBIO_IIC_ReceiveAck:					CALL			_BBIO_IIC_ReceiveBit
+																	TEST			REG_ARG_0,	00000001'b
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _bb_iic_abort begin
-__BB_IIC_Abort:								CALL			__BB_IIC_Initialise
-															LOAD			REG_TMP_0,	1'd
-															SR0				REG_TMP_0
-															RETURN
+;PRAGMA function __io_BBIO_IIC_Abort begin
+__io_BBIO_IIC_Abort:							CALL			__io_BBIO_IIC_Initialise
+																	; set Carry
+																	LOAD			REG_TMP_0,	01
+																	SR0				REG_TMP_0
+																	RETURN
 ;PRAGMA function end
 ;
 ; ==============================================================================================================================================================
 ; private functions
 ; ==============================================================================================================================================================
-;PRAGMA function bb_iic_clocktoz begin
-_BB_IIC_ClockToZ:							INPUT			REG_TMP_1,	IPORT_BBIO_DATAOUT
-															OR				REG_TMP_1,	BBIO_IOPIN_IIC_CLOCK
-															OUTPUT		REG_TMP_1,	OPORT_BBIO_DATAOUT
-	_BB_IIC_ClockToZ_Loop:			INPUT			REG_TMP_1,	IPORT_BBIO_DATAIN
-															TEST			REG_TMP_1,	BBIO_IOPIN_IIC_CLOCK
-															JUMP Z,		_BB_IIC_ClockToZ_Loop
-															RETURN
+;PRAGMA function _BBIO_IIC_ClockToZ begin
+_BBIO_IIC_ClockToZ:								OUTPUTK		BBIO_IOPIN_IIC_CLOCK,	KPORT_BBIO8_SET
+	_BBIO_IIC_ClockToZ_Loop:				INPUT			REG_TMP_1,	IPORT_BBIO8_DATAIN
+																	TEST			REG_TMP_1,	BBIO_IOPIN_IIC_CLOCK
+																	JUMP Z,		_BBIO_IIC_ClockToZ_Loop
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function bb_iic_clocktolow begin
-_BB_IIC_ClockToLow:						INPUT			REG_TMP_1,	IPORT_BBIO_DATAOUT
-															AND				REG_TMP_1,	~BBIO_IOPIN_IIC_CLOCK
-															OUTPUT		REG_TMP_1,	OPORT_BBIO_DATAOUT
-															JUMP			_BB_IIC_Delay_5us										; tail call elimination
+;PRAGMA function _BBIO_IIC_ClockToLow begin
+_BBIO_IIC_ClockToLow:							OUTPUTK		BBIO_IOPIN_IIC_CLOCK,	KPORT_BBIO8_CLEAR
+																	JUMP			_BBIO_IIC_Delay_5us										; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function bb_iic_datatoz begin
-_BB_IIC_DataToZ:							INPUT			REG_TMP_1,	IPORT_BBIO_DATAOUT
-															OR				REG_TMP_1,	BBIO_IOPIN_IIC_DATA
-															OUTPUT		REG_TMP_1,	OPORT_BBIO_DATAOUT
-															RETURN
+;PRAGMA function _BBIO_IIC_DataToZ begin
+_BBIO_IIC_DataToZ:								OUTPUTK		BBIO_IOPIN_IIC_DATA,	KPORT_BBIO8_SET
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function bb_iic_datatolow begin
-_BB_IIC_DataToLow:						INPUT			REG_TMP_1,	IPORT_BBIO_DATAOUT
-															AND				REG_TMP_1,	~BBIO_IOPIN_IIC_DATA
-															OUTPUT		REG_TMP_1,	OPORT_BBIO_DATAOUT
-															RETURN
+;PRAGMA function _BBIO_IIC_DataToLow begin
+_BBIO_IIC_DataToLow:							OUTPUTK		BBIO_IOPIN_IIC_DATA,	KPORT_BBIO8_CLEAR
+																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function bb_iic_receivebit begin
-_BB_IIC_ReceiveBit:						CALL			_BB_IIC_DataToZ
-															CALL			_BB_IIC_Delay_5us
-															CALL			_BB_IIC_ClockToZ
-															CALL			_BB_IIC_Delay_2us
-															INPUT			REG_TMP_1,	IPORT_BBIO_DATAIN
-															TEST			REG_TMP_1,	BBIO_IOPIN_IIC_DATA
-															SLA				REG_ARG_0
-															CALL			_BB_IIC_Delay_2us
-															JUMP			_BB_IIC_ClockToLow				; tail call elimination
+;PRAGMA function _BBIO_IIC_ReceiveBit begin
+_BBIO_IIC_ReceiveBit:							CALL			_BBIO_IIC_DataToZ
+																	CALL			_BBIO_IIC_Delay_5us
+																	CALL			_BBIO_IIC_ClockToZ
+																	CALL			_BBIO_IIC_Delay_2us
+																	INPUT			REG_TMP_1,	IPORT_BBIO8_DATAIN
+																	TEST			REG_TMP_1,	BBIO_IOPIN_IIC_DATA
+																	SLA				REG_ARG_0
+																	CALL			_BBIO_IIC_Delay_2us
+																	JUMP			_BBIO_IIC_ClockToLow				; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function bb_iic_clockpulse begin
-_BB_IIC_ClockPulse:						CALL				_BB_IIC_Delay_5us
-															CALL				_BB_IIC_ClockToZ
-															CALL				_BB_IIC_Delay_4us
-															JUMP				_BB_IIC_ClockToLow			; tail call elimination
+;PRAGMA function _BBIO_IIC_ClockPulse begin
+_BBIO_IIC_ClockPulse:							CALL				_BBIO_IIC_Delay_5us
+																	CALL				_BBIO_IIC_ClockToZ
+																	CALL				_BBIO_IIC_Delay_4us
+																	JUMP				_BBIO_IIC_ClockToLow				; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function bb_iic_delay_5us begin
-_BB_IIC_Delay_5us:						CALL			__Sleep_1_us
-_BB_IIC_Delay_4us:						CALL			__Sleep_1_us
-															CALL			__Sleep_1_us
-_BB_IIC_Delay_2us:						CALL			__Sleep_1_us
-															JUMP			__Sleep_1_us							; tail call elimination
-															
+;PRAGMA function _BBIO_IIC_Delay_Xus begin
+_BBIO_IIC_Delay_5us:							CALL			__Sleep_1_us
+_BBIO_IIC_Delay_4us:							CALL			__Sleep_1_us
+																	CALL			__Sleep_1_us
+_BBIO_IIC_Delay_2us:							CALL			__Sleep_1_us
+																	JUMP			__Sleep_1_us									; tail call elimination
 ;PRAGMA function end
 ;

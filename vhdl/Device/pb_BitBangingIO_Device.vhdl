@@ -5,7 +5,7 @@
 -- ============================================================================
 -- Authors:					Patrick Lehmann
 -- 
--- Module:					PicoBlaze BitBanging I/O Adapter
+-- Module:					BitBanging I/O Device for PicoBlaze
 --
 -- Description:
 -- ------------------------------------
@@ -42,11 +42,11 @@ library	L_PicoBlaze;
 use			L_PicoBlaze.pb.all;
 
 
-entity pb_BBIO_Adapter is
+entity pb_BitBangingIO_Device is
 	generic (
-		DEBUG													: BOOLEAN												:= TRUE;
 		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE;
-		BITS													: POSITIVE											:= 8
+		BITS													: POSITIVE											:= 8;
+		INITIAL_VALUE									: STD_LOGIC_VECTOR
 	);
 	port (
 		Clock													: in	STD_LOGIC;
@@ -71,20 +71,32 @@ entity pb_BBIO_Adapter is
 end entity;
 
 
-architecture rtl of pb_BBIO_Adapter is
-	constant REG_RW_DATAOUT			: UNSIGNED(0 downto 0)			:= "0";
-	constant REG_RO_DATAIN			: UNSIGNED(0 downto 0)			:= "1";
-	
+architecture rtl of pb_BitBangingIO_Device is
 	signal AdrDec_we						: STD_LOGIC;
 	signal AdrDec_re						: STD_LOGIC;
 	signal AdrDec_WriteAddress	: T_SLV_8;
 	signal AdrDec_ReadAddress		: T_SLV_8;
 	signal AdrDec_Data					: T_SLV_8;
 	
-	signal Reg_DataOut					: T_SLV_8										:= (others => '0');
-	signal Reg_DataIn						: T_SLV_8										:= (others => '0');
+	constant REQUIRED_REG_BYTES				: POSITIVE									:= div_ceil(BITS, 8);
+	constant BIT_SET_CLR							: NATURAL										:= log2ceil(REQUIRED_REG_BYTES);
+	constant BIT_OUT_IN								: NATURAL										:= log2ceil(REQUIRED_REG_BYTES);
+	
+	constant REG_WO_SET_BIT_VALUE			: STD_LOGIC		:= '0';
+	constant REG_WO_CLEAR_BIT_VALUE		: STD_LOGIC		:= '1';
+	constant REG_RO_OUTPUT_BIT_VALUE	: STD_LOGIC		:= '0';
+	constant REG_RO_INPUT_BIT_VALUE		: STD_LOGIC		:= '1';
+	
+	constant INITIAL_VALUE_I					: STD_LOGIC_VECTOR((REQUIRED_REG_BYTES * 8) - 1 downto 0)	:= resize(INITIAL_VALUE, REQUIRED_REG_BYTES * 8);
+	
+	signal Reg_DataOut								: T_SLVV_8(REQUIRED_REG_BYTES - 1 downto 0)			:= to_slvv_8(INITIAL_VALUE_I);
+	signal Reg_DataIn									: T_SLVV_8(REQUIRED_REG_BYTES - 1 downto 0)			:= to_slvv_8(INITIAL_VALUE_I);
 	
 begin
+	assert (BITS <= 16)
+		report "BitBangingIO size is not supported. Supported sizes up to 16 bits. BITS=" & INTEGER'image(BITS)
+		severity failure;
+
 	AdrDec : entity L_PicoBlaze.PicoBlaze_AddressDecoder
 		generic map (
 			DEVICE_INSTANCE						=> DEVICE_INSTANCE
@@ -107,43 +119,39 @@ begin
 		);
 	
 	process(Clock)
+		variable index		: NATURAL		:= to_index(AdrDec_WriteAddress(BIT_SET_CLR - 1 downto 0));
 	begin
 		if rising_edge(Clock) then
 			if (Reset = '1') then
-				Reg_DataOut					<= (others => '0');
-				Reg_DataIn					<= (others => '0');
+				Reg_DataOut					<= to_slvv_8(INITIAL_VALUE_I);
 			else
 				if (AdrDec_we = '1') then
-					case unsigned(AdrDec_WriteAddress(0 downto 0)) is
-						when REG_RW_DATAOUT =>
-							Reg_DataOut		<= AdrDec_Data;
-							
-						when others =>				null;
+					case AdrDec_WriteAddress(BIT_SET_CLR) is
+						when REG_WO_SET_BIT_VALUE =>		Reg_DataOut(index)	<= Reg_DataOut(index) or AdrDec_Data;
+						when REG_WO_CLEAR_BIT_VALUE =>	Reg_DataOut(index)	<= Reg_DataOut(index) and not AdrDec_Data;
+						when others =>									null;
 					end case;
 				end if;
 				
-				Reg_DataIn	<= BBIO_In;
+				Reg_DataIn	<= to_slvv_8(resize(BBIO_In, (Reg_DataIn'length * 8)));
 			end if;
 		end if;
 	end process;
 	
-	process(AdrDec_re, AdrDec_ReadAddress, Reg_DataIn, Reg_DataOut)
+	process(AdrDec_re, AdrDec_ReadAddress, Reg_DataOut, Reg_DataIn)
+		variable index	: NATURAL;
 	begin
-		DataOut					<= Reg_DataIn;
-		
-		case unsigned(AdrDec_ReadAddress(0 downto 0)) is
-			when REG_RW_DATAOUT =>
-				DataOut			<= Reg_DataOut;
-			when REG_RO_DATAIN =>
-				DataOut			<= Reg_DataIn;
-
-			when others =>
-				null;
+		index			:= to_index(AdrDec_ReadAddress(BIT_OUT_IN - 1 downto 0));
+	
+		case AdrDec_ReadAddress(BIT_OUT_IN) is
+			when REG_RO_OUTPUT_BIT_VALUE =>		DataOut		<= Reg_DataOut(index);
+			when REG_RO_INPUT_BIT_VALUE =>		DataOut		<= Reg_DataIn(index);
+			when others =>										DataOut		<= (others => 'X');
 		end case;
 	end process;
 
 	Interrupt		<= '0';
 	Message			<= x"00";
 
-	BBIO_Out		<= Reg_DataOut;
+	BBIO_Out		<= resize(to_slv(Reg_DataOut), BBIO_Out'length);
 end;

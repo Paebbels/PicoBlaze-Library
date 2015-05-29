@@ -1265,7 +1265,7 @@ package body pb is
 						RegID							:= System.DeviceInstances(DeviceInstanceID).Mappings(MappingID).RegID;
 						Reg								:= System.DeviceInstances(DeviceInstanceID).Device.Registers(RegID);
 						
-						report "pb_ExportAddressMappingAsAssemblerConstants:" & LF & "PortNumber " & INTEGER'image(Mapping.PortNumber) &
+						report "pb_ExportAddressMappingAsAssemblerConstants:" & LF & "K PortNumber " & INTEGER'image(Mapping.PortNumber) &
 									 " is already used by " & str_trim(System.DeviceInstances(DeviceInstanceID).DeviceShort) &
 									 " register " & INTEGER'image(Reg.RegisterNumber) &
 									 " (" & str_trim(Reg.RegisterShort) & ")." & LF &
