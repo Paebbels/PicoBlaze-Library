@@ -10,6 +10,7 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
+;		__dev_Term_Initialize
 ;		__dev_Term_CursorUp
 ;		__dev_Term_CursorDown
 ;		__dev_Term_CursorForward
@@ -68,6 +69,18 @@ CONSTANT DEV_TERM_TEXTCOLOR_WHITE,		37		; White
 ;
 ; Terminal macros
 ; ===============================================
+;PRAGMA function __dev_Term_Initialize begin
+__dev_Term_Initialize:				CALL			__UART_Reset
+															CALL			__dev_Term_ClearScreen_All
+															CALL			__Sleep_1_us
+															CALL			__UART_WriteNewline
+															CALL			__dev_Term_ClearScreen_All
+															;
+															LOAD			REG_ARG_0,		07
+															CALL			__UART_WriteChar
+															RETURN
+;PRAGMA function end
+;
 ;PRAGMA function __dev_Term_CursorUp begin
 __dev_Term_CursorUp:					CALL			__Str_ByteToDecimal
 															LOAD			REG_ARG_2,	"0"

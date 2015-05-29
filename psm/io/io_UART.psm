@@ -18,6 +18,7 @@
 ;		__UART_WriteTripleChar
 ;		__UART_WriteQuadChar
 ;		__UART_WriteRegLaR
+;		__UART_WriteNewline
 ;		__UART_WriteString
 ;		__UART_ReadChar
 ;		__UART_ReadChar_wTimeout
@@ -31,7 +32,7 @@
 ; License:
 ; ==============================================================================
 ; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
-;										 Chair for VLSI-Design, Diagnostics and Architecture
+;											Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -113,13 +114,13 @@ __UART_WriteQuadChar:					CALL			_UART_WaitBufferHalfFree
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writereglar begin
+;PRAGMA function __UART_WriteRegLaR begin
 __UART_WriteRegLaR:						CALL			_UART_WaitBufferHalfFree
 															OUTPUT		REG_LAR,		OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _uart_writenewline begin
+;PRAGMA function __UART_WriteNewline begin
 __UART_WriteNewline:					CALL			_UART_WaitBufferNotFull
 															OUTPUTK		LF,		KPORT_UART_DATAOUT								; write CR to UART TX buffer
 															RETURN
