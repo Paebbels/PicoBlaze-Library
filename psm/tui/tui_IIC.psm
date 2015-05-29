@@ -37,7 +37,11 @@
 ; TUI IIC macros
 ; ===============================================
 ;PRAGMA function _IIC_scan_devicemap begin
-__tui_IIC_Scan_DeviceMap:					LOAD			REG_CNT,		00
+__tui_IIC_Scan_DeviceMap:					LOAD			REG_PTR_L,	SENDMSG_IIC_Scan_DeviceMap
+																	CALL			__Pager_Page1_Call_Table2
+																	CALL			__UART_WriteNewline
+																	;
+																	LOAD			REG_CNT,		00
 																	CALL			__UART_DoubleIdent
 																	LOAD			REG_ARG_0,	"0"
 																	LOAD			REG_ARG_1,	"x"
@@ -57,12 +61,15 @@ __tui_IIC_Scan_DeviceMap:					LOAD			REG_CNT,		00
 																	JUMP			_IIC_Scan_DevMap_Jmp2
 																	;
 																	; device has responded -> convert current device address to ASCII and write to UART
-	_IIC_Scan_DevMap_Jmp1:					LOAD			REG_ARG_0,	REG_CNT
+	_IIC_Scan_DevMap_Jmp1:					CALL			__dev_Term_TextColor_White
+																	LOAD			REG_ARG_0,	REG_CNT
 																	CALL			__Str_ByteToAscii
 																	CALL			__UART_WriteDoubleChar
+																	CALL			__dev_Term_TextColor_Reset
 																	;
 	_IIC_Scan_DevMap_Jmp2:					ADD				REG_CNT,		1'd
-																	RETURN Z
+																	;	exit function -> tail call elimination
+																	JUMP Z,		__UART_WriteNewline
 																	;
 																	TEST			REG_CNT,		0F
 																	JUMP Z,		_IIC_Scan_DevMap_Fmt2
@@ -88,7 +95,11 @@ __tui_IIC_Scan_DeviceMap:					LOAD			REG_CNT,		00
 ;PRAGMA function end
 ;
 ;PRAGMA function __tui_IIC_Dump_RegMap begin
-__tui_IIC_Dump_RegMap:						LOAD			REG_CNT,		00
+__tui_IIC_Dump_RegMap:						LOAD			REG_PTR_L,	SENDMSG_IIC_Dump_Registers
+																	CALL			__Pager_Page1_Call_Table2
+																	CALL			__UART_WriteNewline
+																	;
+																	LOAD			REG_CNT,		00
 																	LOAD			REG_LAR,		REG_ARG_0
 																	CALL			__UART_DoubleIdent
 																	LOAD			REG_ARG_0,	"0"
@@ -129,7 +140,8 @@ __tui_IIC_Dump_RegMap:						LOAD			REG_CNT,		00
 																	CALL			__dev_Term_TextColor_Reset
 																	;
 	_IIC_Dump_RegMap_Jmp4:					ADD				REG_CNT,		1'd
-																	RETURN Z
+																	;	exit function -> tail call elimination
+																	JUMP Z,		__UART_WriteNewline
 																	;
 																	TEST			REG_CNT,		0F
 																	JUMP Z,		_IIC_Dump_RegMap_Fmt2
