@@ -1,0 +1,250 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		UART (Universal Asynchronous Receiver Transmitter) functions for PicoBlaze
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		__UART_Reset
+;		__UART_EnableRaw
+;		__UART_DisableRaw
+;		__UART_WriteChar
+;		__UART_WriteDoubleChar
+;		__UART_WriteTripleChar
+;		__UART_WriteQuadChar
+;		__UART_WriteRegLaR
+;		__UART_WriteString
+;		__UART_ReadChar
+;		__UART_ReadChar_wTimeout
+; 
+; Interrupt handler:
+;		__ISR_UART
+;
+;	private functions:
+;
+;
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;										 Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+; UART Status bits
+; ===============================================
+; RX status
+CONSTANT UART_RX_DataPresent,		00000001'b		; new packet arrived
+CONSTANT UART_RX_HalfFull,			00000010'b		; half full
+CONSTANT UART_RX_Full,					00000100'b		; full
+CONSTANT UART_RX_DataLoss,			00001000'b		; data loss
+CONSTANT UART_RX_STATUS_MASK,		00001111'b
+; TX status
+CONSTANT UART_TX_DataPresent,		00010000'b		; data pending in fifo
+CONSTANT UART_TX_HalfFull,			00100000'b		; half full
+CONSTANT UART_TX_Full,					01000000'b		; full
+CONSTANT UART_TX_STATUS_MASK,		01110000'b
+;
+;
+; UART macros
+; ===============================================
+;PRAGMA function _uart_reset begin
+__UART_Reset:									OUTPUTK		RESET_PIN_UART, KPORT_RESET_RESET
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function _uart_enableraw begin
+__UART_EnableRaw:							INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
+															OR				REG_TMP_0,	GPIO_OPIN_RAW_UART
+															OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function _uart_disableraw begin
+__UART_DisableRaw:						INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
+															AND				REG_TMP_0,	~GPIO_OPIN_RAW_UART
+															OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteChar begin
+__UART_WriteChar:							CALL			_UART_WaitBufferNotFull
+															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteDoubleChar begin
+__UART_WriteDoubleChar:				CALL			_UART_WaitBufferHalfFree
+															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg1 to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteTripleChar begin
+__UART_WriteTripleChar:				CALL			_UART_WaitBufferHalfFree
+															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg1 to UART TX buffer
+															OUTPUT		REG_ARG_2,	OPORT_UART_DATAOUT					; write Arg2 to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteQuadChar begin
+__UART_WriteQuadChar:					CALL			_UART_WaitBufferHalfFree
+															OUTPUT		REG_ARG_0,	OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															OUTPUT		REG_ARG_1,	OPORT_UART_DATAOUT					; write Arg1 to UART TX buffer
+															OUTPUT		REG_ARG_2,	OPORT_UART_DATAOUT					; write Arg2 to UART TX buffer
+															OUTPUT		REG_ARG_3,	OPORT_UART_DATAOUT					; write Arg3 to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function _uart_writereglar begin
+__UART_WriteRegLaR:						CALL			_UART_WaitBufferHalfFree
+															OUTPUT		REG_LAR,		OPORT_UART_DATAOUT					; write Arg0 to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function _uart_writenewline begin
+__UART_WriteNewline:					CALL			_UART_WaitBufferNotFull
+															OUTPUTK		LF,		KPORT_UART_DATAOUT								; write CR to UART TX buffer
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteHorizontalLine begin
+STRING _UART_WRITELINE$,					"================"
+;
+__UART_WriteHorizontalLine:				LOAD			REG_LAR,	5'd
+	_UART_WriteHorizontalLine_Loop:	CALL			_UART_WaitBufferEmpty
+																	OUTPUTK		_UART_WRITELINE$,		KPORT_UART_DATAOUT	; write '=' to UART TX buffer
+																	SUB				REG_LAR,	1'd
+																	RETURN		Z
+																	JUMP 			_UART_WriteHorizontalLine_Loop
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteString begin
+__UART_WriteString:						CALL@			(REG_PTR_H, REG_PTR_L)						; load character from pointer address
+															COMPARE		REG_LAR,		NUL										; terminate on NUL character
+															RETURN		Z
+															CALL			__UART_WriteRegLaR								; send character to UART
+															ADD				REG_PTR_L,	1'd										; increment pointer
+															ADDCY			REG_PTR_H,	0'd
+															JUMP			__UART_WriteString								; goto next character
+;PRAGMA function end
+;
+;PRAGMA function __UART_WriteLine begin
+__UART_WriteLine:							CALL@			(REG_PTR_H, REG_PTR_L)						; load character from pointer address
+															COMPARE		REG_LAR,		NUL										; terminate on NUL character
+															JUMP	Z,	_UART_WriteLine_Exit
+															CALL			__UART_WriteRegLaR								; send character to UART
+															ADD				REG_PTR_L,	1'd										; increment pointer
+															ADDCY			REG_PTR_H,	0'd
+															JUMP			__UART_WriteLine									; goto next character
+	_UART_WriteLine_Exit:				LOAD			REG_ARG_0,	LF
+															JUMP			__UART_WriteChar									; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _uart_doubleident begin
+__UART_DoubleIdent:						LOAD			REG_ARG_0,	" "
+															LOAD			REG_ARG_1,	" "
+															JUMP			__UART_WriteDoubleChar
+;PRAGMA function end
+;
+;PRAGMA function _uart_quadident begin
+__UART_QuadIdent:							LOAD			REG_ARG_0,	" "
+															LOAD			REG_ARG_1,	" "
+															LOAD			REG_ARG_2,	" "
+															LOAD			REG_ARG_3,	" "
+															JUMP			__UART_WriteQuadChar
+;PRAGMA function end
+;
+;PRAGMA function _uart_readchar begin
+__UART_ReadChar_wTimeout:			LOAD			REG_TMP_0,	167'd									; timeout (ca. 2000 cycles) := 167 x (6 instructions in '_UART_ReadChar_Loop0' loop x 2 clock cycles per instruction)
+															JUMP			_UART_ReadChar_Loop0
+__UART_ReadChar:							LOAD			REG_TMP_0,	1'd										; timeout = 0
+	_UART_ReadChar_Loop0:				INPUT			REG_TMP_1,	IPORT_UART_STATUS			; Read UART status
+															AND				REG_TMP_1,	UART_RX_STATUS_MASK		; mask; test only RX status bits
+															TEST			REG_TMP_1,	UART_RX_DataPresent		; Check UART status: is RX buffer not empty? (Z=0 and C=1)
+															JUMP			NZ,					_UART_ReadChar_Jmp0		; Goto _UART_ReadChar, if buffer is not empty, else wait until !full
+															SUB				REG_TMP_0,	1'd
+															RETURN		Z																	; return if timeout is reached
+															JUMP			_UART_ReadChar_Loop0
+															;
+	_UART_ReadChar_Jmp0:				INPUT			REG_ARG_0,	IPORT_UART_DATAIN			; Read from UART
+															TEST			REG_TMP_1,	UART_RX_DataPresent		; restore flags to: Z=0 and C=1
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function _uart_readchar_block begin
+__UART_ReadChar_block:				INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+															AND				REG_TMP_0,	UART_RX_STATUS_MASK		; mask; test only RX status bits
+															TEST			REG_TMP_0,	UART_RX_DataPresent		; Check UART status: is RX buffer not empty? (Z=0 and C=1)
+															JUMP			Z,					__UART_ReadChar_block	; Goto __UART_ReadChar_block, if buffer is empty and wait until present
+															INPUT			REG_ARG_0,	IPORT_UART_DATAIN			; Read from UART
+															RETURN
+;PRAGMA function end
+;
+; Private functions
+; ===============================================
+;PRAGMA function _UART_WaitBufferNotFull begin
+	_UART_WaitBufferNotFull:		INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
+															TEST			REG_TMP_0,	UART_TX_Full					; Check UART status: is TX buffer full?
+															RETURN		Z																	; return to write routine
+															JUMP			_UART_WaitBufferNotFull					; Poll UART status again, if buffer is full -> wait until !full
+;PRAGMA function end
+;
+;PRAGMA function _UART_WaitBufferHalfFree begin
+	_UART_WaitBufferHalfFree:	INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
+															TEST			REG_TMP_0,	UART_TX_HalfFull			; Check UART status: is TX buffer halffull?
+															RETURN		Z																	; return to write routine
+															JUMP			_UART_WaitBufferHalfFree					; Poll UART status again, if buffer is full -> wait until !full
+;PRAGMA function end
+;
+;PRAGMA function _UART_WaitBufferEmpty begin
+	_UART_WaitBufferEmpty:			INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
+															TEST			REG_TMP_0,	UART_TX_DataPresent		; Check UART status: is TX buffer halffull?
+															RETURN		Z																	; return to write routine
+															JUMP			_UART_WaitBufferEmpty						; Poll UART status again, if buffer is full -> wait until !full
+;PRAGMA function end
+;
+;
+;
+; Interrupt Handler
+; ===============================================
+;PRAGMA function _ISR_UART begin
+__ISR_UART:										; read interrupt message
+															INPUT		REG_TMP_0,	IPORT_INTC_INTSOURCE			; read interrupt message
+															TEST		REG_TMP_0,	UART_RX_DataLoss				;
+															JUMP		NZ,					_isr_UART_RX_DataLoss
+															;
+															TEST		REG_TMP_0,	UART_RX_DataPresent			; new packet arrived
+															JUMP		NZ,					_isr_UART_RX
+															;
+															; if message is unknown
+															JUMP		__Error
+
+_isr_UART_RX_DataLoss:				; what should I do now?
+										
+_isr_UART_RX:									; read char from UART RX buffer
+															INPUT		REG_TMP_0,		IPORT_UART_DATAIN
+															;
+															RETURN
+
+;PRAGMA function end

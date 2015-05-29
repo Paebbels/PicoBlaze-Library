@@ -1,0 +1,408 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabsget=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		I2C communication functions for a Si570 device
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		__dev_Si570_CheckAddress
+;		__dev_Si570_WriteRegister
+;		__dev_Si570_ReadRegister
+;		__dev_Si570_Cmd_Recall
+;		__dev_Si570_Cmd_Freeze_DCO
+;		__dev_Si570_Cmd_Unfreeze_DCO
+;		__dev_Si570_Cmd_NewFreq
+;		__dev_Si570_Prog_NewFreq
+;		__dev_Si570_ReadSettings
+;		__dev_Si570_WriteSettings
+;		__dev_Si570_ClearStack
+;		__dev_Si570_GetHSDiv
+;		__dev_Si570_GetN1
+;		__dev_Si570_GetRFreq
+;		__dev_Si570_SetHSDiv
+;		__dev_Si570_SetN1
+;		__dev_Si570_SetRFreq
+; 	__dev_Si570_Calculate
+; 
+; private tables
+;		_Si570_Frequency_Table
+;
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;											Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+CONSTANT DEV_SI570_REG_HSDIV,				7'd
+CONSTANT DEV_SI570_REG_N1_1,				7'd
+CONSTANT DEV_SI570_REG_N1_0,				8'd
+CONSTANT DEV_SI570_REG_RFREQ_4,			8'd
+CONSTANT DEV_SI570_REG_RFREQ_3,			9'd
+CONSTANT DEV_SI570_REG_RFREQ_2,		 10'd
+CONSTANT DEV_SI570_REG_RFREQ_1,		 11'd
+CONSTANT DEV_SI570_REG_RFREQ_0,		 12'd
+CONSTANT DEV_SI570_REG_RESET,			135'd
+CONSTANT DEV_SI570_REG_FREEZE,		136'd
+;
+CONSTANT DEV_SI570_CMD_RECALL,				01
+CONSTANT DEV_SI570_CMD_FREEZE_DCO,		10
+CONSTANT DEV_SI570_CMD_FREEZE_VCADC,	10
+CONSTANT DEV_SI570_CMD_FREEZE_M,			20
+CONSTANT DEV_SI570_CMD_NEW_FREQ,			40
+;
+; DEV_Si570 macros
+; ===============================================
+;PRAGMA function __dev_Si570_CheckAddress begin
+;;		Requires:
+;;			Arg0 : *****
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_CheckAddress:			LOAD			REG_ARG_0,	IICBUS_SI570_ADDRESS
+															JUMP			__io_IIC_CheckAddress												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_WriteRegister begin
+;;		Requires:
+;;			Arg0 : *****
+;;			Arg1 : Si570 RegisterAddress
+;;			Arg2 : Data
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_WriteRegister:		LOAD			REG_ARG_0,	IICBUS_SI570_ADDRESS
+															JUMP			__io_IIC_WriteRegister											; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_ReadRegister begin
+;;		Requires:
+;;			Arg0 : *****
+;;			Arg1 : Si570 RegisterAddress
+;;		Returns:
+;;			Arg0 : Data
+;;			C :	Error
+;;			
+__dev_Si570_ReadRegister:			LOAD			REG_ARG_0,	IICBUS_SI570_ADDRESS
+															JUMP			__io_IIC_ReadRegister												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_Cmd_Recall begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_Cmd_Recall:				LOAD			REG_ARG_1,	DEV_SI570_REG_RESET
+															LOAD			REG_ARG_2,	DEV_SI570_CMD_RECALL
+															JUMP			__dev_Si570_WriteRegister											; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_cmd_freeze_dco begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_Cmd_Freeze_DCO:		LOAD			REG_ARG_1,	DEV_SI570_REG_FREEZE
+															LOAD			REG_ARG_2,	DEV_SI570_CMD_FREEZE_DCO
+															JUMP			__dev_Si570_WriteRegister											; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_cmd_unfreeze_dco begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_Cmd_Unfreeze_DCO:	LOAD			REG_ARG_1,	DEV_SI570_REG_FREEZE
+															LOAD			REG_ARG_2,	00
+															JUMP			__dev_Si570_WriteRegister											; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_cmd_newfreq begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_Cmd_NewFreq:			LOAD			REG_ARG_1,	DEV_SI570_REG_RESET
+															LOAD			REG_ARG_2,	DEV_SI570_CMD_NEW_FREQ
+															JUMP			__dev_Si570_WriteRegister											; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_prog_newfreq begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			
+__dev_Si570_Prog_NewFreq:			CALL			__dev_Si570_Cmd_Freeze_DCO
+															CALL NC,	__dev_Si570_WriteSettings
+															CALL NC,	__dev_Si570_Cmd_Unfreeze_DCO
+															JUMP NC,	__dev_Si570_Cmd_NewFreq
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_readsettings begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+;;			C :	Error
+;;			
+__dev_Si570_ReadSettings:			LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_0
+															CALL			__dev_Si570_ReadRegister
+															RETURN C
+															CALL			__push_arg0
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_1
+															CALL			__dev_Si570_ReadRegister
+															RETURN C
+															CALL			__push_arg0
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_2
+															CALL			__dev_Si570_ReadRegister
+															RETURN C
+															CALL			__push_arg0
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_3
+															CALL			__dev_Si570_ReadRegister
+															RETURN C
+															CALL			__push_arg0
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_4
+															CALL			__dev_Si570_ReadRegister
+															RETURN C
+															CALL			__push_arg0
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_N1_1
+															CALL			__dev_Si570_ReadRegister
+															RETURN C
+															JUMP			__push_arg0
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_gethsdiv begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			Arg0 : HS_DIV
+;;			C :	Error
+;;			
+__dev_Si570_GetHSDiv:					CALL			__get0_arg0
+															RL				REG_ARG_0
+															RL				REG_ARG_0
+															RL				REG_ARG_0
+															AND				REG_ARG_0,	07
+															ADD				REG_ARG_0,	4'd
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_getn1 begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			Arg0 : Data
+;;			C :	Error
+;;			
+__dev_Si570_GetN1:						CALL			__get1_tmp0
+															CALL			__get0_arg0
+															SL0				REG_TMP_0
+															SLA				REG_ARG_0
+															SL0				REG_TMP_0
+															SLA				REG_ARG_0
+															AND				REG_ARG_0,	7F
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_getrfreq begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			Stack : 5 new elements
+;;			
+__dev_Si570_GetRFreq:					ADD				REG_SP,			5'd
+															FETCH			REG_ARG_0, (REG_SP)
+															SUB				REG_SP,			1'd
+															FETCH			REG_ARG_1, (REG_SP)
+															SUB				REG_SP,			1'd
+															FETCH			REG_ARG_2, (REG_SP)
+															SUB				REG_SP,			1'd
+															FETCH			REG_ARG_3, (REG_SP)
+															SUB				REG_SP,			1'd
+															FETCH			REG_TMP_0, (REG_SP)
+															SUB				REG_SP,			1'd
+															;
+															AND				REG_TMP_0,	3F
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_writesettings begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+;;			C :	Error
+;;			
+__dev_Si570_WriteSettings:		LOAD			REG_ARG_1,	DEV_SI570_REG_N1_1
+															CALL			__pop_arg2
+															CALL			__dev_Si570_WriteRegister
+															RETURN C
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_4
+															CALL			__pop_arg2
+															CALL			__dev_Si570_WriteRegister
+															RETURN C
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_3
+															CALL			__pop_arg2
+															CALL			__dev_Si570_WriteRegister
+															RETURN C
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_2
+															CALL			__pop_arg2
+															CALL			__dev_Si570_WriteRegister
+															RETURN C
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_1
+															CALL			__pop_arg2
+															CALL			__dev_Si570_WriteRegister
+															RETURN C
+															;
+															LOAD			REG_ARG_1,	DEV_SI570_REG_RFREQ_0
+															CALL			__pop_arg2
+															JUMP			__dev_Si570_WriteRegister							; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_clearstack begin
+__dev_Si570_ClearStack:				ADDCY			REG_SP,			6'd
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_sethsdiv begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			Arg0 : HS_DIV
+;;			C :	Error
+;;			
+__dev_Si570_SetHSDiv:					SUB				REG_ARG_0,	4'd
+															RR				REG_ARG_0
+															RR				REG_ARG_0
+															RR				REG_ARG_0
+															AND				REG_ARG_0,	E0
+															CALL			__get0_tmp0
+															AND				REG_TMP_0,	1F
+															OR				REG_TMP_0,	REG_ARG_0
+															JUMP			__put0_tmp0
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_setn1 begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			Arg0 : Data
+;;			C :	Error
+;;			
+__dev_Si570_SetN1:						RR				REG_ARG_0
+															RR				REG_ARG_0
+															LOAD			REG_TMP_1,	REG_ARG_0
+															;
+															AND				REG_ARG_0,	1F
+															CALL			__get0_tmp0
+															AND				REG_TMP_0,	E0
+															OR				REG_TMP_0,	REG_ARG_0
+															CALL			__put0_tmp0
+															;
+															AND				REG_TMP_1,	C0
+															CALL			__get1_tmp0
+															AND				REG_TMP_0,	3F
+															OR				REG_TMP_0,	REG_TMP_1
+															JUMP			__put1_tmp0
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_setrfreq begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			C :	Error
+;;			Stack : 5 new elements
+;;			
+__dev_Si570_SetRFreq:					ADD				REG_SP,			5'd
+															STORE			REG_ARG_0, (REG_SP)
+															SUB				REG_SP,			1'd
+															STORE			REG_ARG_1, (REG_SP)
+															SUB				REG_SP,			1'd
+															STORE			REG_ARG_2, (REG_SP)
+															SUB				REG_SP,			1'd
+															STORE			REG_ARG_3, (REG_SP)
+															SUB				REG_SP,			1'd
+															;
+															AND				REG_TMP_0,	3F
+															FETCH			REG_TMP_1, (REG_SP)
+															AND				REG_TMP_1,	C0
+															OR				REG_TMP_1,	REG_TMP_0
+															STORE			REG_TMP_1, (REG_SP)
+															;
+															SUB				REG_SP,			1'd
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_calculate begin
+__dev_Si570_Calculate:				; load Si570 parameters from Frequency table (table index = REG_PTR_L)
+															LOAD			REG_PTR_H,	0'd
+															ADD				REG_PTR_L,	_Si570_Frequency_Table'lower
+															ADDCY			REG_PTR_H,	_Si570_Frequency_Table'upper
+															CALL@			(REG_PTR_H, REG_PTR_L)
+															LOAD			REG_ARG_0,	REG_LAR						; hs_div
+															CALL			__dev_Si570_SetHSDiv
+															;
+															ADD				REG_PTR_L,	1'd
+															ADDCY			REG_PTR_H,	0'd
+															CALL@			(REG_PTR_H, REG_PTR_L)
+															LOAD			REG_ARG_0,	REG_LAR						; n1
+															CALL			__dev_Si570_SetN1
+															;
+															CALL			__dev_Si570_GetRFreq					; rfreq -> arg0..3, tmp0
+															;
+															ADD				REG_PTR_L,	1'd
+															ADDCY			REG_PTR_H,	0'd
+															CALL@			(REG_PTR_H, REG_PTR_L)
+															LOAD			REG_TMP_1,	REG_LAR						; mult -> tmp1
+															;
+															ADD				REG_PTR_L,	1'd
+															ADDCY			REG_PTR_H,	0'd
+															CALL@			(REG_PTR_H, REG_PTR_L)
+															LOAD			REG_TMP_2,	REG_LAR						; div -> tmp2
+															;
+															CALL			__dev_Scaler40_Begin
+															CALL			__dev_Scaler40_Wait
+															CALL			__dev_Scaler40_End
+															JUMP			__dev_Si570_SetRFreq					; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function __dev_Si570_frequencytable begin
+CONSTANT SI570_FREQUENCY_150_00MHZ,		0'd
+CONSTANT SI570_FREQUENCY_156_25MHZ,		4'd
+;
+;	[HS-Div,N1,Mult,Div]				 150 MHz			156.25 MHz
+TABLE SI570_FREQUENCY_TABLE#,	[4,7,24,25,		4,7,1,1]'d
+	_Si570_Frequency_Table:			LOAD&RETURN	REG_LAR,	SI570_FREQUENCY_TABLE#
+;PRAGMA function end

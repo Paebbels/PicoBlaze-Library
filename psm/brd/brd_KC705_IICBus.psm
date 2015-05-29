@@ -1,0 +1,64 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		I2C communication functions for a KC705 development board
+; 
+; Description:
+; ------------------------------------
+;	public constants:
+; 
+;
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;											Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+CONSTANT IICBUS_IICSWITCH_ADDRESS,						74					; PCA9548 (8-channel) I2C Bus Switch
+CONSTANT IICBUS_IICSWITCH_PORTID_SI570,				00000001'b	; Channel 0 -> Si570
+CONSTANT IICBUS_IICSWITCH_PORTID_VITA57_HPC,	00000010'b	; Channel 1 -> Vita57 connector (HPC - High Pin Count)
+CONSTANT IICBUS_IICSWITCH_PORTID_VITA57_LPC,	00000100'b	; Channel 2 -> Vita57 connector (LPC - Low Pin Count)
+CONSTANT IICBUS_IICSWITCH_PORTID_M24C08,			00001000'b	; Channel 3 -> M24C08
+CONSTANT IICBUS_IICSWITCH_PORTID_SFP,					00010000'b	; Channel 4 -> SFP+ connector
+CONSTANT IICBUS_IICSWITCH_PORTID_HDMI,				00100000'b	; Channel 5 -> HDMI
+CONSTANT IICBUS_IICSWITCH_PORTID_DDR3,				01000000'b	; Channel 6 -> DDR3 memory
+CONSTANT IICBUS_IICSWITCH_PORTID_SI5324,			10000000'b	; Channel 7 -> Si5324
+;
+CONSTANT IICBUS_SI570_ADDRESS,								5D					; Si570 Programmable Oscillator
+;
+CONSTANT IICBUS_SI5324_ADDRESS,								68					; Si5324  Precision Clock Multiplier
+;
+CONSTANT IICBUS_M24C08_ADDRESS,								54					; M24C08 (8kbit) EEPROM (base address '10101aa')
+;
+CONSTANT IICBUS_SFP_88E1111_ADDRESS,					AC					; SFP connector - Marvel 88E1111 - SGMII to 1000BASE-T PHY
+;
+;PRAGMA function __brd_KC705_ProgI2CMux_xxx begin
+__brd_KC705_ProgI2CMux_Si570:			LOAD			REG_ARG_1,	IICBUS_IICSWITCH_PORTID_SI570
+																	JUMP			_BRD_ProgI2CMux
+__brd_KC705_ProgI2CMux_Si5324:		LOAD			REG_ARG_1,	IICBUS_IICSWITCH_PORTID_SI5324
+																	JUMP			_BRD_ProgI2CMux
+__brd_KC705_ProgI2CMux_M24C08:		LOAD			REG_ARG_1,	IICBUS_IICSWITCH_PORTID_M24C08
+																	JUMP			_BRD_ProgI2CMux
+__brd_KC705_ProgI2CMux_SFP:				LOAD			REG_ARG_1,	IICBUS_IICSWITCH_PORTID_SFP
+																	;
+	_BRD_ProgI2CMux:								LOAD			REG_ARG_0,	IICBUS_IICSWITCH_ADDRESS
+																	JUMP			__dev_PCA9548_WriteSwitch														; tail call elimination
+;PRAGMA function end
+;

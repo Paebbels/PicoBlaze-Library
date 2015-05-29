@@ -1,0 +1,156 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabstop=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Authors:					Patrick Lehmann
+;
+; Assembler-Code:		Text-User-Interface (TUI) functions for IIC
+; 
+; Description:
+; ------------------------------------
+;	public functions:
+;		__tui_IIC_Scan_DeviceMap
+;		__tui_IIC_Dump_RegMap
+; 
+;	private functions:
+;   
+; License:
+; ==============================================================================
+; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
+;											Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+; TUI IIC macros
+; ===============================================
+;PRAGMA function _IIC_scan_devicemap begin
+__tui_IIC_Scan_DeviceMap:					LOAD			REG_CNT,		00
+																	CALL			__UART_DoubleIdent
+																	LOAD			REG_ARG_0,	"0"
+																	LOAD			REG_ARG_1,	"x"
+																	LOAD			REG_ARG_2,	" "
+																	LOAD			REG_ARG_3,	" "
+																	CALL			__UART_WriteQuadChar
+																	;
+																	; test I2C address
+	_IIC_Scan_DevMap_Loop:					LOAD			REG_ARG_0,	REG_CNT
+																	CALL			__io_IIC_CheckAddress
+																	JUMP NC,	_IIC_Scan_DevMap_Jmp1
+																	;
+																	; device does not respond
+																	LOAD			REG_ARG_0,	"-"
+																	LOAD			REG_ARG_1,	"-"
+																	CALL			__UART_WriteDoubleChar
+																	JUMP			_IIC_Scan_DevMap_Jmp2
+																	;
+																	; device has responded -> convert current device address to ASCII and write to UART
+	_IIC_Scan_DevMap_Jmp1:					LOAD			REG_ARG_0,	REG_CNT
+																	CALL			__Str_ByteToAscii
+																	CALL			__UART_WriteDoubleChar
+																	;
+	_IIC_Scan_DevMap_Jmp2:					ADD				REG_CNT,		1'd
+																	RETURN Z
+																	;
+																	TEST			REG_CNT,		0F
+																	JUMP Z,		_IIC_Scan_DevMap_Fmt2
+																	;
+																	TEST			REG_CNT,		03
+																	JUMP Z,		_IIC_Scan_DevMap_Fmt3
+																	;
+		_IIC_Scan_DevMap_Fmt1:				LOAD			REG_ARG_0,	" "
+																	CALL			__UART_WriteChar
+																	JUMP			_IIC_Scan_DevMap_Loop
+																	;
+		_IIC_Scan_DevMap_Fmt2:				CALL			__UART_WriteNewline
+																	CALL			__UART_DoubleIdent
+																	LOAD			REG_ARG_0,	REG_CNT
+																	CALL			__Str_ByteToAscii
+																	LOAD			REG_ARG_1,	"x"
+																	CALL			__UART_WriteDoubleChar
+																	CALL			__UART_DoubleIdent
+																	JUMP 			_IIC_Scan_DevMap_Loop
+																	;
+		_IIC_Scan_DevMap_Fmt3:				CALL			__UART_DoubleIdent
+																	JUMP			_IIC_Scan_DevMap_Loop
+;PRAGMA function end
+;
+;PRAGMA function __tui_IIC_Dump_RegMap begin
+__tui_IIC_Dump_RegMap:						LOAD			REG_CNT,		00
+																	LOAD			REG_LAR,		REG_ARG_0
+																	CALL			__UART_DoubleIdent
+																	LOAD			REG_ARG_0,	"0"
+																	LOAD			REG_ARG_1,	"x"
+																	LOAD			REG_ARG_2,	" "
+																	LOAD			REG_ARG_3,	" "
+																	CALL			__UART_WriteQuadChar
+																	;
+																	; read device register
+	_IIC_Dump_RegMap_Loop:					LOAD			REG_ARG_0,	REG_LAR
+																	LOAD			REG_ARG_1,	REG_CNT
+																	CALL			__io_IIC_ReadRegister
+																	JUMP	C,	_IIC_Dump_RegMap_Jmp1
+																	COMPARE		REG_ARG_0,	00
+																	JUMP	Z,	_IIC_Dump_RegMap_Jmp2
+																	JUMP			_IIC_Dump_RegMap_Jmp3
+																	;
+																	; communication error
+	_IIC_Dump_RegMap_Jmp1:					CALL			__dev_Term_TextColor_Red
+																	LOAD			REG_ARG_0,	"-"
+																	LOAD			REG_ARG_1,	"-"
+																	CALL			__UART_WriteDoubleChar
+																	CALL			__dev_Term_TextColor_Reset
+																	JUMP			_IIC_Dump_RegMap_Jmp4
+																	;
+																	; register read OK, but zero -> print '00' in gray
+	_IIC_Dump_RegMap_Jmp2:					LOAD			REG_ARG_0,	"0"
+																	LOAD			REG_ARG_1,	"0"
+																	CALL			__UART_WriteDoubleChar
+																	JUMP			_IIC_Dump_RegMap_Jmp4
+																	;
+																	; register read OK -> convert current return value to ASCII and write to UART
+	_IIC_Dump_RegMap_Jmp3:					CALL			__push_arg0
+																	CALL			__dev_Term_TextColor_White
+																	CALL			__pop_arg0
+																	CALL			__Str_ByteToAscii
+																	CALL			__UART_WriteDoubleChar
+																	CALL			__dev_Term_TextColor_Reset
+																	;
+	_IIC_Dump_RegMap_Jmp4:					ADD				REG_CNT,		1'd
+																	RETURN Z
+																	;
+																	TEST			REG_CNT,		0F
+																	JUMP Z,		_IIC_Dump_RegMap_Fmt2
+																	;
+																	TEST			REG_CNT,		03
+																	JUMP Z,		_IIC_Dump_RegMap_Fmt3
+																	;
+		_IIC_Dump_RegMap_Fmt1:				LOAD			REG_ARG_0,	" "
+																	CALL			__UART_WriteChar
+																	JUMP			_IIC_Dump_RegMap_Loop
+																	;
+		_IIC_Dump_RegMap_Fmt2:				CALL			__UART_WriteNewline
+																	CALL			__UART_DoubleIdent
+																	LOAD			REG_ARG_0,	REG_CNT
+																	CALL			__Str_ByteToAscii
+																	LOAD			REG_ARG_1,	"x"
+																	CALL			__UART_WriteDoubleChar
+																	CALL			__UART_DoubleIdent
+																	JUMP 			_IIC_Dump_RegMap_Loop
+																	;
+		_IIC_Dump_RegMap_Fmt3:				CALL			__UART_DoubleIdent
+																	JUMP			_IIC_Dump_RegMap_Loop
+;PRAGMA function end
+;

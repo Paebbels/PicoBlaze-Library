@@ -1,0 +1,76 @@
+; EMACS settings: -*-  tab-width: 2; indent-tabs-mode: t -*-
+; vim: tabsget=2:shiftwidth=2:noexpandtab
+; kate: tab-width 2; replace-tabs off; indent-width 2;
+; 
+; ==============================================================================
+; Assembler-Code:		IIC communication functions for a Si5324 device
+; 
+; Authors:					Patrick Lehmann
+;
+; Description:
+; ------------------------------------
+;	public functions:
+;		__DEV_Si5324_CheckAddress
+;		__DEV_Si5324_WriteRegister
+;		__DEV_Si5324_ReadRegister
+;   
+; License:
+; ==============================================================================
+; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
+;										 Chair for VLSI-Design, Diagnostics and Architecture
+; 
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+; 
+;		http://www.apache.org/licenses/LICENSE-2.0
+; 
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+; ==============================================================================
+;
+;
+;CONSTANT DEV_SI5324_REG_,				7'd
+;CONSTANT DEV_SI5324_REG_,				7'd
+;
+;CONSTANT DEV_SI5324_CMD_,				01
+;
+; DEV_Si5324 macros
+; ===============================================
+;PRAGMA function _dev_si5324_checkaddress begin
+;;		Requires:
+;;			Arg0 : *****
+;;		Returns:
+;;			C :	Error
+;;			
+__DEV_Si5324_CheckAddress:		LOAD			REG_ARG_0,	IICBUS_SI5324_ADDRESS
+															JUMP			__IO_IIC_CheckAddress												; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_si5324_writeregister begin
+;;		Requires:
+;;			Arg0 : *****
+;;			Arg1 : Si5324 RegisterAddress
+;;			Arg2 : Data
+;;		Returns:
+;;			C :	Error
+;;			
+__DEV_Si5324_WriteRegister:		LOAD			REG_ARG_0,	IICBUS_SI5324_ADDRESS
+															JUMP			__IO_IIC_WriteRegister											; tail call elimination
+;PRAGMA function end
+;
+;PRAGMA function _dev_si5324_readregister begin
+;;		Requires:
+;;			Arg0 : *****
+;;			Arg1 : Si5324 RegisterAddress
+;;		Returns:
+;;			Arg0 : Data
+;;			C :	Error
+;;			
+__DEV_Si5324_ReadRegister:		LOAD			REG_ARG_0,	IICBUS_SI5324_ADDRESS
+															JUMP			__IO_IIC_ReadRegister												; tail call elimination
+;PRAGMA function end
+;

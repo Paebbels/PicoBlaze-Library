@@ -11,6 +11,7 @@
 ; ------------------------------------
 ;	public functions:
 ;		__Str_ByteToAscii
+;		__Str_ByteToAscii2
 ;		__Str_QuadByteToDecimal
 ; 
 ;	private functions:
@@ -37,7 +38,7 @@
 ;; OUTPUT	REG_ARG_0, REG_ARG_1
 ;; USES		
 ;; CALLS	
-;PRAGMA function _str_bytetoascii begin
+;PRAGMA function __Str_ByteToAscii begin
 __Str_ByteToAscii:				LOAD			REG_ARG_1,	REG_ARG_0
 													AND				REG_ARG_1,	0F
 													COMPARE		REG_ARG_1,	10'd
@@ -55,11 +56,33 @@ __Str_ByteToAscii:				LOAD			REG_ARG_1,	REG_ARG_0
 													RETURN
 ;PRAGMA function end
 ;
+;; INPUT	REG_ARG_2
+;; OUTPUT	REG_ARG_2, REG_ARG_3
+;; USES		
+;; CALLS	
+;PRAGMA function __Str_ByteToAscii2 begin
+__Str_ByteToAscii2:				LOAD			REG_ARG_3,	REG_ARG_2
+													AND				REG_ARG_3,	0F
+													COMPARE		REG_ARG_3,	10'd
+													JUMP C,		_Str_ByteToAscii2_Jmp1
+													ADD				REG_ARG_3,	7'd
+	_Str_ByteToAscii2_Jmp1:	ADD				REG_ARG_3,	"0"
+													SR0				REG_ARG_2
+													SR0				REG_ARG_2
+													SR0				REG_ARG_2
+													SR0				REG_ARG_2
+													COMPARE		REG_ARG_2,	10'd
+													JUMP C,		_Str_ByteToAscii2_Jmp2
+													ADD				REG_ARG_2,	7'd
+	_Str_ByteToAscii2_Jmp2:	ADD				REG_ARG_2,	"0"
+													RETURN
+;PRAGMA function end
+;
 ;; INPUT	REG_ARG_0
 ;; OUTPUT	REG_ARG_0, REG_ARG_1, REG_ARG_2
 ;; USES		REG_TMP_0, REG_TMP_1
 ;; CALLS	
-;PRAGMA function _str_bytetodecimal begin
+;PRAGMA function __Str_ByteToDecimal begin
 __Str_ByteToDecimal:				LOAD			REG_TMP_0,	0'd
 														LOAD			REG_ARG_1,	0'd
 														LOAD			REG_ARG_2,	0'd
@@ -89,7 +112,7 @@ __Str_ByteToDecimal:				LOAD			REG_TMP_0,	0'd
 														RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function _str_doublebytetodecimal begin
+;PRAGMA function __Str_DoubleByteToDecimal begin
 __Str_DoubleByteToDecimal:	JUMP			__Error
 ;PRAGMA function end
 ;
@@ -98,7 +121,7 @@ __Str_DoubleByteToDecimal:	JUMP			__Error
 ;; USES		
 ;; CALLS	
 ;; INTER	DISABLE, ENABLE
-;PRAGMA function _str_quadbytetodecimal begin
+;PRAGMA function __Str_QuadByteToDecimal begin
 __Str_QuadByteToDecimal:		DISABLE INTERRUPT
 														STAR			s0,					REG_ARG_0
 														STAR			s1,					REG_ARG_1
