@@ -93,6 +93,6 @@ __dev_Scaler32_End:						INPUT		REG_ARG_0,		IPORT_SCALER32_REG_R0			;	Write Reg 
 ; Interrupt Handler
 ; ===============================================
 ;PRAGMA function __ISR_Scaler32 begin
-__ISR_Scaler32:			JUMP __ISR_Error
+__ISR_Scaler32:								JUMP __ISR_Error
 
 ;PRAGMA function end
