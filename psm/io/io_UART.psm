@@ -239,7 +239,7 @@ __ISR_UART:										; read interrupt message
 															JUMP		NZ,					_isr_UART_RX
 															;
 															; if message is unknown
-															JUMP		__Error
+															JUMP		__ISR_Error
 
 _isr_UART_RX_DataLoss:				; what should I do now?
 										
@@ -247,5 +247,5 @@ _isr_UART_RX:									; read char from UART RX buffer
 															INPUT		REG_TMP_0,		IPORT_UART_DATAIN
 															;
 															RETURN
-
 ;PRAGMA function end
+;

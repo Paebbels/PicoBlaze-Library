@@ -18,7 +18,7 @@
 ; License:
 ; ==============================================================================
 ; Copyright 2007-2015 Technische Universitaet Dresden - Germany,
-;										 Chair for VLSI-Design, Diagnostics and Architecture
+;											Chair for VLSI-Design, Diagnostics and Architecture
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
@@ -35,16 +35,54 @@
 ;
 ; Constants
 ; ===============================================
-;CONSTANT Div32_STATUS_DONE,						01		;
+CONSTANT CONVBCD24_STATUS_SIGN,						10		;
+CONSTANT CONVBCD24_STATUS_DONE,						80		;
 ;
 ; Co-Processor macros
 ; ===============================================
-
+;PRAGMA function __dev_ConvBCD24_Wait begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			
+__dev_ConvBCD24_Wait:					INPUT		REG_TMP_0,		IPORT_CONVBCD24_STATUS	; Read computation status
+															TEST		REG_TMP_0,		CONVBCD24_STATUS_DONE
+															RETURN	C
+															JUMP 		__dev_ConvBCD24_Wait
+;PRAGMA function end
+;
+;PRAGMA function __dev_ConvBCD24_Begin begin
+;;		Requires:
+;;			Arg0 : Input value(7:0)
+;;			Arg1 : Input value(15:8)
+;;			Arg2 : Input value(23:16)
+;;		Returns:
+;;			
+__dev_ConvBCD24_Begin:				OUTPUT	REG_ARG_0,		OPORT_CONVBCD24_OPERANDA0			;	Write arg0 to Reg A0
+															OUTPUT	REG_ARG_1,		OPORT_CONVBCD24_OPERANDA1			;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_2,		OPORT_CONVBCD24_OPERANDA2			;	Write arg2 to Reg A2
+															RETURN
+;PRAGMA function end
+;
+;PRAGMA function __dev_ConvBCD24_End begin
+;;		Requires:
+;;			
+;;		Returns:
+;;			Arg0 : Scaled value(7:0)
+;;			Arg1 : Scaled value(15:8)
+;;			Arg2 : Scaled value(23:16)
+;;			Arg3 : Scaled value(31:24)
+;;		
+__dev_ConvBCD24_End:					INPUT		REG_ARG_0,		IPORT_CONVBCD24_RESULT0			;	Write Reg R0 to arg0
+															INPUT		REG_ARG_1,		IPORT_CONVBCD24_RESULT1			;	Write Reg R1 to arg1
+															INPUT		REG_ARG_2,		IPORT_CONVBCD24_RESULT2			;	Write Reg R2 to arg2
+															RETURN
+;PRAGMA function end
 ;
 ;
 ; Interrupt Handler
 ; ===============================================
 ;PRAGMA function __ISR_ConvBCD24 begin
-__ISR_ConvBCD24:			JUMP __ISR_Error
+__ISR_ConvBCD24:							JUMP __ISR_Error
 
 ;PRAGMA function end

@@ -38,7 +38,7 @@
 ; ===============================================
 ;PRAGMA function _IIC_scan_devicemap begin
 __tui_IIC_Scan_DeviceMap:					LOAD			REG_PTR_L,	SENDMSG_IIC_Scan_DeviceMap
-																	CALL			__Pager_Page1_Call_Table2
+																	CALL			__Pager_Page1_Call_Table1
 																	CALL			__UART_WriteNewline
 																	;
 																	LOAD			REG_CNT,		00
@@ -96,7 +96,7 @@ __tui_IIC_Scan_DeviceMap:					LOAD			REG_PTR_L,	SENDMSG_IIC_Scan_DeviceMap
 ;
 ;PRAGMA function __tui_IIC_Dump_RegMap begin
 __tui_IIC_Dump_RegMap:						LOAD			REG_PTR_L,	SENDMSG_IIC_Dump_Registers
-																	CALL			__Pager_Page1_Call_Table2
+																	CALL			__Pager_Page1_Call_Table1
 																	CALL			__UART_WriteNewline
 																	;
 																	LOAD			REG_CNT,		00
