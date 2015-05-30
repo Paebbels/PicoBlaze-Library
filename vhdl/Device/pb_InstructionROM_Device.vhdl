@@ -11,7 +11,8 @@
 -- =============================================================================
 -- Authors:					Patrick Lehmann
 --
--- Package:					TODO
+-- Module:					Wrapper module for up to 8 PicoBlaze ROM pages. All ROMs are
+--									reprogrammable via JTAG_Loader
 --
 -- Description:
 -- ------------------------------------
@@ -20,8 +21,7 @@
 -- 
 -- License:
 -- -----------------------------------------------------------------------------
--- Copyright 2007-2015 Technische Universitaet Dresden - Germany
---										 Chair for VLSI-Design, Diagnostics and Architecture
+-- Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ use			L_PicoBlaze.pb.all;
 use			L_PicoBlaze.pb_comp.all;
 
 
-entity pb_ROM_paged is
+entity pb_InstructionROM_Device is
 	generic (
 		PAGES								: POSITIVE							:= 1;
 		DEVICE_INSTANCE			: T_PB_DEVICE_INSTANCE
@@ -79,7 +79,7 @@ entity pb_ROM_paged is
 end;
 
 
-architecture rtl of pb_ROM_paged is
+architecture rtl of pb_InstructionROM_Device is
 	type T_PB_INSTRUCTION_VECTOR	is array (NATURAL range <>) of T_PB_INSTRUCTION;
 
 	function reverse(vec : T_PB_INSTRUCTION_VECTOR) return T_PB_INSTRUCTION_VECTOR is
