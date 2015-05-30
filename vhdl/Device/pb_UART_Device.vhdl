@@ -3,10 +3,10 @@
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
 -- ============================================================================
--- Module:					PicoBlaze UART Adapter
--- 
 -- Authors:					Patrick Lehmann
 --
+-- Module:					PicoBlaze UART Adapter
+-- 
 -- Description:
 -- ------------------------------------
 --		TODO
@@ -14,8 +14,7 @@
 --
 -- License:
 -- ============================================================================
--- Copyright 2007-2014 Technische Universitaet Dresden - Germany,
---										 Chair for VLSI-Design, Diagnostics and Architecture
+-- Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -42,7 +41,7 @@ library	L_PicoBlaze;
 use			L_PicoBlaze.pb.all;
 
 
-entity pb_UART_Adapter is
+entity pb_UART_Device is
 	generic (
 		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE
 	);
@@ -77,7 +76,7 @@ entity pb_UART_Adapter is
 end entity;
 
 
-architecture rtl of pb_UART_Adapter is
+architecture rtl of pb_UART_Device is
 	CONSTANT REG_WO_INT_ENABLE			: UNSIGNED(0 downto 0)			:= "0";
 	CONSTANT REG_RO_STATUS					: UNSIGNED(0 downto 0)			:= "0";
 	CONSTANT REG_RW_FIFO						: UNSIGNED(0 downto 0)			:= "1";
@@ -157,10 +156,7 @@ begin
 				DataOut				<= Reg_Status;
 			when REG_RW_FIFO =>
 				DataOut				<= UART_RX_Data;
-				
-				if (AdrDec_re = '1') then
-					UART_RX_got	<= '1';
-				end if;
+				UART_RX_got		<= AdrDec_re;
 			when others =>
 				null;
 		end case;

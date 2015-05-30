@@ -5,8 +5,7 @@
 -- ============================================================================
 -- Authors:					Patrick Lehmann
 -- 
--- Package:					VHDL package for TODO
---									TODO
+-- Package:					PicoBlaze component declarations
 --
 -- Description:
 -- ------------------------------------

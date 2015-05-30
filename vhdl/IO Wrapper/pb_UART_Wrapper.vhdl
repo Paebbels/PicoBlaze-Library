@@ -3,10 +3,10 @@
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
 -- ============================================================================
--- Module:					PicoBlaze UART Wrapper
--- 
 -- Authors:					Patrick Lehmann
 --
+-- Module:					PicoBlaze UART Wrapper
+-- 
 -- Description:
 -- ------------------------------------
 --		TODO
@@ -14,8 +14,7 @@
 --
 -- License:
 -- ============================================================================
--- Copyright 2007-2014 Technische Universitaet Dresden - Germany,
---										 Chair for VLSI-Design, Diagnostics and Architecture
+-- Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
