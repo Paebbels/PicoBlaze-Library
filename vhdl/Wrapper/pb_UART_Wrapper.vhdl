@@ -113,7 +113,7 @@ BEGIN
 	assert FALSE report "  BAUDRATE_COUNTER_MAX: " & INTEGER'image(BAUDRATE_COUNTER_MAX)	severity NOTE;
 	assert uart_IsTypicalBaudRate(BAUDRATE) report "The given baudrate is not known to be a typical baudrate!" severity WARNING;
 
-	Adapter : entity L_PicoBlaze.pb_UART_Adapter
+	UART : entity L_PicoBlaze.pb_UART_Device
 		generic map (
 			DEVICE_INSTANCE						=> DEVICE_INSTANCE
 		)
