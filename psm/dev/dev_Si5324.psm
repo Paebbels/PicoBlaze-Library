@@ -3,10 +3,10 @@
 ; kate: tab-width 2; replace-tabs off; indent-width 2;
 ; 
 ; ==============================================================================
-; Assembler-Code:		IIC communication functions for a Si5324 device
-; 
 ; Authors:					Patrick Lehmann
 ;
+; Assembler-Code:		IIC communication functions for a Si5324 device
+; 
 ; Description:
 ; ------------------------------------
 ;	public functions:
@@ -16,8 +16,7 @@
 ;   
 ; License:
 ; ==============================================================================
-; Copyright 2007-2014 Technische Universitaet Dresden - Germany,
-;										 Chair for VLSI-Design, Diagnostics and Architecture
+; Copyright 2012-2015 Patrick Lehmann - Dresden, Germany
 ; 
 ; Licensed under the Apache License, Version 2.0 (the "License");
 ; you may not use this file except in compliance with the License.
