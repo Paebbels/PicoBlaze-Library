@@ -45,42 +45,33 @@ use			L_PicoBlaze.pb.all;
 
 entity PicoBlaze_AddressDecoder is
 	generic (
-		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE
+		DEVICE_NAME						: STRING;
+		BUS_NAME							: STRING;
+		READ_MAPPINGS					: T_PB_PORTNUMBER_MAPPING_VECTOR;
+		WRITE_MAPPINGS				: T_PB_PORTNUMBER_MAPPING_VECTOR;
+		WRITEK_MAPPINGS				: T_PB_PORTNUMBER_MAPPING_VECTOR
 	);
 	port (
-		Clock													: in	STD_LOGIC;
-		Reset													: in	STD_LOGIC;
+		Clock									: in	STD_LOGIC;
+		Reset									: in	STD_LOGIC;
 
 		-- PicoBlaze interface
-		In_WriteStrobe								: in	STD_LOGIC;
-		In_WriteStrobe_K							: in	STD_LOGIC;
-		In_ReadStrobe									: in	STD_LOGIC;
-		In_Address										: in	T_SLV_8;
-		In_Data												: in	T_SLV_8;
-		Out_WriteStrobe								: out	STD_LOGIC;
-		Out_ReadStrobe								: out	STD_LOGIC;
-		Out_WriteAddress							: out	T_SLV_8;
-		Out_ReadAddress								: out	T_SLV_8;
-		Out_Data											: out	T_SLV_8
+		In_WriteStrobe				: in	STD_LOGIC;
+		In_WriteStrobe_K			: in	STD_LOGIC;
+		In_ReadStrobe					: in	STD_LOGIC;
+		In_Address						: in	T_SLV_8;
+		In_Data								: in	T_SLV_8;
+		Out_WriteStrobe				: out	STD_LOGIC;
+		Out_ReadStrobe				: out	STD_LOGIC;
+		Out_WriteAddress			: out	T_SLV_8;
+		Out_ReadAddress				: out	T_SLV_8;
+		Out_Data							: out	T_SLV_8
 	);
 end entity;
 
 
 architecture rtl of PicoBlaze_AddressDecoder is
 	attribute KEEP								: BOOLEAN;
-
-	function filterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR is
-		variable Result				: T_PB_PORTNUMBER_MAPPING_VECTOR(0 to DeviceInstance.Mappings'length - 1);
-		variable ResultCount	: NATURAL := 0;
-	begin
-		for i in DeviceInstance.Mappings'range loop
-			if (DeviceInstance.Mappings(i).MappingKind = MappingKind) then
-				Result(ResultCount)	:= DeviceInstance.Mappings(i);
-				ResultCount					:= ResultCount + 1;
-			end if;
-		end loop;
-		return Result(0 to ResultCount - 1);
-	end function;
 
 	signal WriteAddress				: T_SLV_8;
 	signal WriteAddress_K			: T_SLV_8;
@@ -97,9 +88,6 @@ architecture rtl of PicoBlaze_AddressDecoder is
 begin
 
 	process(In_Address, In_WriteStrobe, In_WriteStrobe_K, In_ReadStrobe)
-		constant READ_MAPPINGS		: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_READ);
-		constant WRITE_MAPPINGS		: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITE);
-		constant WRITEK_MAPPINGS	: T_PB_PORTNUMBER_MAPPING_VECTOR := filterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITEK);
 	begin
 		WriteAddress		<= (others => '0');
 		WriteAddress_K	<= (others => '0');
@@ -109,8 +97,8 @@ begin
 		ReadHit					<= '0';
 
 		assert PB_VERBOSE
-			report "PicoBlaze_AddressDecoder: Report PortNumber mappings for device " & str_trim(DEVICE_INSTANCE.DeviceShort) &
-						 " on bus " & str_trim(DEVICE_INSTANCE.BusShort)
+			report "PicoBlaze_AddressDecoder: Report PortNumber mappings for device " & str_trim(DEVICE_NAME) &
+						 " on bus " & str_trim(BUS_NAME)
 			severity NOTE;
 		
 		for i in WRITEK_MAPPINGS'range loop

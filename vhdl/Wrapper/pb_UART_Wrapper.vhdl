@@ -115,7 +115,7 @@ BEGIN
 
 	UART : entity L_PicoBlaze.pb_UART_Device
 		generic map (
-			DEVICE_INSTANCE						=> DEVICE_INSTANCE
+			DEVICE_INSTANCE			=> DEVICE_INSTANCE
 		)
 		port map (
 			Clock								=> Clock,

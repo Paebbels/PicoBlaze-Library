@@ -46,7 +46,7 @@ use			PoC.strings.all;
 
 package pb is
 
-	constant PB_VERBOSE				: BOOLEAN			:= TRUE;	-- POC_VERBOSE;
+	constant PB_VERBOSE				: BOOLEAN			:= FALSE;	-- POC_VERBOSE;
 	constant PB_REPORT				: BOOLEAN			:= FALSE;
 
 	subtype T_PB_ADDRESS			is STD_LOGIC_VECTOR(11 downto 0);
@@ -320,6 +320,9 @@ package pb is
 	function pb_GetInterruptVector(PicoBlazeBus : T_PB_IOBUS_DEV_PB_VECTOR; System : T_PB_SYSTEM) return STD_LOGIC_VECTOR;
 	function pb_GetInterruptMessages(PicoBlazeBus : T_PB_IOBUS_DEV_PB_VECTOR; System : T_PB_SYSTEM) return T_SLVV_8;
 	procedure pb_AssignInterruptAck(signal Output : inout T_PB_IOBUS_PB_DEV_VECTOR; Input : STD_LOGIC_VECTOR; System : T_PB_SYSTEM);
+	
+	-- PicoBlaze AddressDecoder functions
+	function pb_FilterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR;
 	
 	-- PicoBlaze bus functions
 	function pb_GetBusIndex(System : T_PB_SYSTEM; DeviceShort : STRING) return NATURAL;
@@ -1026,6 +1029,20 @@ package body pb is
 		end loop;
 	end procedure;
 	
+	-- PicoBlaze AddressDecoder functions
+	function pb_FilterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR is
+		variable Result				: T_PB_PORTNUMBER_MAPPING_VECTOR(0 to DeviceInstance.Mappings'length - 1);
+		variable ResultCount	: NATURAL := 0;
+	begin
+		for i in DeviceInstance.Mappings'range loop
+			if (DeviceInstance.Mappings(i).MappingKind = MappingKind) then
+				Result(ResultCount)	:= DeviceInstance.Mappings(i);
+				ResultCount					:= ResultCount + 1;
+			end if;
+		end loop;
+		return Result(0 to ResultCount - 1);
+	end function;
+	
 	-- PicoBlaze bus functions
 	function pb_GetBusWidth(System : T_PB_SYSTEM; BusShort : STRING) return NATURAL is
 		constant BUSID			: T_PB_BUSID	:= pb_GetBusID(System, pb_ShortName(BusShort));
@@ -1192,11 +1209,11 @@ package body pb is
 														ite((Mapping.PortNumber < 100), " ", "") &
 														INTEGER'image(Mapping.PortNumber) & "'d    ; " &
 														str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterName) & "(");
-						write(psmLine, "dummy[3:0]");
+						write(psmLine, STRING'("dummy[3:0]"));
 						for k in 1 to 1 loop
-							write(psmLine, ",dummy[7:4]");
+							write(psmLine, STRING'(",dummy[7:4]"));
 						end loop;
-						write(psmLine, ")");
+						write(psmLine, STRING'(")"));
 						writeline(psmFile, psmLine);
 					else
 						DeviceInstanceID	:= AddressMapRead(Mapping.PortNumber).DeviceInstanceID;
@@ -1396,7 +1413,7 @@ package body pb is
 						PortNumber_slv	:= to_slv(Mapping.PortNumber, 8);
 						AddressMapRead(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);					-- save used MappingID for a PortNumber
 						
-						write(tokenLine, "RD_" & str_trim(DeviceInstance.DeviceShort) & "=2" & to_string(PortNumber_slv, 'h', 2));
+						write(tokenLine, "RD_" & str_trim(DeviceInstance.DeviceShort) & "_" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & "=2" & to_string(PortNumber_slv, 'h', 2));
 						writeline(tokenFile, tokenLine);
 					else
 						DeviceInstanceID	:= AddressMapRead(Mapping.PortNumber).DeviceInstanceID;
@@ -1420,7 +1437,7 @@ package body pb is
 					if (AddressMapWrite(Mapping.PortNumber).MappingID = 255) then
 						AddressMapWrite(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
 						
-						write(tokenLine, "WR_" & str_trim(DeviceInstance.DeviceShort) & "=1" & to_string(PortNumber_slv, 'h', 2));
+						write(tokenLine, "WR_" & str_trim(DeviceInstance.DeviceShort) & "_" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & "=1" & to_string(PortNumber_slv, 'h', 2));
 						writeline(tokenFile, tokenLine);
 					else
 						DeviceInstanceID	:= AddressMapWrite(Mapping.PortNumber).DeviceInstanceID;
@@ -1445,7 +1462,7 @@ package body pb is
 						
 						for k in 0 to 15 loop
 							PortNumber_slv	:= to_slv(k, 4) & to_slv(Mapping.PortNumber, 4);
-							write(tokenLine, STRING'("WK_" & str_trim(DeviceInstance.DeviceShort) & "=4" & to_string(PortNumber_slv, 'h', 2)));
+							write(tokenLine, STRING'("WK_" & str_trim(DeviceInstance.DeviceShort) & "_" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & "=4" & to_string(PortNumber_slv, 'h', 2)));
 							writeline(tokenFile, tokenLine);
 						end loop;
 					else
