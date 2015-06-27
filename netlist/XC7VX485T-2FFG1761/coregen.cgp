@@ -1,0 +1,22 @@
+# Date: Tue Jul 22 09:31:47 2014
+
+SET addpads = false
+SET asysymbol = false
+SET busformat = BusFormatAngleBracketNotRipped
+SET createndf = false
+SET designentry = VHDL
+SET device = xc7vx485t
+SET devicefamily = virtex7
+SET flowvendor = Other
+SET formalverification = false
+SET foundationsym = false
+SET implementationfiletype = Ngc
+SET package = ffg1761
+SET removerpms = false
+SET simulationfiles = Structural
+SET speedgrade = -2
+SET verilogsim = false
+SET vhdlsim = true
+SET workingdirectory = .\tmp\
+
+# CRC: b96cfae8

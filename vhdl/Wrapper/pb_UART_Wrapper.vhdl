@@ -49,8 +49,8 @@ entity pb_UART_Wrapper is
 	generic (
 		DEBUG													: BOOLEAN												:= TRUE;
 		ENABLE_CHIPSCOPE							: BOOLEAN												:= TRUE;
-		CLOCK_FREQ										: FREQ													:= 100.0 MHz;
-		BAUDRATE											: BAUD													:= 115.200 kBd;
+		CLOCK_FREQ										: FREQ													:= 100 MHz;
+		BAUDRATE											: BAUD													:= 115200 Bd;
 		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE
 	);
 	port (
@@ -83,7 +83,7 @@ architecture rtl of pb_UART_Wrapper is
 	attribute FSM_ENCODING						: STRING;
 
 	constant UART_OVERSAMPLING_RATE		: POSITIVE					:= 16;
-	constant TIME_UNIT_INTERVAL				: TIME							:= 1.0 sec / (to_real(BAUDRATE, 1.0 Bd) * real(UART_OVERSAMPLING_RATE));
+	constant TIME_UNIT_INTERVAL				: TIME							:= 1 sec / (to_real(BAUDRATE, 1 Bd) * real(UART_OVERSAMPLING_RATE));
 	constant BAUDRATE_COUNTER_MAX			: POSITIVE					:= TimingToCycles(TIME_UNIT_INTERVAL, CLOCK_FREQ);
 	constant BAUDRATE_COUNTER_BITS		: POSITIVE					:= log2ceilnz(BAUDRATE_COUNTER_MAX + 1);
 	

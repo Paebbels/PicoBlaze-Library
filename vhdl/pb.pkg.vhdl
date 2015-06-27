@@ -418,10 +418,10 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result 					: T_PB_REGISTER;
 	begin
-		assert (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ)
-			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RO, but should be translated into a READ register."
-			severity FAILURE;
-	
+		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READ) then
+			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RO, but should be translated into a READ register." severity FAILURE;
+		end if;
+		
 		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
 		Result.RegisterNumber		:= RegisterNumber;
@@ -440,9 +440,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result 					: T_PB_REGISTER_VECTOR(0 to 1);
 	begin
-		assert (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READWRITE)
-			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RW, but should be translated into a READ and a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READWRITE) then
+			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RW, but should be translated into a READ and a WRITE register." severity FAILURE;
+		end if;
 	
 		Result(0).RegisterName		:= pb_LongName(NameShort);
 		Result(0).RegisterShort		:= pb_ShortName(NameShort);
@@ -472,9 +472,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result : T_PB_REGISTER;
 	begin
-		assert (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_WRITE)
-			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but shall be translated into a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_WRITE) then
+			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but shall be translated into a WRITE register." severity FAILURE;
+		end if;
 	
 		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
@@ -494,9 +494,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result : T_PB_REGISTER;
 	begin
-		assert (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READ)
-			report "pb_CreateRegisterK: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO or RW, but should be translated into a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ) then
+			report "pb_CreateRegisterK: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO or RW, but should be translated into a WRITE register." severity FAILURE;
+		end if;
 	
 		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
@@ -516,9 +516,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result 					: T_PB_REGISTER_VECTOR(0 to 1);
 	begin
-		assert (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READ)
-			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but should be translated into a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ) then
+			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but should be translated into a WRITE register." severity FAILURE;
+		end if;
 	
 		Result(0).RegisterName		:= pb_LongName(NameShort);
 		Result(0).RegisterShort		:= pb_ShortName(NameShort);
@@ -625,9 +625,9 @@ package body pb is
 		variable Reg						: T_PB_REGISTER;
 		variable j							: T_UINT_8;
 	begin
-		assert not (PB_VERBOSE or PB_REPORT)
-			report "Creating PortNumber mapping for device " & str_trim(Device.DeviceShort) & " with " & INTEGER'image(Device.RegisterCount) & " registers:"
-			severity NOTE;
+		if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+			report "Creating PortNumber mapping for device " & str_trim(Device.DeviceShort) & " with " & INTEGER'image(Device.RegisterCount) & " registers:" severity NOTE;
+		end if;
 	
 		j := 0;
 		for i in 0 to Device.RegisterCount - 1 loop
@@ -635,9 +635,9 @@ package body pb is
 			
 			case Reg.RegisterKind is
 				when PB_REGISTER_KIND_READ =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as readable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as readable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		MappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -647,9 +647,9 @@ package body pb is
 					j := j + 1;
 					
 				when PB_REGISTER_KIND_READWRITE =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as read/writeable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as read/writeable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		MappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -665,9 +665,9 @@ package body pb is
 					j := j + 2;
 					
 				when PB_REGISTER_KIND_WRITE =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as writeable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as writeable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		MappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -677,9 +677,9 @@ package body pb is
 					j := j + 1;
 				
 				when PB_REGISTER_KIND_WRITEK =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(KMappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as K-writeable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(KMappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as K-writeable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		KMappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -688,9 +688,9 @@ package body pb is
 					);
 					j := j + 1;
 				
-				assert (j <= C_PB_MAX_MAPPINGS)
-					report "pb_CreateMapping: Too many mappings created."
-					severity FAILURE;
+				if (j > C_PB_MAX_MAPPINGS) then
+					report "pb_CreateMapping: Too many mappings created." severity FAILURE;
+				end if;
 			end case;
 		end loop;
 
@@ -812,9 +812,10 @@ package body pb is
 		variable j					: T_UINT_8;
 	begin
 		for i in Busses'range loop
-			assert (PB_VERBOSE)
-				report "pb_ConnectBusses: Connecting bus '" & str_trim(Busses(i).BusShort) & "' to '" & str_trim(Busses(i).SuperBusShort) & "'"
-				severity note;
+			if (PB_VERBOSE = TRUE) then
+				report "pb_ConnectBusses: Connecting bus '" & str_trim(Busses(i).BusShort) & "' to '" & str_trim(Busses(i).SuperBusShort) & "'" severity NOTE;
+			end if;
+			
 			if (str_length(Busses(i).SuperBusShort) /= 0) then
 				SuperBusID	:= pb_GetBusID(Busses, Busses(i).SuperBusShort);
 			else
@@ -1186,13 +1187,14 @@ package body pb is
 				Mapping	:= DeviceInstance.Mappings(j);
 
 				if (Mapping.MappingKind /= PB_MAPPING_KIND_EMPTY) then
-					assert not PB_VERBOSE
+					if (PB_VERBOSE = TRUE) then
 						report "  Map PortNumber " & INTEGER'image(Mapping.PortNumber) &
 									 " to device " & INTEGER'image(i) &
 									 " (" & str_trim(DeviceInstance.DeviceShort) &
 									 ") register " & INTEGER'image(DeviceInstance.Device.Registers(Mapping.RegID).RegisterNumber) &
 									 " (" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & ")."
 						severity NOTE;
+					end if;
 				end if;
 
 				-- tokenFile content for INPUT address space
@@ -1399,13 +1401,14 @@ package body pb is
 			for j in 0 to DeviceInstance.MappingCount - 1 loop
 				Mapping	:= DeviceInstance.Mappings(j);
 
-				assert not PB_VERBOSE
+				if (PB_VERBOSE = TRUE) then
 					report "  Map PortNumber " & INTEGER'image(Mapping.PortNumber) &
 								 " to device " & INTEGER'image(i) &
 								 " (" & str_trim(DeviceInstance.DeviceShort) &
 								 ") register " & INTEGER'image(DeviceInstance.Device.Registers(Mapping.RegID).RegisterNumber) &
 								 " (" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & ")."
 					severity NOTE;
+				end if;
 
 				-- tokenFile content for INPUT address space
 				if (Mapping.MappingKind = PB_MAPPING_KIND_READ) then
