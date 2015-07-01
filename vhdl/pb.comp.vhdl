@@ -2,7 +2,14 @@
 -- vim: tabstop=2:shiftwidth=2:noexpandtab
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
--- ============================================================================
+-- =============================================================================
+--	 ____  _           ____  _                 _     _ _                          
+--	|  _ \(_) ___ ___ | __ )| | __ _ _______  | |   (_) |__  _ __ __ _ _ __ _   _ 
+--	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
+--	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
+--	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
+--	                                                                        |___/ 
+-- =============================================================================
 -- Authors:					Patrick Lehmann
 -- 
 -- Package:					PicoBlaze component declarations
@@ -34,8 +41,11 @@ use			IEEE.NUMERIC_STD.all;
 use			IEEE.STD_LOGIC_1164.all;
 use			IEEE.STD_LOGIC_TEXTIO.all;
 
-package pb_comp is
+library PoC;
+use			PoC.utils.all;
 
+
+package pb_comp is
 	component main_Page0 is
 		port (
 			Clock										: in	std_logic;
@@ -163,7 +173,31 @@ package pb_comp is
 			JTAGLoader_DataOut			: out	std_logic_vector(17 downto 0)
 		);
 	end component;
-end pb_comp;
+	
+	component JTAGLoader6 is
+		generic (
+			C_NUM_PICOBLAZE : integer := 1;
+			C_JTAG_CHAIN : INTEGER					:= 2;
+			C_ADDR_WIDTH : T_INTVEC(0 to 7)	:= (others => 10)
+		);
+		port (
+			picoblaze_reset	: out std_logic_vector(C_NUM_PICOBLAZE - 1 downto 0);
+			jtag_en					: out std_logic_vector(C_NUM_PICOBLAZE - 1 downto 0);
+			jtag_din				: out std_logic_vector(17 downto 0);
+			jtag_addr				: out std_logic_vector(imax(C_ADDR_WIDTH) - 1 downto 0);
+			jtag_clk				: out std_logic;
+			jtag_we					: out std_logic;
+			jtag_dout_0			: in  std_logic_vector(17 downto 0);
+			jtag_dout_1			: in  std_logic_vector(17 downto 0);
+			jtag_dout_2			: in  std_logic_vector(17 downto 0);
+			jtag_dout_3			: in  std_logic_vector(17 downto 0);
+			jtag_dout_4			: in  std_logic_vector(17 downto 0);
+			jtag_dout_5			: in  std_logic_vector(17 downto 0);
+			jtag_dout_6			: in  std_logic_vector(17 downto 0);
+			jtag_dout_7			: in  std_logic_vector(17 downto 0)
+		);
+	end component;
+end package;
 
 
 package body pb_comp is

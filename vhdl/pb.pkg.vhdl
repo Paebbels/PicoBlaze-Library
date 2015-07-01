@@ -2,7 +2,14 @@
 -- vim: tabstop=2:shiftwidth=2:noexpandtab
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
--- ============================================================================
+-- =============================================================================
+--	 ____  _           ____  _                 _     _ _                          
+--	|  _ \(_) ___ ___ | __ )| | __ _ _______  | |   (_) |__  _ __ __ _ _ __ _   _ 
+--	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
+--	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
+--	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
+--	                                                                        |___/ 
+-- =============================================================================
 -- Authors:					Patrick Lehmann
 -- 
 -- Package:					VHDL package for component declarations, types and
@@ -38,7 +45,7 @@ use			IEEE.STD_LOGIC_1164.all;
 use			IEEE.STD_LOGIC_TEXTIO.all;
 
 library	PoC;
-use			PoC.config.POC_VERBOSE;
+use			PoC.config.all;
 use			PoC.utils.all;
 use			PoC.vectors.all;
 use			PoC.strings.all;
