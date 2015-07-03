@@ -209,7 +209,7 @@ __UART_ReadChar_block:				INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART sta
 ;PRAGMA function end
 ;
 ;PRAGMA function _UART_WaitBufferHalfFree begin
-	_UART_WaitBufferHalfFree:	INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
+	_UART_WaitBufferHalfFree:		INPUT			REG_TMP_0,	IPORT_UART_STATUS			; Read UART status
 															AND				REG_TMP_0,	UART_TX_STATUS_MASK		; mask; test only TX status bits
 															TEST			REG_TMP_0,	UART_TX_HalfFull			; Check UART status: is TX buffer halffull?
 															RETURN		Z																	; return to write routine

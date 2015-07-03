@@ -1,9 +1,18 @@
+# files
 /.project
-psm/*.fmt
-psm/io/*.fmt
-psm/lib/*.fmt
-netlist/
-psm/dev/*.fmt
+
+# ignore generated KCPSM6/opbasm files
+psm/**/*.log
+psm/**/*.fmt
+
+# ignore generated netlist files
+/netlist/**/*.*
+!/netlist/**/*.cgp
+!/netlist/**/*.cgc
+!/netlist/**/*.xco
+!/netlist/**/*.vhdl
+
+
 UARTServer/bin/
 UARTServer/obj/
 Assembler/KCPSM6_session_log.txt
@@ -12,3 +21,6 @@ Open PicoBlaze Assembler/build/
 Open PicoBlaze Assembler/setuptools-5.1-py3.4.egg
 Open PicoBlaze Assembler/setuptools-5.1.zip
 Open PicoBlaze Assembler/opbasm.egg-info/
+
+# white list
+!/**/.publish

@@ -2,7 +2,14 @@
 -- vim: tabstop=2:shiftwidth=2:noexpandtab
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
--- ============================================================================
+-- =============================================================================
+--	 ____  _           ____  _                 _     _ _                          
+--	|  _ \(_) ___ ___ | __ )| | __ _ _______  | |   (_) |__  _ __ __ _ _ __ _   _ 
+--	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
+--	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
+--	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
+--	                                                                        |___/ 
+-- =============================================================================
 -- Authors:					Patrick Lehmann
 --
 -- Module:					PicoBlaze UART Wrapper
@@ -49,8 +56,8 @@ entity pb_UART_Wrapper is
 	generic (
 		DEBUG													: BOOLEAN												:= TRUE;
 		ENABLE_CHIPSCOPE							: BOOLEAN												:= TRUE;
-		CLOCK_FREQ										: FREQ													:= 100.0 MHz;
-		BAUDRATE											: BAUD													:= 115.200 kBd;
+		CLOCK_FREQ										: FREQ													:= 100 MHz;
+		BAUDRATE											: BAUD													:= 115200 Bd;
 		DEVICE_INSTANCE								: T_PB_DEVICE_INSTANCE
 	);
 	port (
@@ -83,7 +90,7 @@ architecture rtl of pb_UART_Wrapper is
 	attribute FSM_ENCODING						: STRING;
 
 	constant UART_OVERSAMPLING_RATE		: POSITIVE					:= 16;
-	constant TIME_UNIT_INTERVAL				: TIME							:= 1.0 sec / (to_real(BAUDRATE, 1.0 Bd) * real(UART_OVERSAMPLING_RATE));
+	constant TIME_UNIT_INTERVAL				: TIME							:= 1 sec / (to_real(BAUDRATE, 1 Bd) * real(UART_OVERSAMPLING_RATE));
 	constant BAUDRATE_COUNTER_MAX			: POSITIVE					:= TimingToCycles(TIME_UNIT_INTERVAL, CLOCK_FREQ);
 	constant BAUDRATE_COUNTER_BITS		: POSITIVE					:= log2ceilnz(BAUDRATE_COUNTER_MAX + 1);
 	
@@ -115,7 +122,7 @@ BEGIN
 
 	UART : entity L_PicoBlaze.pb_UART_Device
 		generic map (
-			DEVICE_INSTANCE						=> DEVICE_INSTANCE
+			DEVICE_INSTANCE			=> DEVICE_INSTANCE
 		)
 		port map (
 			Clock								=> Clock,

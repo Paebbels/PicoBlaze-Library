@@ -2,7 +2,14 @@
 -- vim: tabstop=2:shiftwidth=2:noexpandtab
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
--- ============================================================================
+-- =============================================================================
+--	 ____  _           ____  _                 _     _ _                          
+--	|  _ \(_) ___ ___ | __ )| | __ _ _______  | |   (_) |__  _ __ __ _ _ __ _   _ 
+--	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
+--	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
+--	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
+--	                                                                        |___/ 
+-- =============================================================================
 -- Authors:					Patrick Lehmann
 -- 
 -- Module:					BitBanging I/O Device for PicoBlaze
@@ -36,6 +43,7 @@ use			IEEE.NUMERIC_STD.all;
 library PoC;
 use			PoC.utils.all;
 use			PoC.vectors.all;
+use			PoC.strings.all;
 
 library	L_PicoBlaze;
 use			L_PicoBlaze.pb.all;
@@ -98,7 +106,11 @@ begin
 
 	AdrDec : entity L_PicoBlaze.PicoBlaze_AddressDecoder
 		generic map (
-			DEVICE_INSTANCE						=> DEVICE_INSTANCE
+			DEVICE_NAME				=> str_trim(DEVICE_INSTANCE.DeviceShort),
+			BUS_NAME					=> str_trim(DEVICE_INSTANCE.BusShort),
+			READ_MAPPINGS			=> pb_FilterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_READ),
+			WRITE_MAPPINGS		=> pb_FilterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITE),
+			WRITEK_MAPPINGS		=> pb_FilterMappings(DEVICE_INSTANCE, PB_MAPPING_KIND_WRITEK)
 		)
 		port map (
 			Clock											=> Clock,
@@ -118,9 +130,11 @@ begin
 		);
 	
 	process(Clock)
-		variable index		: NATURAL		:= to_index(AdrDec_WriteAddress(BIT_SET_CLR - 1 downto 0));
+		variable index		: NATURAL;
 	begin
 		if rising_edge(Clock) then
+			index	:= to_index(AdrDec_WriteAddress(BIT_SET_CLR - 1 downto 0));
+			
 			if (Reset = '1') then
 				Reg_DataOut					<= to_slvv_8(INITIAL_VALUE_I);
 			else

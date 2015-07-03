@@ -2,7 +2,14 @@
 -- vim: tabstop=2:shiftwidth=2:noexpandtab
 -- kate: tab-width 2; replace-tabs off; indent-width 2;
 -- 
--- ============================================================================
+-- =============================================================================
+--	 ____  _           ____  _                 _     _ _                          
+--	|  _ \(_) ___ ___ | __ )| | __ _ _______  | |   (_) |__  _ __ __ _ _ __ _   _ 
+--	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
+--	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
+--	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
+--	                                                                        |___/ 
+-- =============================================================================
 -- Authors:					Patrick Lehmann
 -- 
 -- Package:					VHDL package for component declarations, types and
@@ -38,7 +45,7 @@ use			IEEE.STD_LOGIC_1164.all;
 use			IEEE.STD_LOGIC_TEXTIO.all;
 
 library	PoC;
-use			PoC.config.POC_VERBOSE;
+use			PoC.config.all;
 use			PoC.utils.all;
 use			PoC.vectors.all;
 use			PoC.strings.all;
@@ -46,7 +53,7 @@ use			PoC.strings.all;
 
 package pb is
 
-	constant PB_VERBOSE				: BOOLEAN			:= TRUE;	-- POC_VERBOSE;
+	constant PB_VERBOSE				: BOOLEAN			:= FALSE;	-- POC_VERBOSE;
 	constant PB_REPORT				: BOOLEAN			:= FALSE;
 
 	subtype T_PB_ADDRESS			is STD_LOGIC_VECTOR(11 downto 0);
@@ -135,7 +142,6 @@ package pb is
 		Offset			: T_UINT_8;
 		MappingKind	: T_PB_REGISTER_FIELD_MAPPING_KIND;
 	end record;
-	end record;
 	
 	type T_PB_REGISTER_FIELD_GROUP_VECTOR is array(NATURAL range <>) of T_PB_REGISTER_FIELD_GROUP;
 	
@@ -154,7 +160,6 @@ package pb is
 		Length =>				0,
 		MappingKind =>	PB_REGISTER_FIELD_MAPPING_KIND_READ
 	);
-	end record;
 	
 	type T_PB_REGISTER_KIND is (PB_REGISTER_KIND_READ, PB_REGISTER_KIND_WRITE, PB_REGISTER_KIND_READWRITE, PB_REGISTER_KIND_WRITEK);
 	
@@ -165,13 +170,6 @@ package pb is
 		RegisterKind			: T_PB_REGISTER_KIND;
 		FieldMappings			: T_PB_REGISTER_FIELD_MAPPING_VECTOR(T_PB_REGISTER_FIELD_MAPPING_INDEX);
 		FieldMappingCount	: T_UINT_8;
-	
-	type T_PB_DEVICE is record
-		DeviceName				: T_PB_LONGNAME;
-		DeviceShort				: T_PB_SHORTNAME;
-		Registers					: T_PB_REGISTER_VECTOR(T_PB_REGISTER_INDEX);
-		RegisterFields		: T_PB_REGISTER_FIELD_VECTOR(T_PB_REGISTER_FIELD_INDEX);
-		CreatesInterrupt	: BOOLEAN;
 	end record;
 	
 	constant C_PB_REGISTER_EMPTY : T_PB_REGISTER := (
@@ -184,10 +182,6 @@ package pb is
 	);
 	
 	type T_PB_REGISTER_VECTOR is array(NATURAL range <>) of T_PB_REGISTER;
-		Registers =>					(others => C_PB_REGISTER_EMPTY),
-		RegisterFields =>			(others => C_PB_REGISTER_FIELD_EMPTY),
-		CreatesInterrupt =>		FALSE
-	);
 	
 	type T_PB_DEVICE is record
 		DeviceName					: T_PB_LONGNAME;
@@ -200,7 +194,7 @@ package pb is
 	end record;
 	
 	type T_PB_DEVICE_VECTOR is array (NATURAL range <>) of T_PB_DEVICE;
-
+	
 	constant C_PB_DEVICE_EMPTY : T_PB_DEVICE := (
 		DeviceName =>					C_PB_LONGNAME_EMPTY,
 		DeviceShort =>				C_PB_SHORTNAME_EMPTY,
@@ -334,6 +328,9 @@ package pb is
 	function pb_GetInterruptMessages(PicoBlazeBus : T_PB_IOBUS_DEV_PB_VECTOR; System : T_PB_SYSTEM) return T_SLVV_8;
 	procedure pb_AssignInterruptAck(signal Output : inout T_PB_IOBUS_PB_DEV_VECTOR; Input : STD_LOGIC_VECTOR; System : T_PB_SYSTEM);
 	
+	-- PicoBlaze AddressDecoder functions
+	function pb_FilterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR;
+	
 	-- PicoBlaze bus functions
 	function pb_GetBusIndex(System : T_PB_SYSTEM; DeviceShort : STRING) return NATURAL;
 	function pb_GetBusWidth(System : T_PB_SYSTEM; BusShort : STRING) return NATURAL;
@@ -428,10 +425,10 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result 					: T_PB_REGISTER;
 	begin
-		assert (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ)
-			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RO, but should be translated into a READ register."
-			severity FAILURE;
-	
+		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READ) then
+			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RO, but should be translated into a READ register." severity FAILURE;
+		end if;
+		
 		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
 		Result.RegisterNumber		:= RegisterNumber;
@@ -450,9 +447,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result 					: T_PB_REGISTER_VECTOR(0 to 1);
 	begin
-		assert (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READWRITE)
-			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RW, but should be translated into a READ and a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READWRITE) then
+			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not RW, but should be translated into a READ and a WRITE register." severity FAILURE;
+		end if;
 	
 		Result(0).RegisterName		:= pb_LongName(NameShort);
 		Result(0).RegisterShort		:= pb_ShortName(NameShort);
@@ -482,9 +479,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result : T_PB_REGISTER;
 	begin
-		assert (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_WRITE)
-			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but shall be translated into a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_WRITE) then
+			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but shall be translated into a WRITE register." severity FAILURE;
+		end if;
 	
 		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
@@ -504,9 +501,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result : T_PB_REGISTER;
 	begin
-		assert (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READ)
-			report "pb_CreateRegisterK: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO or RW, but should be translated into a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ) then
+			report "pb_CreateRegisterK: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO or RW, but should be translated into a WRITE register." severity FAILURE;
+		end if;
 	
 		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
@@ -526,9 +523,9 @@ package body pb is
 		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
 		variable Result 					: T_PB_REGISTER_VECTOR(0 to 1);
 	begin
-		assert (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_READ)
-			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but should be translated into a WRITE register."
-			severity FAILURE;
+		if (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ) then
+			report "pb_CreateRegisterRW: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but should be translated into a WRITE register." severity FAILURE;
+		end if;
 	
 		Result(0).RegisterName		:= pb_LongName(NameShort);
 		Result(0).RegisterShort		:= pb_ShortName(NameShort);
@@ -624,7 +621,8 @@ package body pb is
 					Result.RegisterKind := PB_REGISTER_KIND_READWRITE;
 				end if;
 			end if;
-				
+		end loop;
+		
 		return Result;
 	end function;
 
@@ -634,9 +632,9 @@ package body pb is
 		variable Reg						: T_PB_REGISTER;
 		variable j							: T_UINT_8;
 	begin
-		assert not (PB_VERBOSE or PB_REPORT)
-			report "Creating PortNumber mapping for device " & str_trim(Device.DeviceShort) & " with " & INTEGER'image(Device.RegisterCount) & " registers:"
-			severity NOTE;
+		if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+			report "Creating PortNumber mapping for device " & str_trim(Device.DeviceShort) & " with " & INTEGER'image(Device.RegisterCount) & " registers:" severity NOTE;
+		end if;
 	
 		j := 0;
 		for i in 0 to Device.RegisterCount - 1 loop
@@ -644,9 +642,9 @@ package body pb is
 			
 			case Reg.RegisterKind is
 				when PB_REGISTER_KIND_READ =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as readable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as readable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		MappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -656,9 +654,9 @@ package body pb is
 					j := j + 1;
 					
 				when PB_REGISTER_KIND_READWRITE =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as read/writeable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as read/writeable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		MappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -674,9 +672,9 @@ package body pb is
 					j := j + 2;
 					
 				when PB_REGISTER_KIND_WRITE =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as writeable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(MappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as writeable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		MappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -686,9 +684,9 @@ package body pb is
 					j := j + 1;
 				
 				when PB_REGISTER_KIND_WRITEK =>
-					assert not (PB_VERBOSE or PB_REPORT)
-						report "  Mapping PortNumber " & INTEGER'image(KMappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as K-writeable"
-						severity NOTE;
+					if ((PB_VERBOSE or PB_REPORT) = TRUE) then
+						report "  Mapping PortNumber " & INTEGER'image(KMappingStart + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ") as K-writeable" severity NOTE;
+					end if;
 					Result(j)			:= (
 						PortNumber =>		KMappingStart + Reg.RegisterNumber,
 						RegID =>				i,
@@ -697,91 +695,14 @@ package body pb is
 					);
 					j := j + 1;
 				
-				assert (j <= C_PB_MAX_MAPPINGS)
-					report "pb_CreateMapping: Too many mappings created."
-					severity FAILURE;
+				if (j > C_PB_MAX_MAPPINGS) then
+					report "pb_CreateMapping: Too many mappings created." severity FAILURE;
+				end if;
 			end case;
-		Result(1).RegisterName		:= pb_LongName(NameShort);
-		Result(1).RegisterShort		:= pb_ShortName(NameShort);
-		Result(1).RegisterNumber	:= RegisterNumber;
-		Result(1).RegisterKind		:= PB_REGISTER_KIND_WRITEK;
-		Result(1).FieldMappings		:= pb_Resize((
-			FieldID =>			RegisterFieldID,
-			Start =>				Offset,
-			Length =>				RegisterField.Length,
-			MappingKind =>	PB_REGISTER_FIELD_MAPPING_KIND_WRITEK));
-		
-		return Result;
-	end function;
-
-	function pb_GetRegisterCount(Device : T_PB_DEVICE) return T_UINT_8 is
-		variable Count : T_UINT_8 := 0;
-	begin
-		for i in Device.Registers'range loop
-			if (Device.Registers(i).RegisterNumber /= 255) then
-				Count := Count + 1;
-			end if;
 		end loop;
-		variable Count : T_UINT_8 := 0;
-	begin
-		for i in DeviceInstance.Device.Registers'range loop
-			if (DeviceInstance.Device.Registers(i).RegisterNumber /= 255) then
-				Count := Count + 1;
-		end loop;
-		return Count;
-	end function;
 
 		return Result(0 to j - 1);
 	end function;
-	begin
-		report "pb_CreateMapping: for device " & str_trim(Device.DeviceShort) & " with " & INTEGER'image(RegisterCount) & " registers." severity NOTE;
-	
-		j := 0;
-		for i in 0 to RegisterCount - 1 loop
-			Reg := Device.Registers(i);
-			
-			report "  Mapping PortNumber " & INTEGER'image(Start + Reg.RegisterNumber) & " to register " & INTEGER'image(Reg.RegisterNumber) & " (" & str_trim(Reg.RegisterShort) & ")" severity NOTE;
-			case Reg.RegisterKind is
-				when PB_REGISTER_KIND_READ =>
-					Result(j)			:= (
-						PortNumber =>		Start + Reg.RegisterNumber,
-						RegID =>				i,
-						MappingKind =>	PB_MAPPING_KIND_READ
-					);
-					j := j + 1;
-					
-				when PB_REGISTER_KIND_READWRITE =>
-					Result(j)			:= (
-						PortNumber =>		Start + Reg.RegisterNumber,
-						RegID =>				i,
-						MappingKind =>	PB_MAPPING_KIND_READ
-					);
-					Result(j + 1)	:= (
-						PortNumber =>		Start + Reg.RegisterNumber,
-						RegID =>				i,
-						MappingKind =>	PB_MAPPING_KIND_WRITE
-					);
-					j := j + 2;
-					
-				when PB_REGISTER_KIND_WRITE =>
-					Result(j)			:= (
-						PortNumber =>		Start + Reg.RegisterNumber,
-						RegID =>				i,
-						MappingKind =>	PB_MAPPING_KIND_WRITE
-					);
-					j := j + 1;
-				
-				when PB_REGISTER_KIND_WRITEK =>
-					Result(j)			:= (
-						PortNumber =>		Start + Reg.RegisterNumber,
-						RegID =>				i,
-						MappingKind =>	PB_MAPPING_KIND_WRITEK
-					);
-					j := j + 1;
-				
-				assert (j <= C_PB_MAX_MAPPINGS) report "pb_CreateMapping: Too many mappings created." severity FAILURE;
-			end case;
-		end loop;
 	
 	function pb_CreateDevice(DeviceName : STRING; DeviceShort : STRING; Registers : T_PB_REGISTER_VECTOR; RegisterFields : T_PB_REGISTER_FIELD_VECTOR; CreatesInterrupt : BOOLEAN := FALSE) return T_PB_DEVICE is
 		variable Result						: T_PB_DEVICE;
@@ -898,9 +819,10 @@ package body pb is
 		variable j					: T_UINT_8;
 	begin
 		for i in Busses'range loop
-			assert (PB_VERBOSE)
-				report "pb_ConnectBusses: Connecting bus '" & str_trim(Busses(i).BusShort) & "' to '" & str_trim(Busses(i).SuperBusShort) & "'"
-				severity note;
+			if (PB_VERBOSE = TRUE) then
+				report "pb_ConnectBusses: Connecting bus '" & str_trim(Busses(i).BusShort) & "' to '" & str_trim(Busses(i).SuperBusShort) & "'" severity NOTE;
+			end if;
+			
 			if (str_length(Busses(i).SuperBusShort) /= 0) then
 				SuperBusID	:= pb_GetBusID(Busses, Busses(i).SuperBusShort);
 			else
@@ -923,109 +845,6 @@ package body pb is
 
 	function pb_GetTotalDeviceCount(Busses : T_PB_BUS_VECTOR; BusID : T_PB_BUSID) return T_UINT_8 is
 		variable Result : T_UINT_8	:= 0;
-	begin
-		report "pb_GetTotalDeviceCount: BusID=" & INTEGER'image(BusID) severity NOTE;
-		for i in 0 to Busses(BusID).SubBusCount - 1 loop
-			Result := Result + pb_GetTotalDeviceCount(Busses, Busses(BusID).SubBusses(i));
-		end loop;
-		return Result + Busses(BusID).DeviceCount;
-	end function;
-	
-	procedure pb_PrintBusses(Busses : T_PB_BUS_VECTOR) is
-	
-	begin
-		report "pb_PrintBusses: Count=" & INTEGER'image(Busses'length) severity NOTE;
-		for i in Busses'range loop
-			report "BusID " & INTEGER'image(i) severity NOTE;
-			report "  SuperBusID " & INTEGER'image(Busses(i).SuperBusID) severity NOTE;
-			report "  SubBusCount " & INTEGER'image(Busses(i).SubBusCount) severity NOTE;
-			for j in 0 to Busses(i).SubBusCount - 1 loop
-				report "    SubBusID " & INTEGER'image(Busses(i).SubBusses(j)) severity NOTE;
-			end loop;
-			report "  DeviceCount " & INTEGER'image(Busses(i).DeviceCount) severity NOTE;
-			for j in 0 to Busses(i).DeviceCount - 1 loop
-				report "    DeviceID " & INTEGER'image(Busses(i).Devices(j)) severity NOTE;
-			end loop;
-		end loop;
-	end procedure;
-	
-	function pb_CreateSystem(DeviceInstances : T_PB_DEVICE_INSTANCE_VECTOR; Busses : T_PB_BUS_VECTOR) return T_PB_SYSTEM is
-		variable Result : T_PB_SYSTEM;
-		variable BusID	: T_PB_BUSID;
-		variable j			: T_UINT_8;
-	begin
-		Result.DeviceInstances			:= pb_ResizeVec(DeviceInstances);
-		Result.DeviceInstanceCount	:= DeviceInstances'length;
-		Result.Busses								:= pb_ResizeVec(Busses);
-		Result.BusCount							:= Busses'length;
-	
-		-- connect devices to busses
-		for i in DeviceInstances'range loop
-			BusID															:= pb_GetBusID(Busses, DeviceInstances(i).BusShort);
-			j																	:= Result.Busses(BusID).DeviceCount;
-			Result.Busses(BusID).Devices(j)		:= i;
-			Result.Busses(BusID).DeviceCount	:= j + 1;
-		end loop;
-		-- count devices on a bus
-		-- TODO: rewrite recursion to local loops
-		for i in 0 to Result.BusCount - 1 loop
-			Result.Busses(i).TotalDeviceCount := pb_GetTotalDeviceCount(Result.Busses(0 to Result.BusCount - 1), i);
-		end loop;
-
-		pb_PrintBusses(Result.Busses(0 to Result.BusCount - 1));	
-		return Result;
-	end function;
-	
-	function pb_Resize(RegisterMapping : T_PB_REGISTER_FIELD_MAPPING; Size : NATURAL := 0) return T_PB_REGISTER_FIELD_MAPPING_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_REGISTER_FIELD_MAPPING_INDEX'high);
-	begin
-		return RegisterMapping & T_PB_REGISTER_FIELD_MAPPING_VECTOR'(1 to high => C_PB_REGISTER_FIELD_MAPPING_EMPTY);
-	end function;
-	
-	function pb_Resize(RegisterField : T_PB_REGISTER_FIELD; Size : NATURAL := 0) return T_PB_REGISTER_FIELD_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_REGISTER_FIELD_INDEX'high);
-	begin
-		return RegisterField & T_PB_REGISTER_FIELD_VECTOR'(1 to high => C_PB_REGISTER_FIELD_EMPTY);
-	end function;
-	
-	function pb_Resize(Reg : T_PB_REGISTER; Size : NATURAL := 0) return T_PB_REGISTER_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_REGISTER_INDEX'high);
-	begin
-		return Reg & T_PB_REGISTER_VECTOR'(1 to high => C_PB_REGISTER_EMPTY);
-	end function;
-	
-	function pb_ResizeVec(RegisterMappings : T_PB_REGISTER_FIELD_MAPPING_VECTOR; Size : NATURAL := 0) return T_PB_REGISTER_FIELD_MAPPING_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_REGISTER_FIELD_MAPPING_INDEX'high);
-	begin
-		return RegisterMappings & T_PB_REGISTER_FIELD_MAPPING_VECTOR'(RegisterMappings'length to high => C_PB_REGISTER_FIELD_MAPPING_EMPTY);
-	end function;
-	
-	function pb_ResizeVec(RegisterFields : T_PB_REGISTER_FIELD_VECTOR; Size : NATURAL := 0) return T_PB_REGISTER_FIELD_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_REGISTER_FIELD_INDEX'high);
-	begin
-		return RegisterFields & T_PB_REGISTER_FIELD_VECTOR'(RegisterFields'length to high => C_PB_REGISTER_FIELD_EMPTY);
-	end function;
-	
-	function pb_ResizeVec(Registers : T_PB_REGISTER_VECTOR; Size : NATURAL := 0) return T_PB_REGISTER_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_REGISTER_INDEX'high);
-	begin
-		return Registers & T_PB_REGISTER_VECTOR'(Registers'length to high => C_PB_REGISTER_EMPTY);
-	end function;
-
-	function pb_ResizeVec(Busses : T_PB_BUS_VECTOR; Size : NATURAL := 0) return T_PB_BUS_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_BUS_INDEX'high);
-	begin
-		return Busses & T_PB_BUS_VECTOR'(Busses'length to high => C_PB_BUS_EMPTY);
-	end function;
-	
-	function pb_ResizeVec(DeviceInstances : T_PB_DEVICE_INSTANCE_VECTOR; Size : NATURAL := 0) return T_PB_DEVICE_INSTANCE_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_DEVICE_INSTANCE_INDEX'high);
-	begin
-		return DeviceInstances & T_PB_DEVICE_INSTANCE_VECTOR'(DeviceInstances'length to high => C_PB_DEVICE_INSTANCE_EMPTY);
-	end function;
-	
-	-- PicoBlaze interrupt functions
-	function pb_GetInterruptCount(System : T_PB_SYSTEM) return NATURAL is
 	begin
 --		report "pb_GetTotalDeviceCount: BusID=" & INTEGER'image(BusID) severity NOTE;
 		for i in 0 to Busses(BusID).SubBusCount - 1 loop
@@ -1149,24 +968,21 @@ package body pb is
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			if (System.DeviceInstances(i).Device.CreatesInterrupt = TRUE) then
 				Result := Result + 1;
+			end if;
 		end loop;
 		return Result;
 	end function;
 	
 	function pb_GetInterruptPortIndex(System : T_PB_SYSTEM; DeviceShort : STRING) return NATURAL is
 		variable Result : NATURAL		:= 0;
-		variable InterruptPortID	: T_UINT_8							:= 0;
 	begin
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			exit when str_match(System.DeviceInstances(i).DeviceShort, DeviceShort);
 			Result := Result + 1;
-			if (DeviceInstance.Device.CreatesInterrupt = TRUE) then
-				Result(InterruptPortID)	:= PicoBlazeBus(BusIndex).Interrupt;
-				InterruptPortID					:= InterruptPortID + 1;
 		end loop;
-		return Result(InterruptPortID - 1 downto 0);
+		return Result;
 	end function;
-
+	
 	function pb_GetInterruptVector(PicoBlazeBus : T_PB_IOBUS_DEV_PB_VECTOR; System : T_PB_SYSTEM) return STD_LOGIC_VECTOR is
 		variable Result						: STD_LOGIC_VECTOR(System.DeviceInstanceCount - 1 downto 0);
 		variable DeviceInstance		: T_PB_DEVICE_INSTANCE;
@@ -1220,6 +1036,20 @@ package body pb is
 			end if;
 		end loop;
 	end procedure;
+	
+	-- PicoBlaze AddressDecoder functions
+	function pb_FilterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR is
+		variable Result				: T_PB_PORTNUMBER_MAPPING_VECTOR(0 to DeviceInstance.Mappings'length - 1);
+		variable ResultCount	: NATURAL := 0;
+	begin
+		for i in DeviceInstance.Mappings'range loop
+			if (DeviceInstance.Mappings(i).MappingKind = MappingKind) then
+				Result(ResultCount)	:= DeviceInstance.Mappings(i);
+				ResultCount					:= ResultCount + 1;
+			end if;
+		end loop;
+		return Result(0 to ResultCount - 1);
+	end function;
 	
 	-- PicoBlaze bus functions
 	function pb_GetBusWidth(System : T_PB_SYSTEM; BusShort : STRING) return NATURAL is
@@ -1288,16 +1118,6 @@ package body pb is
 	begin
 		if (not (PB_VERBOSE or PB_REPORT)) then
 			return FALSE;
-					report "        " & INTEGER'image(j) & ": " & str_trim(Reg.RegisterShort) & " Reg#=" & INTEGER'image(Reg.RegisterNumber) & " " &
-							ite((Reg.RegisterKind = PB_REGISTER_KIND_READ),				"RD",
-							ite((Reg.RegisterKind = PB_REGISTER_KIND_READWRITE),	"RW",
-							ite((Reg.RegisterKind = PB_REGISTER_KIND_WRITE),			"WR", "K ")))
-						severity NOTE;
-					for k in Reg.FieldMappings'range loop
-						Field	:= Reg.FieldMappings(k);
-						if (Field.FieldID /= 255) then
-							report "          " & INTEGER'image(k) & ": FieldID=" & INTEGER'image(Field.FieldID) & " (" & str_trim(Device.RegisterFields(Field.FieldID).FieldShort) & ")"
-								severity NOTE;
 		end if;
 
 		report "Printing PicoBlaze address mappings..." severity NOTE;
@@ -1374,13 +1194,14 @@ package body pb is
 				Mapping	:= DeviceInstance.Mappings(j);
 
 				if (Mapping.MappingKind /= PB_MAPPING_KIND_EMPTY) then
-					assert not PB_VERBOSE
+					if (PB_VERBOSE = TRUE) then
 						report "  Map PortNumber " & INTEGER'image(Mapping.PortNumber) &
 									 " to device " & INTEGER'image(i) &
 									 " (" & str_trim(DeviceInstance.DeviceShort) &
 									 ") register " & INTEGER'image(DeviceInstance.Device.Registers(Mapping.RegID).RegisterNumber) &
 									 " (" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & ")."
 						severity NOTE;
+					end if;
 				end if;
 
 				-- tokenFile content for INPUT address space
@@ -1397,11 +1218,11 @@ package body pb is
 														ite((Mapping.PortNumber < 100), " ", "") &
 														INTEGER'image(Mapping.PortNumber) & "'d    ; " &
 														str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterName) & "(");
-						write(psmLine, "dummy[3:0]");
+						write(psmLine, STRING'("dummy[3:0]"));
 						for k in 1 to 1 loop
-							write(psmLine, ",dummy[7:4]");
+							write(psmLine, STRING'(",dummy[7:4]"));
 						end loop;
-						write(psmLine, ")");
+						write(psmLine, STRING'(")"));
 						writeline(psmFile, psmLine);
 					else
 						DeviceInstanceID	:= AddressMapRead(Mapping.PortNumber).DeviceInstanceID;
@@ -1487,7 +1308,7 @@ package body pb is
 		
 		return true;
 	end function;
-
+	
 	impure function pb_ExportAddressMappingAsAssemblerInterruptVector(System : T_PB_SYSTEM; psmFileName : STRING; TableRows : POSITIVE) return BOOLEAN is
 		file psmFile						: TEXT open WRITE_MODE is psmFileName;
 		variable psmLine				: LINE;
@@ -1495,45 +1316,14 @@ package body pb is
 
 		variable j							: NATURAL := 0;
 
-		variable DeviceInstance	: T_PB_DEVICE_INSTANCE;
-		variable Device					: T_PB_DEVICE;
-		variable Mapping				: T_PB_PORTNUMBER_MAPPING;
-		
-		variable PortNumber_slv	: T_SLV_8;
-
-		type T_USAGE_TRACKING is record
-			DeviceInstanceID	: T_UINT_8;
-			MappingID					: T_UINT_8;
-		end record;
-		
-		type T_ERROR_DETECT is array (NATURAL range <>) of T_USAGE_TRACKING;
-		variable AddressMapRead		: T_ERROR_DETECT(0 to 255)	:= (others => (0, 255));
-		variable AddressMapWrite	: T_ERROR_DETECT(0 to 255)	:= (others => (0, 255));
-		variable AddressMapWriteK	: T_ERROR_DETECT(0 to 15)		:= (others => (0, 255));
-
-		variable MappingID					: T_UINT_8;
-		variable DeviceInstanceID		: T_UINT_8;
-		variable RegID							: T_UINT_8;
-		variable Reg								: T_PB_REGISTER;
-		
-		variable dummy							: BOOLEAN;
 	begin
 		report "Exporting PicoBlaze interrupt vector table as psm-file to '" & psmFileName & "' ..." severity note;
-	
+		
 		-- psm-file: write file header
 		write(psmLine, STRING'("; Generate by synthesis for '" & str_trim(System.SystemShort) & "'"));	writeline(psmFile, psmLine);
 		write(psmLine, STRING'(";"));																																		writeline(psmFile, psmLine);
 		write(psmLine, STRING'("; This file contains the PicoBlaze InterruptVector table."));						writeline(psmFile, psmLine);
 		write(psmLine, STRING'("; ======================================================="));						writeline(psmFile, psmLine);
-		-- token-file: write file header
-		write(tokenLine, STRING'("# " & Name & " - PortNumbers"));				writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("#"));																writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("#"));																writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("# ChipScope Token File Version"));	writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("@FILE_VERSION=1.0.0"));							writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("#"));																writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("# Default token value"));						writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("@DEFAULT_TOKEN="));									writeline(tokenFile, tokenLine);
 
 		-- write per device entires
 		for i in 0 to System.DeviceInstanceCount - 1 loop
@@ -1618,13 +1408,14 @@ package body pb is
 			for j in 0 to DeviceInstance.MappingCount - 1 loop
 				Mapping	:= DeviceInstance.Mappings(j);
 
-				assert not PB_VERBOSE
+				if (PB_VERBOSE = TRUE) then
 					report "  Map PortNumber " & INTEGER'image(Mapping.PortNumber) &
 								 " to device " & INTEGER'image(i) &
 								 " (" & str_trim(DeviceInstance.DeviceShort) &
 								 ") register " & INTEGER'image(DeviceInstance.Device.Registers(Mapping.RegID).RegisterNumber) &
 								 " (" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & ")."
 					severity NOTE;
+				end if;
 
 				-- tokenFile content for INPUT address space
 				if (Mapping.MappingKind = PB_MAPPING_KIND_READ) then
@@ -1632,7 +1423,7 @@ package body pb is
 						PortNumber_slv	:= to_slv(Mapping.PortNumber, 8);
 						AddressMapRead(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);					-- save used MappingID for a PortNumber
 						
-						write(tokenLine, "RD_" & str_trim(DeviceInstance.DeviceShort) & "=2" & to_string(PortNumber_slv, 'h', 2));
+						write(tokenLine, "RD_" & str_trim(DeviceInstance.DeviceShort) & "_" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & "=2" & to_string(PortNumber_slv, 'h', 2));
 						writeline(tokenFile, tokenLine);
 					else
 						DeviceInstanceID	:= AddressMapRead(Mapping.PortNumber).DeviceInstanceID;
@@ -1656,13 +1447,7 @@ package body pb is
 					if (AddressMapWrite(Mapping.PortNumber).MappingID = 255) then
 						AddressMapWrite(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
 						
-						write(tokenLine, "WR_" & str_trim(DeviceInstance.DeviceShort) & "=1" & to_string(PortNumber_slv, 'h', 2));
-				elsif (Mapping.MappingKind = PB_MAPPING_KIND_WRITE) then
-					PortNumber_slv	:= to_slv(Mapping.PortNumber, 8);
-					if (AddressMapWrite(Mapping.PortNumber).MappingID = 255) then
-						AddressMapWrite(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
-						
-						write(tokenLine, "WR_" & str_trim(DeviceInstance.DeviceShort) & "=1" & to_string(PortNumber_slv, 'h', 2));
+						write(tokenLine, "WR_" & str_trim(DeviceInstance.DeviceShort) & "_" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & "=1" & to_string(PortNumber_slv, 'h', 2));
 						writeline(tokenFile, tokenLine);
 					else
 						DeviceInstanceID	:= AddressMapWrite(Mapping.PortNumber).DeviceInstanceID;
@@ -1685,15 +1470,9 @@ package body pb is
 					if (AddressMapWriteK(Mapping.PortNumber).MappingID = 255) then
 						AddressMapWriteK(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
 						
-				
-				-- tokenFile content for OUTPUTK address space
-				elsif (Mapping.MappingKind = PB_MAPPING_KIND_WRITEK) then
-					if (AddressMapWriteK(Mapping.PortNumber).MappingID = 255) then
-						AddressMapWriteK(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
-						
 						for k in 0 to 15 loop
 							PortNumber_slv	:= to_slv(k, 4) & to_slv(Mapping.PortNumber, 4);
-							write(tokenLine, STRING'("WK_" & str_trim(DeviceInstance.DeviceShort) & "=4" & to_string(PortNumber_slv, 'h', 2)));
+							write(tokenLine, STRING'("WK_" & str_trim(DeviceInstance.DeviceShort) & "_" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & "=4" & to_string(PortNumber_slv, 'h', 2)));
 							writeline(tokenFile, tokenLine);
 						end loop;
 					else
@@ -1738,54 +1517,10 @@ package body pb is
 					PortNumber_slv	:= to_slv(k, 4) & to_slv(i, 4);
 					write(tokenLine, "WK_ERR" & "=4" & to_string(PortNumber_slv, 'h', 2));
 					writeline(tokenFile, tokenLine);
-					else
-						DeviceInstanceID	:= AddressMapWriteK(Mapping.PortNumber).DeviceInstanceID;
-						MappingID					:= AddressMapWriteK(Mapping.PortNumber).MappingID;
-						RegID							:= DeviceInstances(DeviceInstanceID).Mappings(MappingID).RegID;
-						Reg								:= DeviceInstances(DeviceInstanceID).Device.Registers(RegID);
-						
-						report "pb_ExportAddressMapping:" & LF & "PortNumber " & INTEGER'image(Mapping.PortNumber) &
-									 " is already used by " & str_trim(DeviceInstances(DeviceInstanceID).DeviceShort) &
-									 " register " & INTEGER'image(Reg.RegisterNumber) &
-									 " (" & str_trim(Reg.RegisterShort) & ")." & LF &
-									 "This overlaps with device " & str_trim(DeviceInstance.DeviceShort) &
-									 " register " & INTEGER'image(DeviceInstance.Device.Registers(Mapping.RegID).RegisterNumber) &
-									 " (" & str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort) & ")."
-							severity FAILURE;
-					end if;
-				end if;
 				end loop;
 			end if;
 		end loop;
 		
-		-- write tokens for unused PortNumbers
-		write(tokenLine, STRING'("#"));											writeline(tokenFile, tokenLine);
-		write(tokenLine, STRING'("# unused PortNumbers"));	writeline(tokenFile, tokenLine);
-		for i in AddressMapWrite'range loop
-			PortNumber_slv	:= to_slv(i, 8);
-			if (AddressMapWrite(i).MappingID = 255) then
-				write(tokenLine, "WR_ERR" & "=1" & to_string(PortNumber_slv, 'h', 2));
-				writeline(tokenFile, tokenLine);
-			end if;
-		end loop;
-		for i in AddressMapRead'range loop
-			PortNumber_slv	:= to_slv(i, 8);
-			if (AddressMapRead(i).MappingID = 255) then
-				write(tokenLine, "RD_ERR" & "=2" & to_string(PortNumber_slv, 'h', 2));
-				writeline(tokenFile, tokenLine);
-			end if;
-		end loop;
-		for i in AddressMapWriteK'range loop
-			if (AddressMapWriteK(i).MappingID = 255) then
-				for k in 0 to 15 loop
-					PortNumber_slv	:= to_slv(k, 4) & to_slv(i, 4);
-					write(tokenLine, "WK_ERR" & "=4" & to_string(PortNumber_slv, 'h', 2));
-					writeline(tokenFile, tokenLine);
-				end loop;
-			end if;
-		end loop;
-		
-		file_close(psmFile);
 		file_close(tokenFile);
 		
 		return true;

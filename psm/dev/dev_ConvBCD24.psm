@@ -66,15 +66,17 @@ __dev_ConvBCD24_Begin:				OUTPUT	REG_ARG_0,		OPORT_CONVBCD24_OPERANDA0			;	Write
 ;PRAGMA function __dev_ConvBCD24_End begin
 ;;		Requires:
 ;;			
-;;		Returns:
-;;			Arg0 : Scaled value(7:0)
-;;			Arg1 : Scaled value(15:8)
-;;			Arg2 : Scaled value(23:16)
-;;			Arg3 : Scaled value(31:24)
+;;		Returns: Compact BCD
+;;			Arg0 : digit(1:0)
+;;			Arg1 : digit(3:2)
+;;			Arg2 : digit(5:4)
+;;			Arg3 : digit(6)
 ;;		
 __dev_ConvBCD24_End:					INPUT		REG_ARG_0,		IPORT_CONVBCD24_RESULT0			;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_CONVBCD24_RESULT1			;	Write Reg R1 to arg1
 															INPUT		REG_ARG_2,		IPORT_CONVBCD24_RESULT2			;	Write Reg R2 to arg2
+															INPUT		REG_ARG_3,		IPORT_CONVBCD24_STATUS			;	Write Reg R3 to arg3
+															AND 		REG_ARG_3, 		0f
 															RETURN
 ;PRAGMA function end
 ;
