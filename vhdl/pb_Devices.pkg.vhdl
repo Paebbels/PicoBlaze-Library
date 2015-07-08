@@ -682,7 +682,7 @@ package body pb_Devices is
 	);
 	
 	-- define aliases
-	constant PB_DEV_INTERRUPT		: T_PB_DEVICE		:= pb_RenameDevice(PB_DEV_INTERRUPT16,	"IntC");
-	constant PB_DEV_MULTIPLIER	: T_PB_DEVICE		:= pb_RenameDevice(PB_DEV_MULTIPLIER32,	"Mult");
-	constant PB_DEV_DIVIDER			: T_PB_DEVICE		:= pb_RenameDevice(PB_DEV_DIVIDER32,		"Div");
+	constant PB_DEV_INTERRUPT		: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_INTERRUPT16,		"IntC");
+	constant PB_DEV_MULTIPLIER	: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_MULTIPLIER32,	"Mult");
+	constant PB_DEV_DIVIDER			: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_DIVIDER32,			"Div");
 end package body;
