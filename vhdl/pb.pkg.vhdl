@@ -721,6 +721,7 @@ package body pb is
 	function pb_RenameDevice(Device : T_PB_DEVICE; NewName : STRING) return T_PB_DEVICE is
 		variable Result		: T_PB_DEVICE;
 	begin
+		Result										:= Device;
 		Result.DeviceShort				:= pb_ShortName(NewName);
 		return Result;
 	end function;
