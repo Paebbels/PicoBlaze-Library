@@ -13,7 +13,7 @@
 -- Authors:					Patrick Lehmann
 -- 
 -- Package:					VHDL package for component declarations, types and
---									functions assoziated to the L_PicoBlaze namespace
+--									functions associated to the L_PicoBlaze namespace
 --
 -- Description:
 -- ------------------------------------
@@ -71,11 +71,19 @@ package pb_Devices is
 	constant PB_DEV_RESET							: T_PB_DEVICE;
 	constant PB_DEV_ROM								: T_PB_DEVICE;
 	constant PB_DEV_INTERRUPT					: T_PB_DEVICE;
+	constant PB_DEV_INTERRUPT8				: T_PB_DEVICE;
+	constant PB_DEV_INTERRUPT16				: T_PB_DEVICE;
 	constant PB_DEV_TIMER							: T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER				: T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER8				: T_PB_DEVICE;
 	constant PB_DEV_MULTIPLIER16			: T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER24			: T_PB_DEVICE;
 	constant PB_DEV_MULTIPLIER32			: T_PB_DEVICE;
 	constant PB_DEV_ACCUMULATOR16			: T_PB_DEVICE;
+	constant PB_DEV_DIVIDER						: T_PB_DEVICE;
+	constant PB_DEV_DIVIDER8					: T_PB_DEVICE;
 	constant PB_DEV_DIVIDER16					: T_PB_DEVICE;
+	constant PB_DEV_DIVIDER24					: T_PB_DEVICE;
 	constant PB_DEV_DIVIDER32					: T_PB_DEVICE;
 --	constant PB_DEV_SCALER16					: T_PB_DEVICE;
 --	constant PB_DEV_SCALER32					: T_PB_DEVICE;
@@ -130,25 +138,41 @@ package body pb_Devices is
 	
 	-- InterruptController
 	-- ---------------------------------------------------------------------------
-	constant PB_DEV_INTERRUPT_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+	constant PB_DEV_INTERRUPT8_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Interrupt Enable",			"IntEnable",	8) &
+		pb_CreateWriteOnlyField("Interrupt Disable",		"IntDisable", 8) &
+		pb_CreateReadOnlyField("Interrupt Enable Mask",	"IntMask", 		8) &
+		pb_CreateReadOnlyField("Interrupt Source",			"IntSource",	 8)
+	);
+	constant PB_DEV_INTERRUPT16_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
 		pb_CreateWriteOnlyField("Interrupt Enable",			"IntEnable",	16) &
 		pb_CreateWriteOnlyField("Interrupt Disable",		"IntDisable", 16) &
 		pb_CreateReadOnlyField("Interrupt Enable Mask",	"IntMask", 		16) &
 		pb_CreateReadOnlyField("Interrupt Source",			"IntSource",	 8)
 	);
 	
-	constant PB_DEV_INTERRUPT : T_PB_DEVICE := pb_CreateDevice(
-		DeviceName =>					"Interrupt Controller",
-		DeviceShort =>				"IntC",
+	constant PB_DEV_INTERRUPT8 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Interrupt Controller (8 ports)",
+		DeviceShort =>				"IntC8",
 		Registers =>					(
-			pb_CreateRegisterWK("IntEnable0",		0, PB_DEV_INTERRUPT_FIELDS, "IntEnable",	0) &
-			pb_CreateRegisterWK("IntEnable1",		1, PB_DEV_INTERRUPT_FIELDS, "IntEnable",	8) &
-			pb_CreateRegisterWK("IntDisable0",	2, PB_DEV_INTERRUPT_FIELDS, "IntDisable",	0) &
-			pb_CreateRegisterWK("IntDisable1",	3, PB_DEV_INTERRUPT_FIELDS, "IntDisable",	8) &
-			pb_CreateRegisterRO("IntMask0",			0, PB_DEV_INTERRUPT_FIELDS, "IntMask",		0) &
-			pb_CreateRegisterRO("IntMask1",			1, PB_DEV_INTERRUPT_FIELDS, "IntMask",		8) &
-			pb_CreateRegisterRO("IntSource",		2, PB_DEV_INTERRUPT_FIELDS, "IntSource",	0)),
-		RegisterFields =>			PB_DEV_INTERRUPT_FIELDS
+			pb_CreateRegisterWK("IntEnable0",		0, PB_DEV_INTERRUPT8_FIELDS, "IntEnable",	0) &
+			pb_CreateRegisterWK("IntDisable0",	1, PB_DEV_INTERRUPT8_FIELDS, "IntDisable",	0) &
+			pb_CreateRegisterRO("IntMask0",			0, PB_DEV_INTERRUPT8_FIELDS, "IntMask",		0) &
+			pb_CreateRegisterRO("IntSource",		1, PB_DEV_INTERRUPT8_FIELDS, "IntSource",	0)),
+		RegisterFields =>			PB_DEV_INTERRUPT8_FIELDS
+	);
+	constant PB_DEV_INTERRUPT16 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Interrupt Controller (16 ports)",
+		DeviceShort =>				"IntC16",
+		Registers =>					(
+			pb_CreateRegisterWK("IntEnable0",		0, PB_DEV_INTERRUPT16_FIELDS, "IntEnable",	0) &
+			pb_CreateRegisterWK("IntEnable1",		1, PB_DEV_INTERRUPT16_FIELDS, "IntEnable",	8) &
+			pb_CreateRegisterWK("IntDisable0",	2, PB_DEV_INTERRUPT16_FIELDS, "IntDisable",	0) &
+			pb_CreateRegisterWK("IntDisable1",	3, PB_DEV_INTERRUPT16_FIELDS, "IntDisable",	8) &
+			pb_CreateRegisterRO("IntMask0",			0, PB_DEV_INTERRUPT16_FIELDS, "IntMask",		0) &
+			pb_CreateRegisterRO("IntMask1",			1, PB_DEV_INTERRUPT16_FIELDS, "IntMask",		8) &
+			pb_CreateRegisterRO("IntSource",		2, PB_DEV_INTERRUPT16_FIELDS, "IntSource",	0)),
+		RegisterFields =>			PB_DEV_INTERRUPT16_FIELDS
 	);
 
 	-- Timer
@@ -174,12 +198,37 @@ package body pb_Devices is
 
 	-- Multiplier (16 bit)
 	-- ---------------------------------------------------------------------------
+	constant PB_DEV_MULTIPLIER8_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	8) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	8) &
+		pb_CreateReadOnlyField("Result R",		"Result",		16)
+	);
 	constant PB_DEV_MULTIPLIER16_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
 		pb_CreateWriteOnlyField("Operand A",	"OperandA",	16) &
 		pb_CreateWriteOnlyField("Operand B",	"OperandB",	16) &
 		pb_CreateReadOnlyField("Result R",		"Result",		32)
 	);
+	constant PB_DEV_MULTIPLIER24_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	24) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	24) &
+		pb_CreateReadOnlyField("Result R",		"Result",		48)
+	);
+	constant PB_DEV_MULTIPLIER32_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	32) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	32) &
+		pb_CreateReadOnlyField("Result R",		"Result",		64)
+	);
 	
+	constant PB_DEV_MULTIPLIER8 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Multiplier (8 bit)",
+		DeviceShort =>				"Mult8",
+		Registers =>					(
+			pb_CreateRegisterWO("OperandA0",	0, PB_DEV_MULTIPLIER8_FIELDS, "OperandA",	 0) &
+			pb_CreateRegisterWO("OperandB0",	2, PB_DEV_MULTIPLIER8_FIELDS, "OperandB",	 0) &
+			pb_CreateRegisterRO("Result0",		0, PB_DEV_MULTIPLIER8_FIELDS, "Result",		 0) &
+			pb_CreateRegisterRO("Result1",		1, PB_DEV_MULTIPLIER8_FIELDS, "Result",		 8)),
+		RegisterFields =>			PB_DEV_MULTIPLIER8_FIELDS
+	);
 	constant PB_DEV_MULTIPLIER16 : T_PB_DEVICE := pb_CreateDevice(
 		DeviceName =>					"Multiplier (16 bit)",
 		DeviceShort =>				"Mult16",
@@ -194,15 +243,24 @@ package body pb_Devices is
 			pb_CreateRegisterRO("Result3",		3, PB_DEV_MULTIPLIER16_FIELDS, "Result",		24)),
 		RegisterFields =>			PB_DEV_MULTIPLIER16_FIELDS
 	);
-	
-	-- Multiplier (32 bit)
-	-- ---------------------------------------------------------------------------
-	constant PB_DEV_MULTIPLIER32_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
-		pb_CreateWriteOnlyField("Operand A",	"OperandA",	32) &
-		pb_CreateWriteOnlyField("Operand B",	"OperandB",	32) &
-		pb_CreateReadOnlyField("Result R",		"Result",		64)
+	constant PB_DEV_MULTIPLIER24 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Multiplier (24 bit)",
+		DeviceShort =>				"Mult24",
+		Registers =>					(
+			pb_CreateRegisterWO("OperandA0",	0, PB_DEV_MULTIPLIER24_FIELDS, "OperandA",	 0) &
+			pb_CreateRegisterWO("OperandA1",	1, PB_DEV_MULTIPLIER24_FIELDS, "OperandA",	 8) &
+			pb_CreateRegisterWO("OperandA2",	2, PB_DEV_MULTIPLIER24_FIELDS, "OperandA",	16) &
+			pb_CreateRegisterWO("OperandB0",	3, PB_DEV_MULTIPLIER24_FIELDS, "OperandB",	 0) &
+			pb_CreateRegisterWO("OperandB1",	4, PB_DEV_MULTIPLIER24_FIELDS, "OperandB",	 8) &
+			pb_CreateRegisterWO("OperandB2",	5, PB_DEV_MULTIPLIER24_FIELDS, "OperandB",	16) &
+			pb_CreateRegisterRO("Result0",		0, PB_DEV_MULTIPLIER24_FIELDS, "Result",		 0) &
+			pb_CreateRegisterRO("Result1",		1, PB_DEV_MULTIPLIER24_FIELDS, "Result",		 8) &
+			pb_CreateRegisterRO("Result2",		2, PB_DEV_MULTIPLIER24_FIELDS, "Result",		16) &
+			pb_CreateRegisterRO("Result3",		3, PB_DEV_MULTIPLIER24_FIELDS, "Result",		24) &
+			pb_CreateRegisterRO("Result4",		4, PB_DEV_MULTIPLIER24_FIELDS, "Result",		32) &
+			pb_CreateRegisterRO("Result5",		5, PB_DEV_MULTIPLIER24_FIELDS, "Result",		40)),
+		RegisterFields =>			PB_DEV_MULTIPLIER24_FIELDS
 	);
-	
 	constant PB_DEV_MULTIPLIER32 : T_PB_DEVICE := pb_CreateDevice(
 		DeviceName =>					"Multiplier (32 bit)",
 		DeviceShort =>				"Mult32",
@@ -253,13 +311,42 @@ package body pb_Devices is
 
 	-- Divider (16 bit)
 	-- ---------------------------------------------------------------------------
+	constant PB_DEV_DIVIDER8_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	 8) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	 8) &
+		pb_CreateReadOnlyField("Result R",		"Result",		 8) &
+		pb_CreateReadOnlyField("Status",			"Status",		 8)
+	);
 	constant PB_DEV_DIVIDER16_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
 		pb_CreateWriteOnlyField("Operand A",	"OperandA",	16) &
 		pb_CreateWriteOnlyField("Operand B",	"OperandB",	16) &
 		pb_CreateReadOnlyField("Result R",		"Result",		16) &
 		pb_CreateReadOnlyField("Status",			"Status",		 8)
 	);
+	constant PB_DEV_DIVIDER24_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	24) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	24) &
+		pb_CreateReadOnlyField("Result R",		"Result",		24) &
+		pb_CreateReadOnlyField("Status",			"Status",		 8)
+	);
+	constant PB_DEV_DIVIDER32_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
+		pb_CreateWriteOnlyField("Operand A",	"OperandA",	32) &
+		pb_CreateWriteOnlyField("Operand B",	"OperandB",	32) &
+		pb_CreateReadOnlyField("Result R",		"Result",		32) &
+		pb_CreateReadOnlyField("Status",			"Status",		 8)
+	);
 
+	constant PB_DEV_DIVIDER8 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Divider (8 bit)",
+		DeviceShort =>				"Div8",
+		Registers =>					(
+			pb_CreateRegisterWO("OperandA0",	0, PB_DEV_DIVIDER8_FIELDS, "OperandA",	 0) &
+			pb_CreateRegisterWO("OperandB0",	2, PB_DEV_DIVIDER8_FIELDS, "OperandB",	 0) &
+			pb_CreateRegisterRO("Result0",		0, PB_DEV_DIVIDER8_FIELDS, "Result",		 0) &
+			pb_CreateRegisterRO("Status",			3, PB_DEV_DIVIDER8_FIELDS, "Status",		 0)),
+		RegisterFields =>			PB_DEV_DIVIDER8_FIELDS,
+		CreatesInterrupt =>		TRUE
+	);
 	constant PB_DEV_DIVIDER16 : T_PB_DEVICE := pb_CreateDevice(
 		DeviceName =>					"Divider (16 bit)",
 		DeviceShort =>				"Div16",
@@ -270,20 +357,27 @@ package body pb_Devices is
 			pb_CreateRegisterWO("OperandB1",	3, PB_DEV_DIVIDER16_FIELDS, "OperandB",	 8) &
 			pb_CreateRegisterRO("Result0",		0, PB_DEV_DIVIDER16_FIELDS, "Result",		 0) &
 			pb_CreateRegisterRO("Result1",		1, PB_DEV_DIVIDER16_FIELDS, "Result",		 8) &
-			pb_CreateRegisterRO("Status",			3, PB_DEV_DIVIDER16_FIELDS, "Result",		 0)),
+			pb_CreateRegisterRO("Status",			3, PB_DEV_DIVIDER16_FIELDS, "Status",		 0)),
 		RegisterFields =>			PB_DEV_DIVIDER16_FIELDS,
 		CreatesInterrupt =>		TRUE
 	);
-	
-	-- Divider (32 bit)
-	-- ---------------------------------------------------------------------------
-	constant PB_DEV_DIVIDER32_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
-		pb_CreateWriteOnlyField("Operand A",	"OperandA",	32) &
-		pb_CreateWriteOnlyField("Operand B",	"OperandB",	32) &
-		pb_CreateReadOnlyField("Result R",		"Result",		32) &
-		pb_CreateReadOnlyField("Status",			"Status",		 8)
+	constant PB_DEV_DIVIDER24 : T_PB_DEVICE := pb_CreateDevice(
+		DeviceName =>					"Divider (24 bit)",
+		DeviceShort =>				"Div24",
+		Registers =>					(
+			pb_CreateRegisterWO("OperandA0",	0, PB_DEV_DIVIDER24_FIELDS, "OperandA",	 0) &
+			pb_CreateRegisterWO("OperandA1",	1, PB_DEV_DIVIDER24_FIELDS, "OperandA",  8) &
+			pb_CreateRegisterWO("OperandA2",	2, PB_DEV_DIVIDER24_FIELDS, "OperandA", 16) &
+			pb_CreateRegisterWO("OperandB0",	3, PB_DEV_DIVIDER24_FIELDS, "OperandB",	 0) &
+			pb_CreateRegisterWO("OperandB1",	4, PB_DEV_DIVIDER24_FIELDS, "OperandB",	 8) &
+			pb_CreateRegisterWO("OperandB2",	5, PB_DEV_DIVIDER24_FIELDS, "OperandB",	16) &
+			pb_CreateRegisterRO("Result0",		0, PB_DEV_DIVIDER24_FIELDS, "Result",		 0) &
+			pb_CreateRegisterRO("Result1",		1, PB_DEV_DIVIDER24_FIELDS, "Result",		 8) &
+			pb_CreateRegisterRO("Result2",		2, PB_DEV_DIVIDER24_FIELDS, "Result",		16) &
+			pb_CreateRegisterRO("Status",			5, PB_DEV_DIVIDER24_FIELDS, "Status",		 0)),
+		RegisterFields =>			PB_DEV_DIVIDER24_FIELDS,
+		CreatesInterrupt =>		TRUE
 	);
-
 	constant PB_DEV_DIVIDER32 : T_PB_DEVICE := pb_CreateDevice(
 		DeviceName =>					"Divider (32 bit)",
 		DeviceShort =>				"Div32",
@@ -300,7 +394,7 @@ package body pb_Devices is
 			pb_CreateRegisterRO("Result1",		1, PB_DEV_DIVIDER32_FIELDS, "Result",		 8) &
 			pb_CreateRegisterRO("Result2",		2, PB_DEV_DIVIDER32_FIELDS, "Result",		16) &
 			pb_CreateRegisterRO("Result3",		3, PB_DEV_DIVIDER32_FIELDS, "Result",		24) &
-			pb_CreateRegisterRO("Status",			7, PB_DEV_DIVIDER32_FIELDS, "Result",		 0)),
+			pb_CreateRegisterRO("Status",			7, PB_DEV_DIVIDER32_FIELDS, "Status",		 0)),
 		RegisterFields =>			PB_DEV_DIVIDER32_FIELDS,
 		CreatesInterrupt =>		TRUE
 	);
@@ -586,4 +680,9 @@ package body pb_Devices is
 			pb_CreateRegisterRO("Value3",		3, PB_DEV_BCDCOUNTER_FIELDS, "Value",	24)),
 		RegisterFields =>			PB_DEV_BCDCOUNTER_FIELDS
 	);
+	
+	-- define aliases
+	constant PB_DEV_INTERRUPT		: T_PB_DEVICE		:= pb_RenameDevice(PB_DEV_INTERRUPT16,	"IntC");
+	constant PB_DEV_MULTIPLIER	: T_PB_DEVICE		:= pb_RenameDevice(PB_DEV_MULTIPLIER32,	"Mult");
+	constant PB_DEV_DIVIDER			: T_PB_DEVICE		:= pb_RenameDevice(PB_DEV_DIVIDER32,		"Div");
 end package body;

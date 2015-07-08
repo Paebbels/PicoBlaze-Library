@@ -14,6 +14,12 @@
 ;		__dev_Mult32_Mult16
 ;		__dev_Mult32_Mult24
 ;		__dev_Mult32_Mult32
+;
+; Aliases:
+;		__dev_Mult_Mult8
+;		__dev_Mult_Mult16
+;		__dev_Mult_Mult24
+;		__dev_Mult_Mult32
 ;   
 ; License:
 ; ==============================================================================
@@ -47,6 +53,7 @@ __dev_Mult_Mult8:
 __dev_Mult32_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDB0	;	Write arg1 to Reg B0
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
 															RETURN
@@ -70,6 +77,7 @@ __dev_Mult32_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 
 															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDB1	;	Write arg3 to Reg B1
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
 															INPUT		REG_ARG_2,		IPORT_MULT32_RESULT2		;	Write Reg R2 to arg2
@@ -81,27 +89,33 @@ __dev_Mult32_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
-;;			Arg2 : Factor B(7:0)
-;;			Arg3 : Factor B(15:8)
+;;			Arg2 : Factor A(23:16)
+;;			Arg3 : Factor B(7:0)
+;;			Tmp0 : Factor B(15:8)
+;;			Tmp1 : Factor B(23:16)
 ;;		Returns:
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			Arg2 : Product R(23:32)
-;;			Arg3 : Product R(31:24)
+;;			Arg3 : Product R(39:32)
+;;			Tmp0 : Product R(47:40)
+;;			Tmp1 : Product R(55:48)
 ;;			
+__dev_Mult_Mult24:
 __dev_Mult32_Mult24:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
-															OUTPUT	REG_ARG_2,		OPORT_MULT32_OPERANDB0	;	Write arg2 to Reg B0
-															OUTPUT	REG_TMP_0,		OPORT_MULT32_OPERANDA1	;	Write tmp0 to Reg A1
-															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDB1	;	Write arg1 to Reg B1
-															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDA2	;	Write arg3 to Reg A2
+															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDB0	;	Write arg3 to Reg B0
+															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDA1	;	Write arg1 to Reg A1
+															OUTPUT	REG_TMP_0,		OPORT_MULT32_OPERANDB1	;	Write tmp0 to Reg B1
+															OUTPUT	REG_ARG_2,		OPORT_MULT32_OPERANDA2	;	Write arg2 to Reg A2
 															OUTPUT	REG_TMP_1,		OPORT_MULT32_OPERANDB2	;	Write tmp1 to Reg B2
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1
 															INPUT		REG_ARG_2,		IPORT_MULT32_RESULT2		;	Write Reg R2 to arg2
 															INPUT		REG_ARG_3,		IPORT_MULT32_RESULT3		;	Write Reg R3 to arg3
-															INPUT		REG_TMP_0,		IPORT_MULT32_RESULT3		;	Write Reg R4 to tmp0
-															INPUT		REG_TMP_1,		IPORT_MULT32_RESULT3		;	Write Reg R5 to tmp1
+															INPUT		REG_TMP_0,		IPORT_MULT32_RESULT4		;	Write Reg R4 to tmp0
+															INPUT		REG_TMP_1,		IPORT_MULT32_RESULT5		;	Write Reg R5 to tmp1
 															RETURN
 ;PRAGMA function end
 ;
@@ -109,14 +123,23 @@ __dev_Mult32_Mult24:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
-;;			Arg2 : Factor B(7:0)
-;;			Arg3 : Factor B(15:8)
+;;			Arg2 : Factor A(23:16)
+;;			Arg3 : Factor A(31:24)
+;;			Tmp0 : Factor B(7:0)
+;;			Tmp1 : Factor B(15:8)
+;;			Tmp2 : Factor B(23:16)
+;;			Tmp3 : Factor B(31:24)
 ;;		Returns:
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			Arg2 : Product R(23:32)
 ;;			Arg3 : Product R(31:24)
+;;			Tmp0 : Product R(39:32)
+;;			Tmp1 : Product R(47:40)
+;;			Tmp2 : Product R(55:48)
+;;			Tmp3 : Product R(63:56)
 ;;			
+__dev_Mult_Mult32:
 __dev_Mult32_Mult32:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_TMP_0,		OPORT_MULT32_OPERANDB0	;	Write tmp0 to Reg B0
 															OUTPUT	REG_ARG_1,		OPORT_MULT32_OPERANDA1	;	Write arg1 to Reg A1
@@ -125,6 +148,7 @@ __dev_Mult32_Mult32:					OUTPUT	REG_ARG_0,		OPORT_MULT32_OPERANDA0	;	Write arg0 
 															OUTPUT	REG_TMP_2,		OPORT_MULT32_OPERANDB2	;	Write tmp2 to Reg B2
 															OUTPUT	REG_ARG_3,		OPORT_MULT32_OPERANDA3	;	Write arg3 to Reg A3
 															OUTPUT	REG_TMP_3,		OPORT_MULT32_OPERANDB3	;	Write tmp3 to Reg B3
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT32_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_MULT32_RESULT1		;	Write Reg R1 to arg1

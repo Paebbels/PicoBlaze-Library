@@ -13,7 +13,7 @@
 -- Authors:					Patrick Lehmann
 -- 
 -- Package:					VHDL package for component declarations, types and
---									functions assoziated to the L_PicoBlaze namespace
+--									functions associated to the L_PicoBlaze namespace
 --
 -- Description:
 -- ------------------------------------
@@ -258,6 +258,7 @@ package pb is
 	function pb_CreateRegisterRWK(NameShort : STRING; RegisterNumber : T_UINT_8; RegisterFieldList : T_PB_REGISTER_FIELD_VECTOR; RegisterNameShort : STRING; Offset : T_UINT_8 := 0) return T_PB_REGISTER_VECTOR;
 	function pb_CreateCombinedRegister(NameShort : STRING; RegisterNumber : T_UINT_8; RegisterFieldList : T_PB_REGISTER_FIELD_VECTOR; RegisterFields : T_PB_REGISTER_FIELD_GROUP_VECTOR) return T_PB_REGISTER;
 	function pb_CreateDevice(DeviceName : STRING; DeviceShort : STRING; Registers : T_PB_REGISTER_VECTOR; RegisterFields : T_PB_REGISTER_FIELD_VECTOR; CreatesInterrupt : BOOLEAN := FALSE) return T_PB_DEVICE;
+	function pb_RenameDevice(Device : T_PB_DEVICE; NewName : STRING) return T_PB_DEVICE;
 	function pb_CreateDeviceInstance(Device : T_PB_DEVICE;																				BusShort : STRING; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_DEVICE_INSTANCE;
 	function pb_CreateDeviceInstance(Device : T_PB_DEVICE; InstanceNumber : T_UINT_8;							BusShort : STRING; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_DEVICE_INSTANCE;
 	function pb_CreateDeviceInstance(Device : T_PB_DEVICE; NameLong : STRING; NameShort : STRING;	BusShort : STRING; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_DEVICE_INSTANCE;
@@ -714,6 +715,13 @@ package body pb is
 		Result.RegisterFields			:= pb_ResizeVec(RegisterFields);
 		Result.RegisterFieldCount	:= RegisterFields'length;
 		Result.CreatesInterrupt		:= CreatesInterrupt;
+		return Result;
+	end function;
+	
+	function pb_RenameDevice(Device : T_PB_DEVICE; NewName : STRING) return T_PB_DEVICE is
+		variable Result		: T_PB_DEVICE;
+	begin
+		Result.DeviceShort				:= pb_ShortName(NewName);
 		return Result;
 	end function;
 	
