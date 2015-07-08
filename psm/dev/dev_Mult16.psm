@@ -50,6 +50,7 @@ __dev_Mult_Mult8:
 __dev_Mult16_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_MULT16_OPERANDB0	;	Write arg1 to Reg B0
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT16_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_MULT16_RESULT1		;	Write Reg R1 to arg1
 															RETURN
@@ -72,6 +73,7 @@ __dev_Mult16_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 
 															OUTPUT	REG_ARG_2,		OPORT_MULT16_OPERANDB0	;	Write arg2 to Reg B0
 															OUTPUT	REG_ARG_1,		OPORT_MULT16_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_3,		OPORT_MULT16_OPERANDB1	;	Write arg3 to Reg B1
+															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															INPUT		REG_ARG_0,		IPORT_MULT16_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_MULT16_RESULT1		;	Write Reg R1 to arg1

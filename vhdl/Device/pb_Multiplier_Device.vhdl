@@ -85,7 +85,7 @@ architecture rtl of pb_Multiplier_Device is
 	
 	signal Reg_Operand_A				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
 	signal Reg_Operand_B				: T_SLVV_8(BYTES - 1 downto 0)				:= (others => (others => '0'));
-	signal Reg_Result						: T_SLVV_8((2 * BYTES) - 1 downto 0)	:= (others => (others => '0'));
+	signal Reg_Result						: T_SLVV_8((2 * BYTES) - 1 downto 0);
 	
 begin
 	assert ((BITS = 8) or (BITS = 16) or (BITS = 24) or (BITS = 32))
@@ -123,7 +123,6 @@ begin
 			if (Reset = '1') then
 				Reg_Operand_A						<= (others => (others => '0'));
 				Reg_Operand_B						<= (others => (others => '0'));
-				Reg_Result							<= (others => (others => '0'));
 			else
 				if (AdrDec_we = '1') then
 					if (AdrDec_WriteAddress(BIT_AB) = '0') then
@@ -132,8 +131,6 @@ begin
 						Reg_Operand_B(to_index(AdrDec_WriteAddress(BIT_AB - 1 downto 0)))	<= AdrDec_Data;
 					end if;
 				end if;
-				
-				Reg_Result	<= to_slvv_8(std_logic_vector(unsigned(to_slv(Reg_Operand_A)) * unsigned(to_slv(Reg_Operand_B))));
 			end if;
 		end if;
 	end process;
@@ -142,4 +139,28 @@ begin
 	
 	Interrupt		<= '0';
 	Message			<= x"00";
+	
+	-- pipelined multiplication
+	blkMult : block
+		signal Operand_A	: UNSIGNED(BITS - 1 downto 0);
+		signal Operand_B	: UNSIGNED(BITS - 1 downto 0);
+		signal Result			: UNSIGNED((BITS * 2) - 1 downto 0);
+		signal Result_d1	: STD_LOGIC_VECTOR((BITS * 2) - 1 downto 0);
+		signal Result_d2	: STD_LOGIC_VECTOR((BITS * 2) - 1 downto 0);
+	begin
+		Operand_A		<= unsigned(to_slv(Reg_Operand_A));
+		Operand_B		<= unsigned(to_slv(Reg_Operand_B));
+	
+		process(Clock)
+		begin
+			if rising_edge(Clock) then
+				Result		<= Operand_A * Operand_B;
+				
+				Result_d1		<= std_logic_vector(Result);
+				Result_d2		<= Result_d1;
+			end if;
+		end process;
+	
+		Reg_Result		<= to_slvv_8(Result_d2);
+	end block;
 end;
