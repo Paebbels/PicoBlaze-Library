@@ -53,9 +53,9 @@ CONSTANT DIV16_STATUS_DONE,						01		;
 ; ===============================================
 ;PRAGMA function __dev_Div16_Wait begin
 ;;		Requires:
-;;			
 ;;		Returns:
-;;			
+;;		Uses:
+;;			Tmp0
 __dev_Div_Wait:
 __dev_Div16_Wait:							INPUT		REG_TMP_0,		IPORT_DIV16_STATUS			; Read computation status
 															TEST		REG_TMP_0,		DIV16_STATUS_DONE
@@ -74,9 +74,6 @@ __dev_Div16_Wait:							INPUT		REG_TMP_0,		IPORT_DIV16_STATUS			; Read computati
 __dev_Div_Div8_Begin:
 __dev_Div16_Div8_Begin:				OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_DIV16_OPERANDB0	;	Write arg1 to Reg B0
-															LOAD		REG_ARG_0,		00											; 
-															OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA1	;
-															OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDB1	;
 ;PRAGMA function end						
 ;		
 ;PRAGMA function __dev_Div16_Div8_End begin
@@ -99,8 +96,8 @@ __dev_Div16_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV16_RESULT0		;	Write Reg R0
 ;;			
 __dev_Div_Div16_Begin:
 __dev_Div16_Div16_Begin:			OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA0	;	Write arg0 to Reg A0
-															OUTPUT	REG_ARG_1,		OPORT_DIV16_OPERANDA1	;	Write arg2 to Reg B0
-															OUTPUT	REG_ARG_2,		OPORT_DIV16_OPERANDB0	;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_1,		OPORT_DIV16_OPERANDA1	;	Write arg1 to Reg A1
+															OUTPUT	REG_ARG_2,		OPORT_DIV16_OPERANDB0	;	Write arg2 to Reg B0
 															OUTPUT	REG_ARG_3,		OPORT_DIV16_OPERANDB1	;	Write arg3 to Reg B1
 ;PRAGMA function end						
 ;		
