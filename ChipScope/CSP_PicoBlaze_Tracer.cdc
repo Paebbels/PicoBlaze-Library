@@ -1,13 +1,13 @@
 #ChipScope Core Generator Project File Version 3.0
 #Tue Jul 22 13:50:07 Mitteleuropäische Sommerzeit 2014
 SignalExport.clockChannel=CLK
-SignalExport.bus<0000>.channelList=0 1 2 3 4 5 6 7 8 9 10 11
+SignalExport.bus<0000>.channelList=0 1 2 3 4 5 6 7 8 9 10 11 60 61 62
 SignalExport.bus<0000>.name=InstAdr
 SignalExport.bus<0000>.offset=0.0
 SignalExport.bus<0000>.precision=0
 SignalExport.bus<0000>.radix=Hex
 SignalExport.bus<0000>.scaleFactor=1.0
-SignalExport.bus<0001>.channelList=0 1 2 3 4 5 6 7 8 9 10 11
+SignalExport.bus<0001>.channelList=0 1 2 3 4 5 6 7 8 9 10 11 60 61 62
 SignalExport.bus<0001>.name=Routine
 SignalExport.bus<0001>.offset=0.0
 SignalExport.bus<0001>.precision=0
@@ -91,9 +91,9 @@ SignalExport.dataChannel<0050>=DataIn[4]
 SignalExport.dataChannel<0051>=DataIn[5]
 SignalExport.dataChannel<0052>=DataIn[6]
 SignalExport.dataChannel<0053>=DataIn[7]
-SignalExport.dataChannel<0054>=PortID[8]
-SignalExport.dataChannel<0055>=PortID[10]
-SignalExport.dataChannel<0056>=PortID[9]
+SignalExport.dataChannel<0054>=Write[8]
+SignalExport.dataChannel<0055>=WriteK[10]
+SignalExport.dataChannel<0056>=Read[9]
 SignalExport.dataChannel<0057>=System[0]
 SignalExport.dataChannel<0058>=System[1]
 SignalExport.dataChannel<0059>=System[2]
