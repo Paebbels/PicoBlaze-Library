@@ -1,6 +1,6 @@
-PicoBlaze-Library
+The PicoBlaze-Library
 =================================================
-The PicoBlaze Library offers several PicoBlaze devices and code routines
+The PicoBlaze-Library offers several PicoBlaze devices and code routines
 to extend a common PicoBlaze environment to a little System on a Chip (SoC or SoFPGA).
 
 Table of Content:
@@ -21,7 +21,7 @@ Table of Content:
 
 2 Download
 ================================================================================
-The PicoBlaze Library can be [downloaded][download] as a zip-file (latest 'master' branch) or
+The PicoBlaze-Library can be [downloaded][download] as a zip-file (latest 'master' branch) or
 cloned with `git` from GitHub. GitHub offers HTTPS and SSH as transfer protocols.
 
 For SSH protocol use the URL `ssh://git@github.com:Paebbels/PicoBlaze-Library.git` or command
@@ -104,12 +104,12 @@ for more details.
  [posh_git]: https://github.com/dahlbyk/posh-git
  
 
-4 Integrating PicoBlaze Library into projects
+4 Integrating the library into projects
 ================================================================================
 
 All Windows command line instructions are intended for PowerShell. So executing the following instructions in `cmd.exe` won't function or result in errors! PowerShell is shipped with Windows since Vista.  
 
-### 4.1 Adding PicoBlaze Library and it's dependencies as git submodules
+### 4.1 Adding the library and it's dependencies as git submodules
 
 The following command line instructions will create a library folder `/lib` and clone all depenencies
 as git [submodules][git_submod] into subfolders.
@@ -162,7 +162,7 @@ Compiling needed IPCores from L_PicoBlaze for a KC705 board:
     # TODO: write a script to regenerate all IP Cores
 
 
-5 Using PicoBlaze Library
+5 Using PicoBlaze-Library
 ================================================================================
 
 ### 6.1 Standalone
@@ -172,7 +172,7 @@ Compiling needed IPCores from L_PicoBlaze for a KC705 board:
 ### 6.2 In Xilinx Vivado (Synth and xSim)
 
 
-6 Configuring a System-on-FPGA with PicoBlaze Library
+6 Configuring a System-on-FPGA with the library
 ================================================================================
 
 
