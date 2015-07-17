@@ -32,6 +32,8 @@ cloned with `git clone` from GitHub. For SSH protocol use the URL `ssh://git@git
     cd <GitRoot>
     git clone --recursive git@github.com:Paebbels/PicoBlaze-Library.git L_PicoBlaze
 
+**Note:** The option `--recursive` performs a recursive clone operation for all integrated [git submodules][git_submod]. An additional `git submodule init` and `git submodule update` is not needed anymore. 
+
 The library is meant to be included into another git repository as a git submodule. This can be achieved with the following instructions:
 
     cd <ProjectRoot>
