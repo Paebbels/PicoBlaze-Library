@@ -17,6 +17,8 @@ to extend a common PicoBlaze environment to a little System on a Chip (SoC or So
 
 ------
 
+> All Windows command line instructions are intended for **Windows PowerShell**, if not marked otherwise. So executing the following instructions in Windows Command Prompt (`cmd.exe`) won't function or result in errors! PowerShell is shipped with Windows since Vista. See the [requirements](Requirements) wiki page on where to download or update PowerShell.
+
 ## 1 Overview
 
 
@@ -34,7 +36,7 @@ The library is meant to be included into another git repository as a git submodu
 
     cd <ProjectRoot>
     mkdir lib -ErrorAction SilentlyContinue; cd lib
-    git submodule add git@github.com:VLSI-EDA/PoC.git L_PicoBlaze
+    git submodule add git@github.com:Paebbels/PicoBlaze-Library.git L_PicoBlaze
     cd L_PicoBlaze
     git remote rename origin github
     cd ..\..
@@ -55,7 +57,8 @@ processor. Both dependencies are available as GitHub repositories and can be dow
 
 See the [dependencies](Requirements#dependencies) wiki page for more details. There is also a detailed page on [Integrating the PicoBlaze-Library into User Projects](Integration).
 
- [poc]: https://github.com/VLSI-EDA/PoC
+ [poc]:      https://github.com/VLSI-EDA/PoC
+ [opbasm]:   https://github.com/kevinpt/opbasm
 
 ##### Common Requirements
 
@@ -73,27 +76,29 @@ See the [optional tools](Requirements#optional-tools) wiki page for more details
 
 ## 4 Integrating the library into projects
 
-All Windows command line instructions are intended for PowerShell. So executing the following instructions in `cmd.exe` won't function or result in errors! PowerShell is shipped with Windows since Vista.  
 
 ### 4.1 Adding the library and it's dependencies as git submodules
 
-The following command line instructions will create a library folder `/lib` and clone all depenencies
+The PicoBlaze-Library is meant to be included in other project or repos as a submodule. Therefore it's recommended to create a library folder and add the PicoBlaze-Library and it's dependencies as git submodules.
+
+The following command line instructions will create a library folder `lib/` and clone all depenencies
 as git [submodules][git_submod] into subfolders.
 
-    cd <ProjectRoot>
-    mkdir lib -ErrorAction SilentlyContinue; cd lib
-
-    git submodule add git@github.com:VLSI-EDA/PoC.git PoC
-    git add .gitmodules PoC
-    git commit -m "Added new git submodule PoC in 'lib\PoC' (PoC-Library)."
+    function gitsubmodule([string]$dir, [string]$url, [string]$name) {
+      $p = pwd
+      mkdir lib -ErrorAction SilentlyContinue; cd lib
+      git submodule add $url $dir
+      cd $dir
+      git remote rename origin github
+      cd $p
+      git add .gitmodules "lib\$dir"
+      git commit -m "Added new git submodule $dir in 'lib\$dir' ($name)."
+    }
     
-    git submodule add git@github.com:Paebbels/PicoBlaze-Library.git L_PicoBlaze
-    git add .gitmodules L_PicoBlaze
-    git commit -m "Added new git submodule L_PicoBlaze in 'lib\L_PicoBlaze' (PicoBalze-Library)."
-
-    git submodule add git@github.com:Paebbels/opbasm.git opbasm
-    git add .gitmodules opbasm
-    git commit -m "Added new git submodule opbasm in 'lib\opbasm' (Open PicoBlaze Assembler)."
+    cd <ProjectRoot>
+    gitsubmodule "PoC" "git@github.com:VLSI-EDA/PoC.git" "PoC-Library"
+    gitsubmodule "L_PicoBlaze" "git@github.com:Paebbels/PicoBlaze-Library.git" "PicoBalze-Library"
+    gitsubmodule "opbasm" "git@github.com:Paebbels/opbasm.git" "Open PicoBlaze Assembler"
 
 [git_submod]: http://git-scm.com/book/en/v2/Git-Tools-Submodules
 
@@ -107,11 +112,11 @@ To run PoC's automated testbenches or use the netlist compilaltion scripts of Po
 
 ### 4.3 Compiling shipped Xilinx IPCores (*.xco files) to netlists
 
-The PicoBlaze Library and the PoC Library are shipped with some pre-configured IPCores from Xilinx. These IPCores are shipped as \*.xco files and need to be compiled to netlists (\*.ngc files) and there auxillary
+The PicoBlaze-Library and the PoC-Library are shipped with some pre-configured IPCores from Xilinx. These IPCores are shipped as \*.xco files and need to be compiled to netlists (\*.ngc files) and there auxillary
 files (\*.ncf files; \*.vhdl files; ...). This can be done by invoking PoC's `Netlist.py` through one of the
 provided wrapper scripts: netlist.[sh|ps1].
 
-Compiling needed IPCores from PoC for a KC705 board:
+**Example:** Compiling all needed IPCores from PoC for a KC705 board:
 
     cd <ProjectRoot>
     cd lib\PoC\netlist
@@ -119,7 +124,7 @@ Compiling needed IPCores from PoC for a KC705 board:
       .\netlist.ps1 --coregen PoC.xil.ChipScopeICON_$i --board KC705
     }
 
-Compiling needed IPCores from L_PicoBlaze for a KC705 board:
+**Example:** Compiling all needed IPCores from L_PicoBlaze for a KC705 board:
 
     cd ....
     cd lib\L_PicoBlaze\netlist\<DeviceString>\
