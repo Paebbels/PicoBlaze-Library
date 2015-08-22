@@ -141,10 +141,10 @@
          </spirit:vendorExtensions>
       </spirit:componentInstance>
       <spirit:componentInstance>
-         <spirit:instanceName>CSP_PicoBlaze_Tracer</spirit:instanceName>
+         <spirit:instanceName>CSP_PB_Tracer_ILA</spirit:instanceName>
          <spirit:componentRef spirit:vendor="xilinx.com" spirit:library="ip" spirit:name="chipscope_ila" spirit:version="1.05.a" />
          <spirit:configurableElementValues>
-            <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.COMPONENT_NAME">CSP_PicoBlaze_Tracer</spirit:configurableElementValue>
+            <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.COMPONENT_NAME">CSP_PB_Tracer_ILA</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.TRIGGER_PORT_WIDTH_6">8</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.TRIGGER_PORT_WIDTH_7">8</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="PARAM_VALUE.TRIGGER_PORT_WIDTH_8">8</spirit:configurableElementValue>
@@ -327,10 +327,10 @@
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_USE_TRIG_OUT">1</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_M13_TYPE">1</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_M9_TPID">1</spirit:configurableElementValue>
-            <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.COMPONENT_NAME">CSP_PicoBlaze_Tracer</spirit:configurableElementValue>
+            <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.COMPONENT_NAME">CSP_PB_Tracer_ILA</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_M15_TPID">3</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_M2_TYPE">7</spirit:configurableElementValue>
-            <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_XCO_LIST">Component_Name=CSP_PicoBlaze_Tracer;Number_Of_Trigger_Ports=4;Max_Sequence_Levels=16;Use_RPMs=false;Enable_Trigger_Output_Port=true;Sample_On=Rising;Sample_Data_Depth=32768;Enable_Storage_Qualification=true;Data_Same_As_Trigger=false;Data_Port_Width=63;Trigger_Port_Width_1=15;Match_Units_1=7;Counter_Width_1=10;Match_Type_1=range_with_edges;Exclude_From_Data_Storage_1=true;Trigger_Port_Width_2=8;Match_Units_2=5;Counter_Width_2=10;Match_Type_2=range_with_edges;Exclude_From_Data_Storage_2=true;Trigger_Port_Width_3=6;Match_Units_3=2;Counter_Width_3=10;Match_Type_3=basic_with_edges;Exclude_From_Data_Storage_3=true;Trigger_Port_Width_4=16;Match_Units_4=2;Counter_Width_4=10;Match_Type_4=range_with_edges;Exclude_From_Data_Storage_4=true;Trigger_Port_Width_5=8;Match_Units_5=1;Counter_Width_5=Disabled;Match_Type_5=basic_with_edges;Exclude_From_Data_Storage_5=true;Trigger_Port_Width_6=8;Match_Units_6=1;Counter_Width_6=Disabled;Match_Type_6=basic_with_edges;Exclude_From_Data_Storage_6=true;Trigger_Port_Width_7=8;Match_Units_7=1;Counter_Width_7=Disabled;Match_Type_7=basic_with_edges;Exclude_From_Data_Storage_7=true;Trigger_Port_Width_8=8;Match_Units_8=1;Counter_Width_8=Disabled;Match_Type_8=basic_with_edges;Exclude_From_Data_Storage_8=true;Trigger_Port_Width_9=8;Match_Units_9=1;Counter_Width_9=Disabled;Match_Type_9=basic_with_edges;Exclude_From_Data_Storage_9=true;Trigger_Port_Width_10=8;Match_Units_10=1;Counter_Width_10=Disabled;Match_Type_10=basic_with_edges;Exclude_From_Data_Storage_10=true;Trigger_Port_Width_11=8;Match_Units_11=1;Counter_Width_11=Disabled;Match_Type_11=basic_with_edges;Exclude_From_Data_Storage_11=true;Trigger_Port_Width_12=8;Match_Units_12=1;Counter_Width_12=Disabled;Match_Type_12=basic_with_edges;Exclude_From_Data_Storage_12=true;Trigger_Port_Width_13=8;Match_Units_13=1;Counter_Width_13=Disabled;Match_Type_13=basic_with_edges;Exclude_From_Data_Storage_13=true;Trigger_Port_Width_14=8;Match_Units_14=1;Counter_Width_14=Disabled;Match_Type_14=basic_with_edges;Exclude_From_Data_Storage_14=true;Trigger_Port_Width_15=8;Match_Units_15=1;Counter_Width_15=Disabled;Match_Type_15=basic_with_edges;Exclude_From_Data_Storage_15=true;Trigger_Port_Width_16=8;Match_Units_16=1;Counter_Width_16=Disabled;Match_Type_16=basic_with_edges;Exclude_From_Data_Storage_16=true</spirit:configurableElementValue>
+            <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_XCO_LIST">Component_Name=CSP_PB_Tracer_ILA;Number_Of_Trigger_Ports=4;Max_Sequence_Levels=16;Use_RPMs=false;Enable_Trigger_Output_Port=true;Sample_On=Rising;Sample_Data_Depth=32768;Enable_Storage_Qualification=true;Data_Same_As_Trigger=false;Data_Port_Width=63;Trigger_Port_Width_1=15;Match_Units_1=7;Counter_Width_1=10;Match_Type_1=range_with_edges;Exclude_From_Data_Storage_1=true;Trigger_Port_Width_2=8;Match_Units_2=5;Counter_Width_2=10;Match_Type_2=range_with_edges;Exclude_From_Data_Storage_2=true;Trigger_Port_Width_3=6;Match_Units_3=2;Counter_Width_3=10;Match_Type_3=basic_with_edges;Exclude_From_Data_Storage_3=true;Trigger_Port_Width_4=16;Match_Units_4=2;Counter_Width_4=10;Match_Type_4=range_with_edges;Exclude_From_Data_Storage_4=true;Trigger_Port_Width_5=8;Match_Units_5=1;Counter_Width_5=Disabled;Match_Type_5=basic_with_edges;Exclude_From_Data_Storage_5=true;Trigger_Port_Width_6=8;Match_Units_6=1;Counter_Width_6=Disabled;Match_Type_6=basic_with_edges;Exclude_From_Data_Storage_6=true;Trigger_Port_Width_7=8;Match_Units_7=1;Counter_Width_7=Disabled;Match_Type_7=basic_with_edges;Exclude_From_Data_Storage_7=true;Trigger_Port_Width_8=8;Match_Units_8=1;Counter_Width_8=Disabled;Match_Type_8=basic_with_edges;Exclude_From_Data_Storage_8=true;Trigger_Port_Width_9=8;Match_Units_9=1;Counter_Width_9=Disabled;Match_Type_9=basic_with_edges;Exclude_From_Data_Storage_9=true;Trigger_Port_Width_10=8;Match_Units_10=1;Counter_Width_10=Disabled;Match_Type_10=basic_with_edges;Exclude_From_Data_Storage_10=true;Trigger_Port_Width_11=8;Match_Units_11=1;Counter_Width_11=Disabled;Match_Type_11=basic_with_edges;Exclude_From_Data_Storage_11=true;Trigger_Port_Width_12=8;Match_Units_12=1;Counter_Width_12=Disabled;Match_Type_12=basic_with_edges;Exclude_From_Data_Storage_12=true;Trigger_Port_Width_13=8;Match_Units_13=1;Counter_Width_13=Disabled;Match_Type_13=basic_with_edges;Exclude_From_Data_Storage_13=true;Trigger_Port_Width_14=8;Match_Units_14=1;Counter_Width_14=Disabled;Match_Type_14=basic_with_edges;Exclude_From_Data_Storage_14=true;Trigger_Port_Width_15=8;Match_Units_15=1;Counter_Width_15=Disabled;Match_Type_15=basic_with_edges;Exclude_From_Data_Storage_15=true;Trigger_Port_Width_16=8;Match_Units_16=1;Counter_Width_16=Disabled;Match_Type_16=basic_with_edges;Exclude_From_Data_Storage_16=true</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_M4_TPID">0</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_M10_TPID">1</spirit:configurableElementValue>
             <spirit:configurableElementValue spirit:referenceId="MODELPARAM_VALUE.C_RAM_TYPE">1</spirit:configurableElementValue>
@@ -403,7 +403,7 @@
             </xilinx:instanceProperties>
             <xilinx:generationHistory>
                <xilinx:fileSet>
-                  <xilinx:name>customization_generator</xilinx:name>
+                  <xilinx:name>apply_current_project_options_generator</xilinx:name>
                </xilinx:fileSet>
                <xilinx:fileSet>
                   <xilinx:name>model_parameter_resolution_generator</xilinx:name>
@@ -411,88 +411,88 @@
                <xilinx:fileSet>
                   <xilinx:name>ip_xco_generator</xilinx:name>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.xco</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.xco</xilinx:name>
                      <xilinx:userFileType>xco</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:04:43 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0xC40AD48C</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:57:04 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0xE027DFC1</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                </xilinx:fileSet>
                <xilinx:fileSet>
                   <xilinx:name>ngc_netlist_generator</xilinx:name>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.cdc</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.cdc</xilinx:name>
                      <xilinx:userFileType>unknown</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0xB90E7B7C</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0x34E37911</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.constraints/CSP_PicoBlaze_Tracer.ucf</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.constraints/CSP_PB_Tracer_ILA.ucf</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>ucf</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x270C3118</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0xEAA6CC01</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.constraints/CSP_PicoBlaze_Tracer.xdc</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.constraints/CSP_PB_Tracer_ILA.xdc</xilinx:name>
                      <xilinx:userFileType>xdc</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
                      <xilinx:checkSum>0x5F4D4543</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.ncf</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.ncf</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>unknown</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
                      <xilinx:checkSum>0x9018CBD4</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.ngc</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.ngc</xilinx:name>
                      <xilinx:userFileType>ngc</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x615FA047</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:04 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0x2400E6D8</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.ucf</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.ucf</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>ucf</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x270C3118</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0xEAA6CC01</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.vhd</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.vhd</xilinx:name>
                      <xilinx:userFileType>vhdl</xilinx:userFileType>
                      <xilinx:userFileType>vhdlSynthesis</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0xE20D553D</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0x3140FBA5</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.vho</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.vho</xilinx:name>
                      <xilinx:userFileType>vho</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x12AB347E</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0x2E80E3CC</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.xdc</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.xdc</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>xdc</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:06:58 GMT 2015</xilinx:timeStamp>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:09 GMT 2015</xilinx:timeStamp>
                      <xilinx:checkSum>0x5F4D4543</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer_xmdf.tcl</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA_xmdf.tcl</xilinx:name>
                      <xilinx:userFileType>tcl</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:04:43 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x5451994C</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:57:06 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0xC21FC8D7</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                </xilinx:fileSet>
@@ -508,48 +508,45 @@
                <xilinx:fileSet>
                   <xilinx:name>ise_generator</xilinx:name>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.gise</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.gise</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>gise</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:07:00 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0xEEF5A71C</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:12 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0xA806F542</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer.xise</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA.xise</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>xise</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:07:00 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x9EC9B87A</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:12 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0x7E50F8E2</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                </xilinx:fileSet>
                <xilinx:fileSet>
                   <xilinx:name>deliver_readme_generator</xilinx:name>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer_readme.txt</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA_readme.txt</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>txtReadme</xilinx:userFileType>
                      <xilinx:userFileType>txt</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:07:00 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0xA29EB210</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:12 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0x2799059F</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
                </xilinx:fileSet>
                <xilinx:fileSet>
                   <xilinx:name>flist_generator</xilinx:name>
                   <xilinx:file>
-                     <xilinx:name>./CSP_PicoBlaze_Tracer_flist.txt</xilinx:name>
+                     <xilinx:name>./CSP_PB_Tracer_ILA_flist.txt</xilinx:name>
                      <xilinx:userFileType>ignore</xilinx:userFileType>
                      <xilinx:userFileType>txtFlist</xilinx:userFileType>
                      <xilinx:userFileType>txt</xilinx:userFileType>
-                     <xilinx:timeStamp>Tue May 26 21:07:00 GMT 2015</xilinx:timeStamp>
-                     <xilinx:checkSum>0x138BBFC3</xilinx:checkSum>
+                     <xilinx:timeStamp>Thu Aug 06 07:59:12 GMT 2015</xilinx:timeStamp>
+                     <xilinx:checkSum>0xC203119E</xilinx:checkSum>
                      <xilinx:generationId>generationID_1879581046</xilinx:generationId>
                   </xilinx:file>
-               </xilinx:fileSet>
-               <xilinx:fileSet>
-                  <xilinx:name>view_readme_generator</xilinx:name>
                </xilinx:fileSet>
             </xilinx:generationHistory>
          </spirit:vendorExtensions>

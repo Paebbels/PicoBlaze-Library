@@ -343,7 +343,7 @@ package pb is
 	impure function pb_ExportAddressMappingAsAssemblerConstants(System : T_PB_SYSTEM; psmFileName : STRING) return BOOLEAN;
 	impure function pb_ExportAddressMappingAsAssemblerInterruptVector(System : T_PB_SYSTEM; psmFileName : STRING; TableRows : POSITIVE) return BOOLEAN;
 	impure function pb_ExportAddressMappingAsChipScopeTokens(System : T_PB_SYSTEM; tokenFileName : STRING) return BOOLEAN;
-end pb;
+end package;
 
 
 package body pb is
@@ -413,7 +413,7 @@ package body pb is
 			next when (not str_match(RegisterFieldList(i).FieldShort, NameShort));
 			return i;
 		end loop;
-		report "RegisterField '" & NameShort & "' does not exist!" severity FAILURE;
+		report "RegisterField '" & str_trim(NameShort) & "' does not exist!" severity FAILURE;
 	end function;
 
 	function pb_GetRegisterField(RegisterFieldList : T_PB_REGISTER_FIELD_VECTOR; NameShort : STRING) return T_PB_REGISTER_FIELD is
@@ -770,7 +770,7 @@ package body pb is
 			next when (not str_match(DeviceInstances(i).DeviceShort, NameShort));
 			return i;
 		end loop;
-		report "Device '" & NameShort & "' does not exist!" severity FAILURE;
+		report "Device '" & str_trim(NameShort) & "' does not exist!" severity FAILURE;
 	end function;
 	
 	function pb_GetDeviceInstanceID(System : T_PB_SYSTEM; NameShort : STRING) return T_PB_DEVICE_INSTANCE_INDEX is
@@ -779,7 +779,7 @@ package body pb is
 			next when (not str_match(System.DeviceInstances(i).DeviceShort, NameShort));
 			return i;
 		end loop;
-		report "Device '" & NameShort & "' does not exist!" severity FAILURE;
+		report "Device '" & str_trim(NameShort) & "' does not exist!" severity FAILURE;
 	end function;
 
 	function pb_GetDeviceInstance(DeviceInstances : T_PB_DEVICE_INSTANCE_VECTOR; NameShort : STRING) return T_PB_DEVICE_INSTANCE is
@@ -1219,8 +1219,8 @@ package body pb is
 						AddressMapRead(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);					-- save used MappingID for a PortNumber
 						
 						write(psmLine, "CONSTANT " & resize(
-															"IPORT_" & str_to_upper(str_trim(DeviceInstance.DeviceShort)) &
-															"_" & str_to_upper(str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort)) &
+															"IPORT_" & str_toUpper(str_trim(DeviceInstance.DeviceShort)) &
+															"_" & str_toUpper(str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort)) &
 															", ", 40, ' ') &
 														ite((Mapping.PortNumber < 10), " ", "") &
 														ite((Mapping.PortNumber < 100), " ", "") &
@@ -1255,8 +1255,8 @@ package body pb is
 						AddressMapWrite(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
 						
 						write(psmLine, "CONSTANT " & resize(
-															"OPORT_" & str_to_upper(str_trim(DeviceInstance.DeviceShort)) &
-															"_" & str_to_upper(str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort)) &
+															"OPORT_" & str_toUpper(str_trim(DeviceInstance.DeviceShort)) &
+															"_" & str_toUpper(str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort)) &
 															", ", 40, ' ') &
 														ite((Mapping.PortNumber < 10), " ", "") &
 														ite((Mapping.PortNumber < 100), " ", "") &
@@ -1285,8 +1285,8 @@ package body pb is
 						AddressMapWriteK(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
 						
 						write(psmLine, "CONSTANT " & resize(
-															"KPORT_" & str_to_upper(str_trim(DeviceInstance.DeviceShort)) &
-															"_" & str_to_upper(str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort)) &
+															"KPORT_" & str_toUpper(str_trim(DeviceInstance.DeviceShort)) &
+															"_" & str_toUpper(str_trim(DeviceInstance.Device.Registers(Mapping.RegID).RegisterShort)) &
 															", ", 40, ' ') &
 														ite((Mapping.PortNumber < 10), " ", "") &
 														ite((Mapping.PortNumber < 100), " ", "") &
