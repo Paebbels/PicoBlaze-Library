@@ -88,8 +88,10 @@ package pb_Devices is
 --	constant PB_DEV_SCALER16					: T_PB_DEVICE;
 --	constant PB_DEV_SCALER32					: T_PB_DEVICE;
 	constant PB_DEV_SCALER40					: T_PB_DEVICE;
+	constant PB_DEV_CONVERTER_BCD			: T_PB_DEVICE;
 	constant PB_DEV_CONVERTER_BCD24		: T_PB_DEVICE;
 	constant PB_DEV_GPIO							: T_PB_DEVICE;
+	constant PB_DEV_BIT_BANGING_IO		: T_PB_DEVICE;
 	constant PB_DEV_BIT_BANGING_IO8		: T_PB_DEVICE;
 	constant PB_DEV_BIT_BANGING_IO16	: T_PB_DEVICE;
 	constant PB_DEV_LCDISPLAY					: T_PB_DEVICE;
@@ -100,7 +102,7 @@ package pb_Devices is
 	constant PB_DEV_DRP								: T_PB_DEVICE;
 	constant PB_DEV_FREQM							: T_PB_DEVICE;
 	constant PB_DEV_BCDCOUNTER				: T_PB_DEVICE;
-	
+
 end package;
 
 
@@ -196,7 +198,7 @@ package body pb_Devices is
 		CreatesInterrupt =>		TRUE
 	);
 
-	-- Multiplier (16 bit)
+	-- Multiplier (8/16/24/32 bit)
 	-- ---------------------------------------------------------------------------
 	constant PB_DEV_MULTIPLIER8_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
 		pb_CreateWriteOnlyField("Operand A",	"OperandA",	8) &
@@ -309,7 +311,7 @@ package body pb_Devices is
 		RegisterFields =>			PB_DEV_ACCUMULATOR16_FIELDS
 	);
 
-	-- Divider (16 bit)
+	-- Divider (8/16/24/32 bit)
 	-- ---------------------------------------------------------------------------
 	constant PB_DEV_DIVIDER8_FIELDS : T_PB_REGISTER_FIELD_VECTOR := (
 		pb_CreateWriteOnlyField("Operand A",	"OperandA",	 8) &
@@ -682,7 +684,9 @@ package body pb_Devices is
 	);
 	
 	-- define aliases
-	constant PB_DEV_INTERRUPT		: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_INTERRUPT16,		"IntC");
-	constant PB_DEV_MULTIPLIER	: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_MULTIPLIER32,	"Mult");
-	constant PB_DEV_DIVIDER			: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_DIVIDER32,			"Div");
+	constant PB_DEV_INTERRUPT				: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_INTERRUPT16,			"IntC");
+	constant PB_DEV_MULTIPLIER			: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_MULTIPLIER32,		"Mult");
+	constant PB_DEV_DIVIDER					: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_DIVIDER32,				"Div");
+	constant PB_DEV_CONVERTER_BCD		: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_CONVERTER_BCD24,	"ConvBCD");
+	constant PB_DEV_BIT_BANGING_IO	: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_BIT_BANGING_IO8,	"BBIO");
 end package body;

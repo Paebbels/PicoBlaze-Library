@@ -51,6 +51,7 @@ use			PoC.xil.all;
 
 library	L_PicoBlaze;
 use			L_PicoBlaze.pb.all;
+use			L_PicoBlaze.pb_comp.all;
 
 
 entity pb_UART_Wrapper is
@@ -148,7 +149,7 @@ BEGIN
 		constant BAUDRATE_COUNTER_MAX			: POSITIVE					:= TimingToCycles(TIME_UNIT_INTERVAL, CLOCK_FREQ);
 		constant BAUDRATE_COUNTER_BITS		: POSITIVE					:= log2ceilnz(BAUDRATE_COUNTER_MAX + 1);
 		
-		signal BaudRate_Counter_us				: UNSIGNED(BAUDRATE_COUNTER_BITS + 1 downto 0);
+		signal BaudRate_Counter_us				: UNSIGNED(BAUDRATE_COUNTER_BITS + 1 downto 0)	:= (others => '0');
 		signal BaudRate_Counter_eq				: STD_LOGIC;
 
 		signal ClockEnable								: STD_LOGIC;
@@ -162,7 +163,7 @@ BEGIN
 		ClockEnable						<= BaudRate_Counter_eq;
 
 		gen00 : if (DEVICE = DEVICE_VIRTEX5) generate
-			TX : entity L_PicoBlaze.uart_tx6_unconstrained
+			TX : uart_tx6_unconstrained
 				port map (
 					clk										=> Clock,
 					buffer_reset					=> Reset,
@@ -179,7 +180,7 @@ BEGIN
 				);
 		end generate;
 		gen01 : if (DEVICE /= DEVICE_VIRTEX5) generate
-			TX : entity L_PicoBlaze.uart_tx6
+			TX : uart_tx6
 				port map (
 					clk										=> Clock,
 					buffer_reset					=> Reset,
@@ -197,7 +198,7 @@ BEGIN
 		end generate;
 		
 		gen10 : if (DEVICE = DEVICE_VIRTEX5) generate
-			RX : entity L_PicoBlaze.uart_rx6_unconstrained
+			RX : uart_rx6_unconstrained
 				port map (
 					clk										=> Clock,
 					buffer_reset					=> Reset,
@@ -214,7 +215,7 @@ BEGIN
 				);
 		end generate;
 		gen11 : if (DEVICE /= DEVICE_VIRTEX5) generate
-			RX : entity L_PicoBlaze.uart_rx6
+			RX : uart_rx6
 				port map (
 					clk										=> Clock,
 					buffer_reset					=> Reset,

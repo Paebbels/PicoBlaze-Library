@@ -41,6 +41,7 @@ use			IEEE.STD_LOGIC_1164.all;
 use			IEEE.NUMERIC_STD.all;
   
 library PoC;
+use			PoC.config.all;
 use			PoC.utils.all;
 use			PoC.vectors.all;
 use			PoC.strings.all;
@@ -95,8 +96,8 @@ architecture rtl of pb_InstructionROM_Device is
 		return	res;
 	end function;
 
-	constant ENABLE_LOADER				: BOOLEAN		:= ENABLE_JTAG_LOADER;
-	constant FILENAME_PATTERN			: STRING		:= "main_Page#.hex";
+	constant ENABLE_LOADER				: BOOLEAN		:= ite((VENDOR = VENDOR_XILINX), ENABLE_JTAG_LOADER, FALSE);
+	constant FILENAME_PATTERN			: STRING		:= ite((VENDOR = VENDOR_ALTERA), "main_Page#.mif", "main_Page#.hex");
 	
 	constant REG_RW_PAGE_NUMBER		: STD_LOGIC_VECTOR(0 downto 0)			:= "0";
 
@@ -370,7 +371,6 @@ begin
 			assert PB_VERBOSE report "Loading ROM file: '" & FILENAME & "'" severity NOTE;
 
 			genOCROM : if (ENABLE_LOADER = FALSE) generate
-			
 				Port1_Address		<= unsigned(InstructionPointer);
 			
 				genericMemory : ocrom_sp
@@ -415,7 +415,14 @@ begin
 		end generate;
 	end generate;
 	
-	genJTAGLoader : if (ENABLE_JTAG_LOADER = TRUE) generate
+	genNoJTAGLoader : if (ENABLE_LOADER = FALSE) generate
+		JTAGLoader_Clock				<= '0';
+		JTAGLoader_Enable				<= (others => '0');
+		JTAGLoader_Address			<= (others => '0');
+		JTAGLoader_WriteEnable	<= '0';
+		JTAGLoader_DataOut			<= (others => '0');
+	end generate;
+	genJTAGLoader : if (ENABLE_LOADER = TRUE) generate
 		signal WorkAround_Enable			: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
 		signal WorkAround_DataIn			: T_PB_INSTRUCTION_VECTOR(PAGES - 1 downto 0);
 	begin
