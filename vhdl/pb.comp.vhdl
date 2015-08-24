@@ -197,6 +197,62 @@ package pb_comp is
 			jtag_dout_7			: in  std_logic_vector(17 downto 0)
 		);
 	end component;
+	
+	component uart_tx6 is
+		port (
+			clk									: in std_logic;
+			en_16_x_baud				: in std_logic;
+			data_in							: in std_logic_vector(7 downto 0);
+			buffer_reset				: in std_logic;
+			buffer_write				: in std_logic;
+			buffer_data_present	: out std_logic;
+			buffer_half_full		: out std_logic;
+			buffer_full					: out std_logic;
+			serial_out					: out std_logic
+		);
+  end component;
+	
+	component uart_tx6_unconstrained is
+		port (
+			clk									: in	std_logic;
+			en_16_x_baud				: in	std_logic;
+			data_in							: in	std_logic_vector(7 downto 0);
+			buffer_reset				: in	std_logic;
+			buffer_write				: in	std_logic;
+			buffer_data_present	: out	std_logic;
+			buffer_half_full		: out	std_logic;
+			buffer_full					: out	std_logic;
+			serial_out					: out	std_logic
+		);
+  end component;
+	
+	component uart_rx6 is
+		port (
+			clk									: in	std_logic;
+			en_16_x_baud				: in	std_logic;
+			serial_in						: in	std_logic;
+			buffer_reset				: in	std_logic;
+			buffer_read					: in	std_logic;
+			buffer_data_present	: out	std_logic;
+			buffer_half_full		: out	std_logic;
+			buffer_full					: out	std_logic;
+			data_out						: out	std_logic_vector(7 downto 0)
+		);
+  end component;
+
+	component uart_rx6_unconstrained is
+		port (
+			clk									: in	std_logic;
+			en_16_x_baud				: in	std_logic;
+			serial_in						: in	std_logic;
+			buffer_reset				: in	std_logic;
+			buffer_read					: in	std_logic;
+			buffer_data_present	: out	std_logic;
+			buffer_half_full		: out	std_logic;
+			buffer_full					: out	std_logic;
+			data_out						: out	std_logic_vector(7 downto 0)
+		);
+  end component;
 end package;
 
 

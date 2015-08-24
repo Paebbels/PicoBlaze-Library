@@ -184,7 +184,7 @@ begin
 
 				start			=> Reg_Start,
 				arg1			=> Operand_A_slv,
-				arg2			=> Operand_A_slv,
+				arg2			=> Operand_B_slv,
 
 				rdy				=> Div_Done,
 				res				=> Div_Result

@@ -142,7 +142,7 @@ architecture rtl of pb_InterruptController_Device is
 	
 begin
 	assert (PORTS <= 32)
-		report "nterruptController supports only up to 32 interrupt sources!"
+		report "InterruptController supports only up to 32 interrupt sources!"
 		severity failure;
 
 	AdrDec : entity L_PicoBlaze.PicoBlaze_AddressDecoder
