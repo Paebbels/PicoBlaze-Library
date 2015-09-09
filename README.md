@@ -30,7 +30,7 @@ Related repositories: [PicoBlaze-Examples][pb_ex]
 
 **The PicoBlaze-Library** can be downloaded as a [zip-file][download] (latest 'master'
 branch) or cloned with `git clone` from GitHub. GitHub offers HTTPS and SSH as transfer
-protocols. See the [Download][wiki-download] wiki page for more details.
+protocols. See the [Download][wiki:download] wiki page for more details.
 
 For SSH protocol use the URL `ssh://git@github.com:Paebbels/PicoBlaze-Library.git` or command
 line instruction:
@@ -245,7 +245,7 @@ cd lib\L_PicoBlaze\netlist\<DeviceString>\
 
 ## 7 Updating PicoBlaze-Library
 
-
+ [wiki:download]:		https://github.com/VLSI-EDA/PoC/wiki/Download
  [wiki:requirements]:	https://github.com/Paebbels/PicoBlaze-Library/wiki/Requirements
  [wiki:dependencies]:	https://github.com/Paebbels/PicoBlaze-Library/wiki/Requirements#dependencies
  [wiki:integration]:	https://github.com/Paebbels/PicoBlaze-Library/wiki/Integration
