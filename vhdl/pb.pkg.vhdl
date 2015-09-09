@@ -506,9 +506,9 @@ package body pb is
 	end function;
 	
 	function pb_CreateRegisterWO(NameShort : STRING; RegisterNumber : T_UINT_8; RegisterFieldList : T_PB_REGISTER_FIELD_VECTOR; RegisterNameShort : STRING; Offset : T_UINT_8 := 0) return T_PB_REGISTER is
-		constant RegisterFields		: T_PB_REGISTER_FIELD_VECTOR	:= pb_EnumerateRegisterFields(RegisterFieldList);
-		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
-		variable Result : T_PB_REGISTER;
+		constant RegisterFields	: T_PB_REGISTER_FIELD_VECTOR	:= pb_EnumerateRegisterFields(RegisterFieldList);
+		constant RegisterField 	: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
+		variable Result					: T_PB_REGISTER;
 	begin
 		if (RegisterField.FieldKind /= PB_REGISTER_FIELD_KIND_WRITE) then
 			report "pb_CreateRegisterRO: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO, but shall be translated into a WRITE register." severity FAILURE;
@@ -532,9 +532,9 @@ package body pb is
 	end function;
 	
 	function pb_CreateRegisterKO(NameShort : STRING; RegisterNumber : T_UINT_8; RegisterFieldList : T_PB_REGISTER_FIELD_VECTOR; RegisterNameShort : STRING; Offset : T_UINT_8 := 0) return T_PB_REGISTER is
-		constant RegisterFields		: T_PB_REGISTER_FIELD_VECTOR	:= pb_EnumerateRegisterFields(RegisterFieldList);
-		constant RegisterField 		: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
-		variable Result : T_PB_REGISTER;
+		constant RegisterFields	: T_PB_REGISTER_FIELD_VECTOR	:= pb_EnumerateRegisterFields(RegisterFieldList);
+		constant RegisterField 	: T_PB_REGISTER_FIELD 				:= pb_GetRegisterField(RegisterFields, RegisterNameShort);
+		variable Result					: T_PB_REGISTER;
 	begin
 		if (RegisterField.FieldKind = PB_REGISTER_FIELD_KIND_READ) then
 			report "pb_CreateRegisterK: Given RegisterField '" & str_trim(RegisterNameShort) & "' is not WO or RW, but should be translated into a WRITE register." severity FAILURE;
@@ -636,8 +636,8 @@ package body pb is
 	end function;
 
 	function pb_CreateCombinedRegister(NameShort : STRING; RegisterNumber : T_UINT_8; RegisterFieldList : T_PB_REGISTER_FIELD_VECTOR; RegisterFields : T_PB_REGISTER_FIELD_GROUP_VECTOR) return T_PB_REGISTER is
-		variable Result						: T_PB_REGISTER;
-		variable RegisterField 		: T_PB_REGISTER_FIELD;
+		variable Result					: T_PB_REGISTER;
+		variable RegisterField 	: T_PB_REGISTER_FIELD;
 	begin
 --		Result.RegisterName			:= pb_LongName(NameShort);
 		Result.RegisterShort		:= pb_ShortName(NameShort);
@@ -766,7 +766,7 @@ package body pb is
 	end function;
 	
 	function pb_CreateDeviceAlias(Device : T_PB_DEVICE; AliasName : STRING) return T_PB_DEVICE is
-		variable Result		: T_PB_DEVICE;
+		variable Result			: T_PB_DEVICE;
 	begin
 		Result							:= Device;
 		Result.DeviceShort	:= pb_ShortName(AliasName);
@@ -859,7 +859,7 @@ package body pb is
 	end function;
 	
 	function pb_CreateBus(BusName : STRING; BusShort : STRING; SuperBusShort : STRING) return T_PB_BUS is
-		variable Result : T_PB_BUS;
+		variable Result					: T_PB_BUS;
 	begin
 --		Result.BusName					:= pb_LongName(BusName);
 		Result.BusShort					:= pb_ShortName(BusShort);
@@ -918,8 +918,9 @@ package body pb is
 	end function;
 
 	function pb_GetTotalDeviceCount(Busses : T_PB_BUS_VECTOR; BusID : T_PB_BUSID) return T_UINT_8 is
-		variable Result : T_UINT_8	:= 0;
+		variable Result : T_UINT_8;
 	begin
+		Result := 0;
 --		report "pb_GetTotalDeviceCount: BusID=" & INTEGER'image(BusID) severity NOTE;
 		for i in 0 to Busses(BusID).SubBusCount - 1 loop
 			Result := Result + pb_GetTotalDeviceCount(Busses, Busses(BusID).SubBusses(i));
@@ -1011,8 +1012,9 @@ package body pb is
 	
 	-- PicoBlaze interrupt functions
 	function pb_GetInterruptCount(System : T_PB_SYSTEM) return NATURAL is
-		variable Result : NATURAL := 0;
+		variable Result : NATURAL;
 	begin
+		Result := 0;
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			if (System.DeviceInstances(i).Device.CreatesInterrupt = TRUE) then
 				Result := Result + 1;
@@ -1022,8 +1024,9 @@ package body pb is
 	end function;
 	
 	function pb_GetInterruptPortIndex(System : T_PB_SYSTEM; DeviceShort : STRING) return NATURAL is
-		variable Result : NATURAL		:= 0;
+		variable Result : NATURAL;
 	begin
+		Result := 0;
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			exit when str_match(System.DeviceInstances(i).DeviceShort, DeviceShort);
 			Result := Result + 1;
@@ -1035,8 +1038,9 @@ package body pb is
 		variable Result						: STD_LOGIC_VECTOR(System.DeviceInstanceCount - 1 downto 0);
 		variable DeviceInstance		: T_PB_DEVICE_INSTANCE;
 		variable BusIndex					: T_PB_BUSID;
-		variable InterruptPortID	: T_UINT_8							:= 0;
+		variable InterruptPortID	: T_UINT_8;
 	begin
+		InterruptPortID		:= 0;
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			DeviceInstance	:= System.DeviceInstances(i);
 			BusIndex				:= pb_GetBusIndex(System, DeviceInstance.DeviceShort);
@@ -1053,8 +1057,9 @@ package body pb is
 		variable Result						: T_SLVV_8(System.DeviceInstanceCount - 1 downto 0);
 		variable DeviceInstance		: T_PB_DEVICE_INSTANCE;
 		variable BusIndex					: T_PB_BUSID;
-		variable InterruptPortID	: T_UINT_8							:= 0;
+		variable InterruptPortID	: T_UINT_8;
 	begin
+		InterruptPortID		:= 0;
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			DeviceInstance	:= System.DeviceInstances(i);
 			BusIndex				:= pb_GetBusIndex(System, DeviceInstance.DeviceShort);
@@ -1070,8 +1075,9 @@ package body pb is
 	procedure pb_AssignInterruptAck(signal Output : inout T_PB_IOBUS_PB_DEV_VECTOR; Input : STD_LOGIC_VECTOR; System : T_PB_SYSTEM) is
 		variable DeviceInstance		: T_PB_DEVICE_INSTANCE;
 		variable BusIndex					: T_PB_BUSID;
-		variable InterruptPortID	: NATURAL								:= 0;
+		variable InterruptPortID	: NATURAL;
 	begin
+		InterruptPortID		:= 0;
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			DeviceInstance	:= System.DeviceInstances(i);
 			BusIndex				:= pb_GetBusIndex(System, DeviceInstance.DeviceShort);
@@ -1113,7 +1119,7 @@ package body pb is
 		constant DeviceInstanceID : T_PB_DEVICE_INSTANCE_INDEX	:= pb_GetDeviceInstanceID(System, DeviceShort);
 		constant BusID						: T_PB_BUSID									:= pb_GetBusID(System, DeviceInstance.BusShort);
 		constant MyBus						: T_PB_BUS										:= System.Busses(BusID);
-		variable Result						: NATURAL											:= 0;
+		variable Result						: NATURAL;
 	begin
 --		report "pb_GetBusIndex: DevInstID=" & INTEGER'image(DeviceInstanceID) severity NOTE;
 	
@@ -1129,8 +1135,9 @@ package body pb is
 	function pb_GetSubBusOffset(System : T_PB_SYSTEM; BusShort : T_PB_SHORTNAME) return NATURAL is
 		constant BusID			: T_PB_BUSID	:= pb_GetBusID(System, BusShort);
 		constant SuperBusID	: T_PB_BUSID	:= System.Busses(BusID).SuperBusID;
-		variable Result			: NATURAL			:= 0;
+		variable Result			: NATURAL;
 	begin
+		Result := 0;
 		for i in 0 to System.Busses(SuperBusID).SubBusCount - 1 loop
 			if (System.Busses(SuperBusID).SubBusses(i) = BusID) then
 				return Result;
@@ -1229,10 +1236,7 @@ package body pb is
 
 		variable psmLine				: LINE;
 		variable DeviceInstance	: T_PB_DEVICE_INSTANCE;
-		variable Device					: T_PB_DEVICE;
 		variable Mapping				: T_PB_PORTNUMBER_MAPPING;
-		
-		variable PortNumber_slv	: T_SLV_8;
 
 		type T_USAGE_TRACKING is record
 			DeviceInstanceID	: T_UINT_8;
@@ -1240,16 +1244,20 @@ package body pb is
 		end record;
 		
 		type T_ERROR_DETECT is array (NATURAL range <>) of T_USAGE_TRACKING;
-		variable AddressMapRead		: T_ERROR_DETECT(0 to 255)	:= (others => (0, 255));
-		variable AddressMapWrite	: T_ERROR_DETECT(0 to 255)	:= (others => (0, 255));
-		variable AddressMapWriteK	: T_ERROR_DETECT(0 to 15)		:= (others => (0, 255));
+		variable AddressMapRead		: T_ERROR_DETECT(0 to 255);
+		variable AddressMapWrite	: T_ERROR_DETECT(0 to 255);
+		variable AddressMapWriteK	: T_ERROR_DETECT(0 to 15);
 
-		variable MappingID					: T_UINT_8;
-		variable DeviceInstanceID		: T_UINT_8;
-		variable RegID							: T_UINT_8;
-		variable Reg								: T_PB_REGISTER;
+		variable MappingID				: T_UINT_8;
+		variable DeviceInstanceID	: T_UINT_8;
+		variable RegID						: T_UINT_8;
+		variable Reg							: T_PB_REGISTER;
 
 	begin
+		AddressMapRead		:= (others => (0, 255));
+		AddressMapWrite		:= (others => (0, 255));
+		AddressMapWriteK	:= (others => (0, 255));
+	
 		report "Exporting PicoBlaze address mappings as psm-file to '" & psmFileName & "' ..." severity note;
 		
 		-- psm-file: write file header
@@ -1261,7 +1269,6 @@ package body pb is
 		-- write per device entires
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			DeviceInstance	:= System.DeviceInstances(i);
-			Device					:= DeviceInstance.Device;
 		
 			write(psmLine, STRING'(";"));																						writeline(psmFile, psmLine);
 			write(psmLine, STRING'("; ") & str_trim(DeviceInstance.DeviceShort));		writeline(psmFile, psmLine);
@@ -1283,7 +1290,6 @@ package body pb is
 				-- tokenFile content for INPUT address space
 				if (Mapping.MappingKind = PB_MAPPING_KIND_READ) then
 					if (AddressMapRead(Mapping.PortNumber).MappingID = 255) then
-						PortNumber_slv	:= to_slv(Mapping.PortNumber, 8);
 						AddressMapRead(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);					-- save used MappingID for a PortNumber
 						
 						write(psmLine, "CONSTANT " & resize(
@@ -1318,7 +1324,6 @@ package body pb is
 				
 				-- tokenFile content for OUTPUT address space
 				elsif (Mapping.MappingKind = PB_MAPPING_KIND_WRITE) then
-					PortNumber_slv	:= to_slv(Mapping.PortNumber, 8);
 					if (AddressMapWrite(Mapping.PortNumber).MappingID = 255) then
 						AddressMapWrite(Mapping.PortNumber)	:= (DeviceInstanceID => i, MappingID => j);
 						
@@ -1451,16 +1456,20 @@ package body pb is
 		end record;
 		
 		type T_ERROR_DETECT is array (NATURAL range <>) of T_USAGE_TRACKING;
-		variable AddressMapRead		: T_ERROR_DETECT(0 to 255)	:= (others => (0, 255));
-		variable AddressMapWrite	: T_ERROR_DETECT(0 to 255)	:= (others => (0, 255));
-		variable AddressMapWriteK	: T_ERROR_DETECT(0 to 15)		:= (others => (0, 255));
+		variable AddressMapRead		: T_ERROR_DETECT(0 to 255);
+		variable AddressMapWrite	: T_ERROR_DETECT(0 to 255);
+		variable AddressMapWriteK	: T_ERROR_DETECT(0 to 15);
 
-		variable MappingID					: T_UINT_8;
-		variable DeviceInstanceID		: T_UINT_8;
-		variable RegID							: T_UINT_8;
-		variable Reg								: T_PB_REGISTER;
+		variable MappingID				: T_UINT_8;
+		variable DeviceInstanceID	: T_UINT_8;
+		variable RegID						: T_UINT_8;
+		variable Reg							: T_PB_REGISTER;
 		
 	begin
+		AddressMapRead		:= (others => (0, 255));
+		AddressMapWrite		:= (others => (0, 255));
+		AddressMapWriteK	:= (others => (0, 255));
+	
 		report "Exporting PicoBlaze address mappings as token-file to '" & tokenFileName & "'..." severity note;
 		
 		-- token-file: write file header
@@ -1476,7 +1485,6 @@ package body pb is
 		-- write per device entires
 		for i in 0 to System.DeviceInstanceCount - 1 loop
 			DeviceInstance	:= System.DeviceInstances(i);
-			Device					:= DeviceInstance.Device;
 		
 			write(tokenLine, STRING'("#"));																					writeline(tokenFile, tokenLine);
 			write(tokenLine, STRING'("# ") & str_trim(DeviceInstance.DeviceShort));	writeline(tokenFile, tokenLine);
