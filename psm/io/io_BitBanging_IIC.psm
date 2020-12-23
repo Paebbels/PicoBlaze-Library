@@ -12,7 +12,7 @@
 ;	public functions:
 ;		__io_BBIO_IIC_EnableRaw
 ;		__io_BBIO_IIC_DisableRaw
-;		__io_BBIO_IIC_Initialise
+;		__io_BBIO_IIC_Initialize
 ;		__io_BBIO_IIC_SendStartCond
 ;		__io_BBIO_IIC_SendRestartCond
 ;		__io_BBIO_IIC_SendStopCond
@@ -68,8 +68,8 @@ __io_BBIO_IIC_DisableRaw:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
 																	RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __io_BBIO_IIC_Initialise begin
-__io_BBIO_IIC_Initialise:					OUTPUTK		BBIO_IOPIN_IIC_CLOCK,	KPORT_BBIO8_SET
+;PRAGMA function __io_BBIO_IIC_Initialize begin
+__io_BBIO_IIC_Initialize:					OUTPUTK		BBIO_IOPIN_IIC_CLOCK,	KPORT_BBIO8_SET
 																	OUTPUTK		BBIO_IOPIN_IIC_DATA,	KPORT_BBIO8_SET
 																	RETURN
 ;PRAGMA function end
@@ -130,7 +130,7 @@ __io_BBIO_IIC_ReceiveAck:					CALL			_BBIO_IIC_ReceiveBit
 ;PRAGMA function end
 ;
 ;PRAGMA function __io_BBIO_IIC_Abort begin
-__io_BBIO_IIC_Abort:							CALL			__io_BBIO_IIC_Initialise
+__io_BBIO_IIC_Abort:							CALL			__io_BBIO_IIC_Initialize
 																	; set Carry
 																	LOAD			REG_TMP_0,	01
 																	SR0				REG_TMP_0

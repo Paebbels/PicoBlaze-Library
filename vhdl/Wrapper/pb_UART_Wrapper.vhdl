@@ -250,8 +250,7 @@ BEGIN
 				TX_MIN_DEPTH			=> FIFO_DEPTH,
 				TX_ESTATE_BITS		=> FILLSTATE_BITS,
 				RX_MIN_DEPTH			=> FIFO_DEPTH,
-				RX_FSTATE_BITS		=> FILLSTATE_BITS,
-				RX_OUT_REGS				=> FALSE
+				RX_FSTATE_BITS		=> FILLSTATE_BITS
 				)
 			port map (
 				Clock					=> Clock,
