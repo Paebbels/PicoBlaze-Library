@@ -10,15 +10,15 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Mult24_Mult8
-;		__dev_Mult24_Mult16
-;		__dev_Mult24_Mult24
-;		__dev_Mult24_Mult32
+;		__DEV_Mult24_Mult8
+;		__DEV_Mult24_Mult16
+;		__DEV_Mult24_Mult24
+;		__DEV_Mult24_Mult32
 ;
 ; Aliases:
-;		__dev_Mult_Mult8
-;		__dev_Mult_Mult16
-;		__dev_Mult_Mult24
+;		__DEV_Mult_Mult8
+;		__DEV_Mult_Mult16
+;		__DEV_Mult_Mult24
 ;   
 ; License:
 ; ==============================================================================
@@ -40,7 +40,7 @@
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Mult24_Mult8 begin
+;PRAGMA function __DEV_Mult24_Mult8 begin
 ;;		Requires:
 ;;			Arg0 : Factor A
 ;;			Arg1 : Factor B
@@ -48,8 +48,8 @@
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			
-__dev_Mult_Mult8:
-__dev_Mult24_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Mult_Mult8:
+__DEV_Mult24_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_MULT24_OPERANDB0	;	Write arg1 to Reg B0
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
@@ -58,7 +58,7 @@ __dev_Mult24_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Mult24_Mult16 begin
+;PRAGMA function __DEV_Mult24_Mult16 begin
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
@@ -70,8 +70,8 @@ __dev_Mult24_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 
 ;;			Arg2 : Product R(23:32)
 ;;			Arg3 : Product R(31:24)
 ;;			
-__dev_Mult_Mult16:
-__dev_Mult24_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Mult_Mult16:
+__DEV_Mult24_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_2,		OPORT_MULT24_OPERANDB0	;	Write arg2 to Reg B0
 															OUTPUT	REG_ARG_1,		OPORT_MULT24_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_3,		OPORT_MULT24_OPERANDB1	;	Write arg3 to Reg B1
@@ -84,7 +84,7 @@ __dev_Mult24_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Mult24_Mult24 begin
+;PRAGMA function __DEV_Mult24_Mult24 begin
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
@@ -100,8 +100,8 @@ __dev_Mult24_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 
 ;;			Tmp0 : Product R(47:40)
 ;;			Tmp1 : Product R(55:48)
 ;;			
-__dev_Mult_Mult24:
-__dev_Mult24_Mult24:					OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Mult_Mult24:
+__DEV_Mult24_Mult24:					OUTPUT	REG_ARG_0,		OPORT_MULT24_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_3,		OPORT_MULT24_OPERANDB0	;	Write arg3 to Reg B0
 															OUTPUT	REG_ARG_1,		OPORT_MULT24_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_TMP_0,		OPORT_MULT24_OPERANDB1	;	Write tmp0 to Reg B1

@@ -10,12 +10,12 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Mult16_Mult8
-;		__dev_Mult16_Mult16
+;		__DEV_Mult16_Mult8
+;		__DEV_Mult16_Mult16
 ;
 ; Aliases:
-;		__dev_Mult_Mult8
-;		__dev_Mult_Mult16
+;		__DEV_Mult_Mult8
+;		__DEV_Mult_Mult16
 ;
 ; 
 ; License:
@@ -38,7 +38,7 @@
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Mult16_Mult8 begin
+;PRAGMA function __DEV_Mult16_Mult8 begin
 ;;		Requires:
 ;;			Arg0 : Factor A
 ;;			Arg1 : Factor B
@@ -46,8 +46,8 @@
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			
-__dev_Mult_Mult8:
-__dev_Mult16_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Mult_Mult8:
+__DEV_Mult16_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_MULT16_OPERANDB0	;	Write arg1 to Reg B0
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
@@ -56,7 +56,7 @@ __dev_Mult16_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Mult16_Mult16 begin
+;PRAGMA function __DEV_Mult16_Mult16 begin
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
@@ -68,8 +68,8 @@ __dev_Mult16_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 
 ;;			Arg2 : Product R(23:16)
 ;;			Arg3 : Product R(31:24)
 ;;			
-__dev_Mult_Mult16:
-__dev_Mult16_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Mult_Mult16:
+__DEV_Mult16_Mult16:					OUTPUT	REG_ARG_0,		OPORT_MULT16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_2,		OPORT_MULT16_OPERANDB0	;	Write arg2 to Reg B0
 															OUTPUT	REG_ARG_1,		OPORT_MULT16_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_3,		OPORT_MULT16_OPERANDB1	;	Write arg3 to Reg B1

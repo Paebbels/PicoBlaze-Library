@@ -118,43 +118,43 @@ use			PoC.utils.all;
 entity JTAGLoader6 is
 	generic (
 		C_NUM_PICOBLAZE : integer := 1;
-		C_JTAG_CHAIN : INTEGER					:= 2;
-		C_ADDR_WIDTH : T_INTVEC(0 to 7)	:= (others => 10)
+		C_JTAG_CHAIN : INTEGER          := 2;
+		C_ADDR_WIDTH : T_INTVEC(0 to 7)  := (others => 10)
 	);
 	port (
-		picoblaze_reset	: out std_logic_vector(C_NUM_PICOBLAZE - 1 downto 0);
-		jtag_en					: out std_logic_vector(C_NUM_PICOBLAZE - 1 downto 0);
-		jtag_din				: out std_logic_vector(17 downto 0);
-		jtag_addr				: out std_logic_vector(imax(C_ADDR_WIDTH) - 1 downto 0);
-		jtag_clk				: out std_logic;
-		jtag_we					: out std_logic;
-		jtag_dout_0			: in  std_logic_vector(17 downto 0);
-		jtag_dout_1			: in  std_logic_vector(17 downto 0);
-		jtag_dout_2			: in  std_logic_vector(17 downto 0);
-		jtag_dout_3			: in  std_logic_vector(17 downto 0);
-		jtag_dout_4			: in  std_logic_vector(17 downto 0);
-		jtag_dout_5			: in  std_logic_vector(17 downto 0);
-		jtag_dout_6			: in  std_logic_vector(17 downto 0);
-		jtag_dout_7			: in  std_logic_vector(17 downto 0)
+		picoblaze_reset  : out std_logic_vector(C_NUM_PICOBLAZE - 1 downto 0);
+		jtag_en          : out std_logic_vector(C_NUM_PICOBLAZE - 1 downto 0);
+		jtag_din        : out std_logic_vector(17 downto 0);
+		jtag_addr        : out std_logic_vector(imax(C_ADDR_WIDTH) - 1 downto 0);
+		jtag_clk        : out std_logic;
+		jtag_we          : out std_logic;
+		jtag_dout_0      : in  std_logic_vector(17 downto 0);
+		jtag_dout_1      : in  std_logic_vector(17 downto 0);
+		jtag_dout_2      : in  std_logic_vector(17 downto 0);
+		jtag_dout_3      : in  std_logic_vector(17 downto 0);
+		jtag_dout_4      : in  std_logic_vector(17 downto 0);
+		jtag_dout_5      : in  std_logic_vector(17 downto 0);
+		jtag_dout_6      : in  std_logic_vector(17 downto 0);
+		jtag_dout_7      : in  std_logic_vector(17 downto 0)
 	);
 end;
 
 
 architecture rtl of JTAGLoader6 is
-  constant C_PICOBLAZE_INSTRUCTION_DATA_WIDTH	: INTEGER		:= 18;
-	constant C_BRAM_MAX_ADDR_WIDTH							: POSITIVE	:= imax(C_ADDR_WIDTH);
+  constant C_PICOBLAZE_INSTRUCTION_DATA_WIDTH  : INTEGER    := 18;
+	constant C_BRAM_MAX_ADDR_WIDTH              : POSITIVE  := imax(C_ADDR_WIDTH);
 	
 	--
   signal num_picoblaze       : std_logic_vector(2 downto 0);
   signal picoblaze_instruction_data_width : std_logic_vector(4 downto 0);
-  --
+	--
   signal drck                : std_logic;
   signal shift_clk           : std_logic;
   signal shift_din           : std_logic;
   signal shift_dout          : std_logic;
   signal shift               : std_logic;
   signal capture             : std_logic;
-  --
+	--
   signal control_reg_ce      : std_logic;
   signal bram_ce             : std_logic_vector(C_NUM_PICOBLAZE-1 downto 0);
   signal bus_zero            : std_logic_vector(C_NUM_PICOBLAZE-1 downto 0) := (others => '0');
@@ -170,7 +170,7 @@ architecture rtl of JTAGLoader6 is
   signal jtag_clk_int        : std_logic;
   signal bram_ce_valid       : std_logic;
   signal din_load            : std_logic;
-  --
+	--
   signal jtag_dout_0_masked  : std_logic_vector(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1 downto 0);
   signal jtag_dout_1_masked  : std_logic_vector(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1 downto 0);
   signal jtag_dout_2_masked  : std_logic_vector(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1 downto 0);
@@ -180,27 +180,27 @@ architecture rtl of JTAGLoader6 is
   signal jtag_dout_6_masked  : std_logic_vector(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1 downto 0);
   signal jtag_dout_7_masked  : std_logic_vector(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1 downto 0);
   signal picoblaze_reset_int : std_logic_vector(C_NUM_PICOBLAZE-1 downto 0) := (others => '0');
-  --        
+	--        
 begin
   bus_zero <= (others => '0');
-  --
+	--
 	jtag : entity PoC.xil_BSCAN
 		generic map (
-			JTAG_CHAIN				=> C_JTAG_CHAIN,
-			DISABLE_JTAG			=> FALSE
+			JTAG_CHAIN        => C_JTAG_CHAIN,
+			DISABLE_JTAG      => FALSE
 		)
 		port map (
-			Reset							=> open,
-			RunTest						=> open,
-			sel								=> bram_ce_valid,
-			Capture						=> capture,
-			drck							=> drck,
-			Shift							=> shift,
-			Test_Clock				=> open,
-			Test_DataIn				=> shift_din,
-			Test_DataOut			=> shift_dout,
-			Test_ModeSelect		=> open,
-			Update						=> jtag_clk_int
+			Reset              => open,
+			RunTest            => open,
+			sel                => bram_ce_valid,
+			Capture            => capture,
+			drck              => drck,
+			Shift              => shift,
+			Test_Clock        => open,
+			Test_DataIn        => shift_din,
+			Test_DataOut      => shift_dout,
+			Test_ModeSelect    => open,
+			Update            => jtag_clk_int
 		);
 		
 	--
@@ -211,11 +211,11 @@ begin
 			I => drck,
 			O => shift_clk
 		);
-    --        
-    --        
-    --  Shift Register      
-    --        
-    --
+		--        
+		--        
+		--  Shift Register      
+		--        
+		--
     control_reg_ce_shift: process (shift_clk)
     begin
       if shift_clk'event and shift_clk = '1' then
@@ -224,7 +224,7 @@ begin
         end if;
       end if;
     end process control_reg_ce_shift;
-    --        
+		--        
     bram_ce_shift: process (shift_clk)
     begin
       if shift_clk'event and shift_clk='1' then  
@@ -238,7 +238,7 @@ begin
         end if;
       end if;
     end process bram_ce_shift;
-    --        
+		--        
     bram_we_shift: process (shift_clk)
     begin
       if shift_clk'event and shift_clk='1' then  
@@ -247,7 +247,7 @@ begin
         end if;
       end if;
     end process bram_we_shift;
-    --        
+		--        
     bram_a_shift: process (shift_clk)
     begin
       if shift_clk'event and shift_clk='1' then  
@@ -259,7 +259,7 @@ begin
         end if;
       end if;
     end process bram_a_shift;
-    --        
+		--        
     bram_d_shift: process (shift_clk)
     begin
       if shift_clk'event and shift_clk='1' then  
@@ -273,10 +273,10 @@ begin
         end if;
       end if;
     end process bram_d_shift;
-    --
+		--
     shift_dout <= jtag_din_int(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1);
-    --
-    --
+		--
+		--
     din_load_select:process (bram_ce, din_load, capture, bus_zero, control_reg_ce) 
     begin
       if ( bram_ce = bus_zero ) then
@@ -285,13 +285,13 @@ begin
         din_load <= capture;
       end if;
     end process din_load_select;
-    --
-    --
-    -- Control Registers 
-    --
-    num_picoblaze <= reverse(conv_std_logic_vector(C_NUM_PICOBLAZE-1,3));			-- work around for a bug in JTAGLoader.exe
+		--
+		--
+		-- Control Registers 
+		--
+    num_picoblaze <= reverse(conv_std_logic_vector(C_NUM_PICOBLAZE-1,3));      -- work around for a bug in JTAGLoader.exe
     picoblaze_instruction_data_width <= conv_std_logic_vector(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1,5);
-    --	
+		--	
     control_registers: process(jtag_clk_int) 
     begin
       if (jtag_clk_int'event and jtag_clk_int = '1') then
@@ -356,9 +356,9 @@ begin
         end if;
       end if;
     end process control_registers;
-    -- 
+		-- 
     control_dout(C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-1 downto C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-8) <= control_dout_int;
-    --
+		--
     pb_reset: process(jtag_clk_int) 
     begin
       if (jtag_clk_int'event and jtag_clk_int = '1') then
@@ -367,22 +367,22 @@ begin
         end if;
       end if;
     end process pb_reset;    
-    --
-    --
-    -- Assignments 
-    --
+		--
+		--
+		-- Assignments 
+		--
     control_dout (C_PICOBLAZE_INSTRUCTION_DATA_WIDTH-9 downto 0) <= (others => '0') when (C_PICOBLAZE_INSTRUCTION_DATA_WIDTH > 8);
-    --
-    -- Qualify the blockram CS signal with bscan select output
+		--
+		-- Qualify the blockram CS signal with bscan select output
     jtag_en_int <= bram_ce when bram_ce_valid = '1' else (others => '0');
-    --      
+		--      
     jtag_en_expanded(C_NUM_PICOBLAZE-1 downto 0) <= jtag_en_int;
     jtag_en_expanded(7 downto C_NUM_PICOBLAZE) <= (others => '0') when (C_NUM_PICOBLAZE < 8);
-    --        
+		--        
     bram_dout_int <= control_dout or jtag_dout_0_masked or jtag_dout_1_masked or jtag_dout_2_masked or jtag_dout_3_masked or jtag_dout_4_masked or jtag_dout_5_masked or jtag_dout_6_masked or jtag_dout_7_masked;
-    --
+		--
     control_din <= jtag_din_int;
-    --        
+		--        
     jtag_dout_0_masked <= jtag_dout_0 when jtag_en_expanded(0) = '1' else (others => '0');
     jtag_dout_1_masked <= jtag_dout_1 when jtag_en_expanded(1) = '1' else (others => '0');
     jtag_dout_2_masked <= jtag_dout_2 when jtag_en_expanded(2) = '1' else (others => '0');
@@ -391,12 +391,12 @@ begin
     jtag_dout_5_masked <= jtag_dout_5 when jtag_en_expanded(5) = '1' else (others => '0');
     jtag_dout_6_masked <= jtag_dout_6 when jtag_en_expanded(6) = '1' else (others => '0');
     jtag_dout_7_masked <= jtag_dout_7 when jtag_en_expanded(7) = '1' else (others => '0');
-    --
+		--
     jtag_en <= jtag_en_int;
     jtag_din <= jtag_din_int;
     jtag_addr <= jtag_addr_int;
     jtag_clk <= jtag_clk_int;
     jtag_we <= jtag_we_int;
     picoblaze_reset <= picoblaze_reset_int;
-    --        
+		--        
 end;

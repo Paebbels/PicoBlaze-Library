@@ -8,7 +8,7 @@
 --	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
 --	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
 --	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
---	                                                                        |___/ 
+--                                                                          |___/ 
 -- =============================================================================
 -- Authors:					Patrick Lehmann
 -- 
@@ -68,40 +68,40 @@ package pb_Devices is
 	-- ===========================================================================
 	-- PicoBlaze device descriptions
 	-- ===========================================================================
-	constant PB_DEV_RESET							: T_PB_DEVICE;
-	constant PB_DEV_ROM								: T_PB_DEVICE;
-	constant PB_DEV_INTERRUPT					: T_PB_DEVICE;
-	constant PB_DEV_INTERRUPT8				: T_PB_DEVICE;
-	constant PB_DEV_INTERRUPT16				: T_PB_DEVICE;
-	constant PB_DEV_TIMER							: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER				: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER8				: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER16			: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER24			: T_PB_DEVICE;
-	constant PB_DEV_MULTIPLIER32			: T_PB_DEVICE;
-	constant PB_DEV_ACCUMULATOR16			: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER						: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER8					: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER16					: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER24					: T_PB_DEVICE;
-	constant PB_DEV_DIVIDER32					: T_PB_DEVICE;
---	constant PB_DEV_SCALER16					: T_PB_DEVICE;
---	constant PB_DEV_SCALER32					: T_PB_DEVICE;
-	constant PB_DEV_SCALER40					: T_PB_DEVICE;
-	constant PB_DEV_CONVERTER_BCD			: T_PB_DEVICE;
-	constant PB_DEV_CONVERTER_BCD24		: T_PB_DEVICE;
-	constant PB_DEV_GPIO							: T_PB_DEVICE;
-	constant PB_DEV_BIT_BANGING_IO		: T_PB_DEVICE;
-	constant PB_DEV_BIT_BANGING_IO8		: T_PB_DEVICE;
-	constant PB_DEV_BIT_BANGING_IO16	: T_PB_DEVICE;
-	constant PB_DEV_LCDISPLAY					: T_PB_DEVICE;
-	constant PB_DEV_UART							: T_PB_DEVICE;
---	constant PB_DEV_UARTSTREAM				: T_PB_DEVICE;
-	constant PB_DEV_IICCONTROLLER			: T_PB_DEVICE;
---	constant PB_DEV_MDIOCONTROLLER		: T_PB_DEVICE;
-	constant PB_DEV_DRP								: T_PB_DEVICE;
-	constant PB_DEV_FREQM							: T_PB_DEVICE;
-	constant PB_DEV_BCDCOUNTER				: T_PB_DEVICE;
+	constant PB_DEV_RESET              : T_PB_DEVICE;
+	constant PB_DEV_ROM                : T_PB_DEVICE;
+	constant PB_DEV_INTERRUPT          : T_PB_DEVICE;
+	constant PB_DEV_INTERRUPT8        : T_PB_DEVICE;
+	constant PB_DEV_INTERRUPT16        : T_PB_DEVICE;
+	constant PB_DEV_TIMER              : T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER        : T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER8        : T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER16      : T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER24      : T_PB_DEVICE;
+	constant PB_DEV_MULTIPLIER32      : T_PB_DEVICE;
+	constant PB_DEV_ACCUMULATOR16      : T_PB_DEVICE;
+	constant PB_DEV_DIVIDER            : T_PB_DEVICE;
+	constant PB_DEV_DIVIDER8          : T_PB_DEVICE;
+	constant PB_DEV_DIVIDER16          : T_PB_DEVICE;
+	constant PB_DEV_DIVIDER24          : T_PB_DEVICE;
+	constant PB_DEV_DIVIDER32          : T_PB_DEVICE;
+--	constant PB_DEV_SCALER16          : T_PB_DEVICE;
+--	constant PB_DEV_SCALER32          : T_PB_DEVICE;
+	constant PB_DEV_SCALER40          : T_PB_DEVICE;
+	constant PB_DEV_CONVERTER_BCD      : T_PB_DEVICE;
+	constant PB_DEV_CONVERTER_BCD24    : T_PB_DEVICE;
+	constant PB_DEV_GPIO              : T_PB_DEVICE;
+	constant PB_DEV_BIT_BANGING_IO    : T_PB_DEVICE;
+	constant PB_DEV_BIT_BANGING_IO8    : T_PB_DEVICE;
+	constant PB_DEV_BIT_BANGING_IO16  : T_PB_DEVICE;
+	constant PB_DEV_LCDISPLAY          : T_PB_DEVICE;
+	constant PB_DEV_UART              : T_PB_DEVICE;
+--	constant PB_DEV_UARTSTREAM        : T_PB_DEVICE;
+	constant PB_DEV_IICCONTROLLER      : T_PB_DEVICE;
+--	constant PB_DEV_MDIOCONTROLLER    : T_PB_DEVICE;
+	constant PB_DEV_DRP                : T_PB_DEVICE;
+	constant PB_DEV_FREQM              : T_PB_DEVICE;
+	constant PB_DEV_BCDCOUNTER        : T_PB_DEVICE;
 
 end package;
 
@@ -684,9 +684,9 @@ package body pb_Devices is
 	);
 	
 	-- define aliases
-	constant PB_DEV_INTERRUPT				: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_INTERRUPT16,			"IntC");
-	constant PB_DEV_MULTIPLIER			: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_MULTIPLIER32,		"Mult");
-	constant PB_DEV_DIVIDER					: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_DIVIDER32,				"Div");
-	constant PB_DEV_CONVERTER_BCD		: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_CONVERTER_BCD24,	"ConvBCD");
-	constant PB_DEV_BIT_BANGING_IO	: T_PB_DEVICE		:= pb_CreateDeviceAlias(PB_DEV_BIT_BANGING_IO8,	"BBIO");
+	constant PB_DEV_INTERRUPT        : T_PB_DEVICE    := pb_CreateDeviceAlias(PB_DEV_INTERRUPT16,			"IntC");
+	constant PB_DEV_MULTIPLIER      : T_PB_DEVICE    := pb_CreateDeviceAlias(PB_DEV_MULTIPLIER32,		"Mult");
+	constant PB_DEV_DIVIDER          : T_PB_DEVICE    := pb_CreateDeviceAlias(PB_DEV_DIVIDER32,				"Div");
+	constant PB_DEV_CONVERTER_BCD    : T_PB_DEVICE    := pb_CreateDeviceAlias(PB_DEV_CONVERTER_BCD24,	"ConvBCD");
+	constant PB_DEV_BIT_BANGING_IO  : T_PB_DEVICE    := pb_CreateDeviceAlias(PB_DEV_BIT_BANGING_IO8,	"BBIO");
 end package body;

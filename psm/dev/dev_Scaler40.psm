@@ -10,9 +10,9 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Scaler40_Wait
-;		__dev_Scaler40_Begin
-;		__dev_Scaler40_End
+;		__DEV_Scaler40_Wait
+;		__DEV_Scaler40_Begin
+;		__DEV_Scaler40_End
 ;
 ; Interrupt Handlers:
 ;		__ISR_Scaler40
@@ -43,18 +43,18 @@ CONSTANT SCALER40_STATUS_DONE,						01		;
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Scaler40_Wait begin
+;PRAGMA function __DEV_Scaler40_Wait begin
 ;;		Requires:
 ;;			
 ;;		Returns:
 ;;			
-__dev_Scaler40_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER40_STATUS	; Read computation status
+__DEV_Scaler40_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER40_STATUS	; Read computation status
 															TEST		REG_TMP_0,		SCALER40_STATUS_DONE
 															RETURN	NZ
-															JUMP 		__dev_Scaler40_Wait
+															JUMP 		__DEV_Scaler40_Wait
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Scaler40_Begin begin
+;PRAGMA function __DEV_Scaler40_Begin begin
 ;;		Requires:
 ;;			Arg0 : Input value(7:0)
 ;;			Arg1 : Input value(15:8)
@@ -65,7 +65,7 @@ __dev_Scaler40_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER40_STATUS	; Read computa
 ;;			Tmp2 : Div(7:0)
 ;;		Returns:
 ;;			
-__dev_Scaler40_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER40_OPERANDA0		;	Write arg0 to Reg A0
+__DEV_Scaler40_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER40_OPERANDA0		;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_SCALER40_OPERANDA1		;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_2,		OPORT_SCALER40_OPERANDA2		;	Write arg2 to Reg A2
 															OUTPUT	REG_ARG_3,		OPORT_SCALER40_OPERANDA3		;	Write arg3 to Reg A3
@@ -75,7 +75,7 @@ __dev_Scaler40_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER40_OPERANDA0		;	Write a
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Scaler40_End begin
+;PRAGMA function __DEV_Scaler40_End begin
 ;;		Requires:
 ;;			
 ;;		Returns:
@@ -85,7 +85,7 @@ __dev_Scaler40_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER40_OPERANDA0		;	Write a
 ;;			Arg3 : Scaled value(31:24)
 ;;			Tmp0 : Scaled value(39:32)
 ;;		
-__dev_Scaler40_End:						INPUT		REG_ARG_0,		IPORT_SCALER40_RESULT0			;	Write Reg R0 to arg0
+__DEV_Scaler40_End:						INPUT		REG_ARG_0,		IPORT_SCALER40_RESULT0			;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_SCALER40_RESULT1			;	Write Reg R1 to arg1
 															INPUT		REG_ARG_2,		IPORT_SCALER40_RESULT2			;	Write Reg R2 to arg2
 															INPUT		REG_ARG_3,		IPORT_SCALER40_RESULT3			;	Write Reg R3 to arg3
@@ -102,8 +102,8 @@ CONSTANT SPM_SCALER40_ISR_REG0,						04		;
 CONSTANT SPM_SCALER40_ISR_REG1,						05		;
 ;
 ;
-;PRAGMA function __dev_Scaler40_WaitForInt begin
-__dev_Scaler40_WaitForInt:		STORE		REG_ARG_0,	SPM_SCALER40_ISR_REG0
+;PRAGMA function __DEV_Scaler40_WaitForInt begin
+__DEV_Scaler40_WaitForInt:		STORE		REG_ARG_0,	SPM_SCALER40_ISR_REG0
 															STORE		REG_ARG_1,	SPM_SCALER40_ISR_REG1
 															JUMP		__Thread_Yield
 ;PRAGMA function end

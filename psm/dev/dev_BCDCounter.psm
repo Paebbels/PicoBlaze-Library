@@ -10,11 +10,11 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_BCDCnt_Reset
-;		__dev_BCDCnt_Start
-;		__dev_BCDCnt_Stop
-;		__dev_BCDCnt_GetValue
-;		__dev_BCDCnt_GetValue_OnStack
+;		__DEV_BCDCnt_Reset
+;		__DEV_BCDCnt_Start
+;		__DEV_BCDCnt_Stop
+;		__DEV_BCDCnt_GetValue
+;		__DEV_BCDCnt_GetValue_OnStack
 ; 
 ;	private functions:
 ;   
@@ -47,34 +47,34 @@ CONSTANT BCDCNT_CMD_COMMAND_COUNT,							00000010'b
 ; Co-Processor macros
 ; ===============================================
 ;
-;PRAGMA function __dev_BCDCnt_Reset begin
-__dev_BCDCnt_Reset:							LOAD			REG_TMP_0, BCDCNT_CMD_COMMAND_RESET
+;PRAGMA function __DEV_BCDCnt_Reset begin
+__DEV_BCDCnt_Reset:							LOAD			REG_TMP_0, BCDCNT_CMD_COMMAND_RESET
 																OUTPUT		REG_TMP_0, OPORT_BCDCNT_COMMAND
 																RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_BCDCnt_Start begin
-__dev_BCDCnt_Start:							LOAD			REG_TMP_0, BCDCNT_CMD_COMMAND_COUNT
+;PRAGMA function __DEV_BCDCnt_Start begin
+__DEV_BCDCnt_Start:							LOAD			REG_TMP_0, BCDCNT_CMD_COMMAND_COUNT
 																OUTPUT		REG_TMP_0, OPORT_BCDCNT_COMMAND
 																RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_BCDCnt_Stop begin
-__dev_BCDCnt_Stop:							LOAD			REG_TMP_0, BCDCNT_CMD_COMMAND_STOP
+;PRAGMA function __DEV_BCDCnt_Stop begin
+__DEV_BCDCnt_Stop:							LOAD			REG_TMP_0, BCDCNT_CMD_COMMAND_STOP
 																OUTPUT		REG_TMP_0, OPORT_BCDCNT_COMMAND
 																RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_BCDCnt_GetValue begin
-__dev_BCDCnt_GetValue:					INPUT			REG_ARG_0, IPORT_BCDCNT_VALUE0
+;PRAGMA function __DEV_BCDCnt_GetValue begin
+__DEV_BCDCnt_GetValue:					INPUT			REG_ARG_0, IPORT_BCDCNT_VALUE0
 																INPUT			REG_ARG_1, IPORT_BCDCNT_VALUE1
 																INPUT			REG_ARG_2, IPORT_BCDCNT_VALUE2
 																INPUT			REG_ARG_3, IPORT_BCDCNT_VALUE3
 																RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_BCDCnt_GetValue_OnStack begin
-__dev_BCDCnt_GetValue_OnStack:	CALL			__dev_BCDCnt_GetValue
+;PRAGMA function __DEV_BCDCnt_GetValue_OnStack begin
+__DEV_BCDCnt_GetValue_OnStack:	CALL			__DEV_BCDCnt_GetValue
 																CALL			__push_arg03
 																RETURN
 ;PRAGMA function end

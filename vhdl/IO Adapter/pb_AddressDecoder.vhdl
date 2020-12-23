@@ -8,7 +8,7 @@
 --	| |_) | |/ __/ _ \|  _ \| |/ _` |_  / _ \ | |   | | '_ \| '__/ _` | '__| | | |
 --	|  __/| | (_| (_) | |_) | | (_| |/ /  __/ | |___| | |_) | | | (_| | |  | |_| |
 --	|_|   |_|\___\___/|____/|_|\__,_/___\___| |_____|_|_.__/|_|  \__,_|_|   \__, |
---	                                                                        |___/ 
+--                                                                          |___/ 
 -- =============================================================================
 -- Authors:					Patrick Lehmann
 --
@@ -52,56 +52,56 @@ use			L_PicoBlaze.pb.all;
 
 entity PicoBlaze_AddressDecoder is
 	generic (
-		DEVICE_NAME						: STRING;
-		BUS_NAME							: STRING;
-		READ_MAPPINGS					: T_PB_PORTNUMBER_MAPPING_VECTOR;
-		WRITE_MAPPINGS				: T_PB_PORTNUMBER_MAPPING_VECTOR;
-		WRITEK_MAPPINGS				: T_PB_PORTNUMBER_MAPPING_VECTOR
+		DEVICE_NAME            : STRING;
+		BUS_NAME              : STRING;
+		READ_MAPPINGS          : T_PB_PORTNUMBER_MAPPING_VECTOR;
+		WRITE_MAPPINGS        : T_PB_PORTNUMBER_MAPPING_VECTOR;
+		WRITEK_MAPPINGS        : T_PB_PORTNUMBER_MAPPING_VECTOR
 	);
 	port (
-		Clock									: in	STD_LOGIC;
-		Reset									: in	STD_LOGIC;
+		Clock                  : in	STD_LOGIC;
+		Reset                  : in	STD_LOGIC;
 
 		-- PicoBlaze interface
-		In_WriteStrobe				: in	STD_LOGIC;
-		In_WriteStrobe_K			: in	STD_LOGIC;
-		In_ReadStrobe					: in	STD_LOGIC;
-		In_Address						: in	T_SLV_8;
-		In_Data								: in	T_SLV_8;
-		Out_WriteStrobe				: out	STD_LOGIC;
-		Out_ReadStrobe				: out	STD_LOGIC;
-		Out_WriteAddress			: out	T_SLV_8;
-		Out_ReadAddress				: out	T_SLV_8;
-		Out_Data							: out	T_SLV_8
+		In_WriteStrobe        : in	STD_LOGIC;
+		In_WriteStrobe_K      : in	STD_LOGIC;
+		In_ReadStrobe          : in	STD_LOGIC;
+		In_Address            : in	T_SLV_8;
+		In_Data                : in	T_SLV_8;
+		Out_WriteStrobe        : out	STD_LOGIC;
+		Out_ReadStrobe        : out	STD_LOGIC;
+		Out_WriteAddress      : out	T_SLV_8;
+		Out_ReadAddress        : out	T_SLV_8;
+		Out_Data              : out	T_SLV_8
 	);
 end entity;
 
 
 architecture rtl of PicoBlaze_AddressDecoder is
-	attribute KEEP								: BOOLEAN;
+	attribute KEEP                : BOOLEAN;
 
-	signal WriteAddress				: T_SLV_8;
-	signal WriteAddress_K			: T_SLV_8;
-	signal ReadAddress				: T_SLV_8;
-	signal WriteHit						: STD_LOGIC;
-	signal WriteHit_K					: STD_LOGIC;
-	signal ReadHit						: STD_LOGIC;
+	signal WriteAddress        : T_SLV_8;
+	signal WriteAddress_K      : T_SLV_8;
+	signal ReadAddress        : T_SLV_8;
+	signal WriteHit            : STD_LOGIC;
+	signal WriteHit_K          : STD_LOGIC;
+	signal ReadHit            : STD_LOGIC;
 
-	signal Out_WriteStrobe_i	: STD_LOGIC			:= '0';
-	signal Out_ReadStrobe_i		: STD_LOGIC;
-	signal Out_WriteAddress_i	: T_SLV_8				:= (others => '0');
-	signal Out_ReadAddress_i	: T_SLV_8;
-	signal Out_Data_i					: T_SLV_8				:= (others => '0');
+	signal Out_WriteStrobe_i  : STD_LOGIC      := '0';
+	signal Out_ReadStrobe_i    : STD_LOGIC;
+	signal Out_WriteAddress_i  : T_SLV_8        := (others => '0');
+	signal Out_ReadAddress_i  : T_SLV_8;
+	signal Out_Data_i          : T_SLV_8        := (others => '0');
 begin
 
 	process(In_Address, In_WriteStrobe, In_WriteStrobe_K, In_ReadStrobe)
 	begin
-		WriteAddress		<= (others => '0');
-		WriteAddress_K	<= (others => '0');
-		ReadAddress			<= (others => '0');
-		WriteHit				<= '0';
-		WriteHit_K			<= '0';
-		ReadHit					<= '0';
+		WriteAddress    <= (others => '0');
+		WriteAddress_K  <= (others => '0');
+		ReadAddress      <= (others => '0');
+		WriteHit        <= '0';
+		WriteHit_K      <= '0';
+		ReadHit          <= '0';
 
 		assert PB_VERBOSE
 			report "PicoBlaze_AddressDecoder: Report PortNumber mappings for device " & str_trim(DEVICE_NAME) &
@@ -116,8 +116,8 @@ begin
 				severity NOTE;
 			
 			if (In_Address(3 downto 0) = to_slv(WRITEK_MAPPINGS(i).PortNumber, 4)) then
-				WriteAddress_K	<= to_slv(WRITEK_MAPPINGS(i).RegNumber, WriteAddress_K'length);
-				WriteHit_K			<= In_WriteStrobe_K;
+				WriteAddress_K  <= to_slv(WRITEK_MAPPINGS(i).RegNumber, WriteAddress_K'length);
+				WriteHit_K      <= In_WriteStrobe_K;
 			end if;
 		end loop;
 		for i in WRITE_MAPPINGS'range loop
@@ -128,8 +128,8 @@ begin
 				severity NOTE;
 			
 			if (In_Address = to_slv(WRITE_MAPPINGS(i).PortNumber, In_Address'length)) then
-				WriteAddress		<= to_slv(WRITE_MAPPINGS(i).RegNumber, WriteAddress'length);
-				WriteHit				<= In_WriteStrobe;
+				WriteAddress    <= to_slv(WRITE_MAPPINGS(i).RegNumber, WriteAddress'length);
+				WriteHit        <= In_WriteStrobe;
 			end if;
 		end loop;
 		for i in READ_MAPPINGS'range loop
@@ -140,8 +140,8 @@ begin
 				severity NOTE;
 			
 			if (In_Address = to_slv(READ_MAPPINGS(i).PortNumber, In_Address'length)) then
-				ReadAddress			<= to_slv(READ_MAPPINGS(i).RegNumber, ReadAddress'length);
-				ReadHit					<= In_ReadStrobe;
+				ReadAddress      <= to_slv(READ_MAPPINGS(i).RegNumber, ReadAddress'length);
+				ReadHit          <= In_ReadStrobe;
 			end if;
 		end loop;
 	end process;
@@ -150,23 +150,23 @@ begin
 	begin
 		if rising_edge(Clock) then
 			if (WriteHit_K = '1') then
-				Out_WriteStrobe_i		<= WriteHit_K;
-				Out_WriteAddress_i	<= WriteAddress_K;
+				Out_WriteStrobe_i    <= WriteHit_K;
+				Out_WriteAddress_i  <= WriteAddress_K;
 			else
-				Out_WriteStrobe_i		<= WriteHit;
-				Out_WriteAddress_i	<= WriteAddress;
+				Out_WriteStrobe_i    <= WriteHit;
+				Out_WriteAddress_i  <= WriteAddress;
 			end if;
 			
-			Out_Data_i						<= In_Data;
+			Out_Data_i            <= In_Data;
 		end if;
 		
-		Out_ReadStrobe_i				<= ReadHit;
-		Out_ReadAddress_i				<= ReadAddress;
+		Out_ReadStrobe_i        <= ReadHit;
+		Out_ReadAddress_i        <= ReadAddress;
 	end process;
 	
-	Out_WriteStrobe			<= Out_WriteStrobe_i;
-	Out_ReadStrobe			<= Out_ReadStrobe_i;
-	Out_WriteAddress		<= Out_WriteAddress_i;
-	Out_ReadAddress			<= Out_ReadAddress_i;
-	Out_Data						<= Out_Data_i;
+	Out_WriteStrobe      <= Out_WriteStrobe_i;
+	Out_ReadStrobe      <= Out_ReadStrobe_i;
+	Out_WriteAddress    <= Out_WriteAddress_i;
+	Out_ReadAddress      <= Out_ReadAddress_i;
+	Out_Data            <= Out_Data_i;
 end;

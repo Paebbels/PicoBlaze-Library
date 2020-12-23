@@ -13,17 +13,17 @@ use			UniSim.vComponents.all;
 
 entity {name} is
   port (
-		Clock										: in	std_logic;
-		Fetch										: in	std_logic;
-		Address									: in	std_logic_vector(11 downto 0);
-		Instruction							: out	std_logic_vector(17 downto 0);
+		Clock                    : in	std_logic;
+		Fetch                    : in	std_logic;
+		Address                  : in	std_logic_vector(11 downto 0);
+		Instruction              : out	std_logic_vector(17 downto 0);
 		
-		JTAGLoader_Clock				: in	std_logic;
-		JTAGLoader_Enable				: in	std_logic;
-		JTAGLoader_Address			: in	std_logic_vector(11 downto 0);
-		JTAGLoader_WriteEnable	: in	std_logic;
-		JTAGLoader_DataIn				: in	std_logic_vector(17 downto 0);
-		JTAGLoader_DataOut			: out	std_logic_vector(17 downto 0)
+		JTAGLoader_Clock        : in	std_logic;
+		JTAGLoader_Enable        : in	std_logic;
+		JTAGLoader_Address      : in	std_logic_vector(11 downto 0);
+		JTAGLoader_WriteEnable  : in	std_logic;
+		JTAGLoader_DataIn        : in	std_logic_vector(17 downto 0);
+		JTAGLoader_DataOut      : out	std_logic_vector(17 downto 0)
 	);
 end;
 
@@ -47,14 +47,14 @@ signal          we_b_l : std_logic_vector(3 downto 0);
 signal          we_b_h : std_logic_vector(3 downto 0);
 -- 
 begin
-	address_a						<= '1' & Address(11 downto 0) & "111";
-	Instruction					<= data_out_a_h(32) & data_out_a_h(7 downto 0) & data_out_a_l(32) & data_out_a_l(7 downto 0);
+	address_a            <= '1' & Address(11 downto 0) & "111";
+	Instruction          <= data_out_a_h(32) & data_out_a_h(7 downto 0) & data_out_a_l(32) & data_out_a_l(7 downto 0);
 
-	we_b								<= (others => JTAGLoader_WriteEnable);
-	address_b						<= '1'		& JTAGLoader_Address(11 downto 0) & "111";	
-	data_in_b_l					<= "000"	& JTAGLoader_DataIn(8)	& x"000000" & JTAGLoader_DataIn(7 downto 0);	
-	data_in_b_h					<= "000"	& JTAGLoader_DataIn(17)	& x"000000" & JTAGLoader_DataIn(16 downto 9);
-	JTAGLoader_DataOut	<= data_out_b_h(32) & data_out_b_h(7 downto 0) & data_out_b_l(32) & data_out_b_l(7 downto 0);
+	we_b                <= (others => JTAGLoader_WriteEnable);
+	address_b            <= '1'		& JTAGLoader_Address(11 downto 0) & "111";	
+	data_in_b_l          <= "000"	& JTAGLoader_DataIn(8)	& x"000000" & JTAGLoader_DataIn(7 downto 0);	
+	data_in_b_h          <= "000"	& JTAGLoader_DataIn(17)	& x"000000" & JTAGLoader_DataIn(16 downto 9);
+	JTAGLoader_DataOut  <= data_out_b_h(32) & data_out_b_h(7 downto 0) & data_out_b_l(32) & data_out_b_l(7 downto 0);
 
 	rom0 : RAMB36E1
 		generic map (
@@ -227,32 +227,32 @@ begin
 			INITP_0F => X"{[8:0]_INITP_0F}"
 		)
 		port map (
-			ADDRARDADDR			=> address_a,
-			ENARDEN					=> Fetch,
-			CLKARDCLK				=> Clock,
-			DOADO						=> data_out_a_l(31 downto 0),
-			DOPADOP					=> data_out_a_l(35 downto 32), 
-			DIADI						=> x"00000000",
-			DIPADIP					=> x"0",
-			WEA							=> "0000",
-			REGCEAREGCE			=> '0',
-			RSTRAMARSTRAM		=> '0',
-			RSTREGARSTREG		=> '0',
-			ADDRBWRADDR			=> address_b,
-			ENBWREN					=> JTAGLoader_Enable,
-			CLKBWRCLK				=> JTAGLoader_Clock,
-			DOBDO						=> data_out_b_l(31 downto 0),
-			DOPBDOP					=> data_out_b_l(35 downto 32), 
-			DIBDI						=> data_in_b_l(31 downto 0),
-			DIPBDIP					=> data_in_b_l(35 downto 32), 
-			WEBWE						=> we_b,
-			REGCEB					=> '0',
-			RSTRAMB					=> '0',
-			RSTREGB					=> '0',
-			CASCADEINA			=> '0',
-			CASCADEINB			=> '0',
-			INJECTDBITERR		=> '0',
-			INJECTSBITERR		=> '0'
+			ADDRARDADDR      => address_a,
+			ENARDEN          => Fetch,
+			CLKARDCLK        => Clock,
+			DOADO            => data_out_a_l(31 downto 0),
+			DOPADOP          => data_out_a_l(35 downto 32), 
+			DIADI            => x"00000000",
+			DIPADIP          => x"0",
+			WEA              => "0000",
+			REGCEAREGCE      => '0',
+			RSTRAMARSTRAM    => '0',
+			RSTREGARSTREG    => '0',
+			ADDRBWRADDR      => address_b,
+			ENBWREN          => JTAGLoader_Enable,
+			CLKBWRCLK        => JTAGLoader_Clock,
+			DOBDO            => data_out_b_l(31 downto 0),
+			DOPBDOP          => data_out_b_l(35 downto 32), 
+			DIBDI            => data_in_b_l(31 downto 0),
+			DIPBDIP          => data_in_b_l(35 downto 32), 
+			WEBWE            => we_b,
+			REGCEB          => '0',
+			RSTRAMB          => '0',
+			RSTREGB          => '0',
+			CASCADEINA      => '0',
+			CASCADEINB      => '0',
+			INJECTDBITERR    => '0',
+			INJECTSBITERR    => '0'
 		);
 	--
 	rom1 : RAMB36E1
@@ -426,32 +426,32 @@ begin
 			INITP_0F => X"{[17:9]_INITP_0F}"
 		)
 		port map (
-			ADDRARDADDR			=> address_a,
-			ENARDEN					=> Fetch,
-			CLKARDCLK				=> Clock,
-			DOADO						=> data_out_a_h(31 downto 0),
-			DOPADOP					=> data_out_a_h(35 downto 32), 
-			DIADI						=> x"00000000",
-			DIPADIP					=> x"0",
-			WEA							=> "0000",
-			REGCEAREGCE			=> '0',
-			RSTRAMARSTRAM		=> '0',
-			RSTREGARSTREG		=> '0',
-			ADDRBWRADDR			=> address_b,
-			ENBWREN					=> JTAGLoader_Enable,
-			CLKBWRCLK				=> JTAGLoader_Clock,
-			DOBDO						=> data_out_b_h(31 downto 0),
-			DOPBDOP					=> data_out_b_h(35 downto 32), 
-			DIBDI						=> data_in_b_h(31 downto 0),
-			DIPBDIP					=> data_in_b_h(35 downto 32), 
-			WEBWE						=> we_b,
-			REGCEB					=> '0',
-			RSTRAMB					=> '0',
-			RSTREGB					=> '0',
-			CASCADEINA			=> '0',
-			CASCADEINB			=> '0',
-			INJECTDBITERR		=> '0',
-			INJECTSBITERR		=> '0'
+			ADDRARDADDR      => address_a,
+			ENARDEN          => Fetch,
+			CLKARDCLK        => Clock,
+			DOADO            => data_out_a_h(31 downto 0),
+			DOPADOP          => data_out_a_h(35 downto 32), 
+			DIADI            => x"00000000",
+			DIPADIP          => x"0",
+			WEA              => "0000",
+			REGCEAREGCE      => '0',
+			RSTRAMARSTRAM    => '0',
+			RSTREGARSTREG    => '0',
+			ADDRBWRADDR      => address_b,
+			ENBWREN          => JTAGLoader_Enable,
+			CLKBWRCLK        => JTAGLoader_Clock,
+			DOBDO            => data_out_b_h(31 downto 0),
+			DOPBDOP          => data_out_b_h(35 downto 32), 
+			DIBDI            => data_in_b_h(31 downto 0),
+			DIPBDIP          => data_in_b_h(35 downto 32), 
+			WEBWE            => we_b,
+			REGCEB          => '0',
+			RSTRAMB          => '0',
+			RSTREGB          => '0',
+			CASCADEINA      => '0',
+			CASCADEINB      => '0',
+			INJECTDBITERR    => '0',
+			INJECTSBITERR    => '0'
 		);
 
 end page;

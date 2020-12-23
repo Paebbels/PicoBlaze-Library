@@ -10,10 +10,10 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_PCA9548_Reset
-;		__dev_PCA9548_TestSwitch
-;		__dev_PCA9548_WriteSwitch
-;		__dev_PCA9548_ReadSwitch
+;		__DEV_PCA9548_Reset
+;		__DEV_PCA9548_TestSwitch
+;		__DEV_PCA9548_WriteSwitch
+;		__DEV_PCA9548_ReadSwitch
 ; 
 ;	private functions:
 ;   
@@ -37,8 +37,8 @@
 ;
 ; DEV_PCA9548 macros
 ; ===============================================
-;PRAGMA function __dev_PCA9548_Reset begin
-__dev_PCA9548_Reset:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
+;PRAGMA function __DEV_PCA9548_Reset begin
+__DEV_PCA9548_Reset:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
 															OR				REG_TMP_0,	GPIO_OPIN_RAW_IICSWITCH_RESET
 															OUTPUT		REG_TMP_0,	OPORT_GPIO_DATAOUT
 															AND				REG_TMP_0,	~GPIO_OPIN_RAW_IICSWITCH_RESET
@@ -46,18 +46,18 @@ __dev_PCA9548_Reset:					INPUT			REG_TMP_0,	IPORT_GPIO_DATAOUT
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_PCA9548_TestSwitch begin
+;PRAGMA function __DEV_PCA9548_TestSwitch begin
 ;	(Arg0 : PCA9548_Address) => (C : Error)
-__dev_PCA9548_TestSwitch:			JUMP			__io_IIC_CheckAddress						; tail call elimination
+__DEV_PCA9548_TestSwitch:			JUMP			__io_IIC_CheckAddress						; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_PCA9548_WriteSwitch begin
+;PRAGMA function __DEV_PCA9548_WriteSwitch begin
 ; (Arg0 : PCA9548_Address; Arg1 : MuxConfig) => (C : Error)
-__dev_PCA9548_WriteSwitch:		JUMP			__io_IIC_WriteByte							; tail call elimination
+__DEV_PCA9548_WriteSwitch:		JUMP			__io_IIC_WriteByte							; tail call elimination
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_PCA9548_ReadSwitch begin
+;PRAGMA function __DEV_PCA9548_ReadSwitch begin
 ; (Arg0 : PCA9548_Address) => (Arg0 : MuxConfig; C : Error)
-__dev_PCA9548_ReadSwitch:			JUMP			__io_IIC_ReadByte								; tail call elimination
+__DEV_PCA9548_ReadSwitch:			JUMP			__io_IIC_ReadByte								; tail call elimination
 ;PRAGMA function end
 ;

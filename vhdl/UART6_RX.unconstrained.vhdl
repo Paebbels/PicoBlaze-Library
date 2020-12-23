@@ -192,7 +192,7 @@ attribute hblknm : string;
 --	
 begin
 
-  -- SRL16E data storage
+	-- SRL16E data storage
 
   data_width_loop: for i in 0 to 7 generate
     attribute hblknm : string; 
@@ -514,7 +514,7 @@ begin
               C => clk);
 
 
-  -- assign internal signals to outputs
+	-- assign internal signals to outputs
 
   buffer_full <= full_int;  
   buffer_half_full <= pointer(3);  

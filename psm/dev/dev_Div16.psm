@@ -10,18 +10,18 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Div16_Wait
-;		__dev_Div16_Div8_Begin
-;		__dev_Div16_Div8_End
-;		__dev_Div16_Div16_Begin
-;		__dev_Div16_Div16_End
+;		__DEV_Div16_Wait
+;		__DEV_Div16_Div8_Begin
+;		__DEV_Div16_Div8_End
+;		__DEV_Div16_Div16_Begin
+;		__DEV_Div16_Div16_End
 ;
 ; Aliases
-;		__dev_Div_Wait
-;		__dev_Div_Div8_Begin
-;		__dev_Div_Div8_End
-;		__dev_Div_Div16_Begin
-;		__dev_Div_Div16_End
+;		__DEV_Div_Wait
+;		__DEV_Div_Div8_Begin
+;		__DEV_Div_Div8_End
+;		__DEV_Div_Div16_Begin
+;		__DEV_Div_Div16_End
 ;
 ; Interrupt Handlers
 ;		__ISR_Div16
@@ -51,19 +51,19 @@ CONSTANT DIV16_STATUS_DONE,						01		;
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Div16_Wait begin
+;PRAGMA function __DEV_Div16_Wait begin
 ;;		Requires:
 ;;		Returns:
 ;;		Uses:
 ;;			Tmp0
-__dev_Div_Wait:
-__dev_Div16_Wait:							INPUT		REG_TMP_0,		IPORT_DIV16_STATUS			; Read computation status
+__DEV_Div_Wait:
+__DEV_Div16_Wait:							INPUT		REG_TMP_0,		IPORT_DIV16_STATUS			; Read computation status
 															TEST		REG_TMP_0,		DIV16_STATUS_DONE
 															RETURN	C
-															JUMP 		__dev_Div16_Wait
+															JUMP 		__DEV_Div16_Wait
 ;PRAGMA function end
 
-;PRAGMA function __dev_Div16_Div8_Begin begin
+;PRAGMA function __DEV_Div16_Div8_Begin begin
 ;;		Requires:
 ;;			Arg0 : Factor A
 ;;			Arg1 : Factor B
@@ -71,18 +71,18 @@ __dev_Div16_Wait:							INPUT		REG_TMP_0,		IPORT_DIV16_STATUS			; Read computati
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			
-__dev_Div_Div8_Begin:
-__dev_Div16_Div8_Begin:				OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Div_Div8_Begin:
+__DEV_Div16_Div8_Begin:				OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_DIV16_OPERANDB0	;	Write arg1 to Reg B0
 ;PRAGMA function end						
 ;		
-;PRAGMA function __dev_Div16_Div8_End begin
-__dev_Div_Div8_End:
-__dev_Div16_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV16_RESULT0		;	Write Reg R0 to arg0
+;PRAGMA function __DEV_Div16_Div8_End begin
+__DEV_Div_Div8_End:
+__DEV_Div16_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV16_RESULT0		;	Write Reg R0 to arg0
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Div16_Div16 begin
+;PRAGMA function __DEV_Div16_Div16 begin
 ;;		Requires:
 ;;			Arg0 : Factor A(7:0)
 ;;			Arg1 : Factor A(15:8)
@@ -94,16 +94,16 @@ __dev_Div16_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV16_RESULT0		;	Write Reg R0
 ;;			Arg2 : Product R(23:16)
 ;;			Arg3 : Product R(31:24)
 ;;			
-__dev_Div_Div16_Begin:
-__dev_Div16_Div16_Begin:			OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Div_Div16_Begin:
+__DEV_Div16_Div16_Begin:			OUTPUT	REG_ARG_0,		OPORT_DIV16_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_DIV16_OPERANDA1	;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_2,		OPORT_DIV16_OPERANDB0	;	Write arg2 to Reg B0
 															OUTPUT	REG_ARG_3,		OPORT_DIV16_OPERANDB1	;	Write arg3 to Reg B1
 ;PRAGMA function end						
 ;		
-;PRAGMA function __dev_Div16_Div16_End begin
-__dev_Div_Div16_End:
-__dev_Div16_Div16_End:				INPUT		REG_ARG_0,		IPORT_DIV16_RESULT0		;	Write Reg R0 to arg0
+;PRAGMA function __DEV_Div16_Div16_End begin
+__DEV_Div_Div16_End:
+__DEV_Div16_Div16_End:				INPUT		REG_ARG_0,		IPORT_DIV16_RESULT0		;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_DIV16_RESULT1		;	Write Reg R1 to arg1
 															RETURN
 ;PRAGMA function end

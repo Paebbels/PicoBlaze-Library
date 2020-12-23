@@ -21,7 +21,8 @@
 --
 -- License:
 -- ============================================================================
--- Copyright 2007-2015 Patrick Lehmann - Dresden, Germany
+-- Copyright 2007-2016 Patrick Lehmann - Dresden, Germany
+-- Copyright 2017      Patrick Lehmann - Boetzingen, Germany
 -- 
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -53,7 +54,7 @@ use			PoC.strings.all;
 
 package pb is
 
-	constant PB_VERBOSE				: BOOLEAN			:= FALSE;	-- POC_VERBOSE;
+	constant PB_VERBOSE				: BOOLEAN			:= TRUE;	-- POC_VERBOSE;
 	constant PB_REPORT				: BOOLEAN			:= FALSE;
 
 	subtype T_PB_ADDRESS			is STD_LOGIC_VECTOR(11 downto 0);
@@ -78,13 +79,13 @@ package pb is
 	type T_PB_IOBUS_PB_DEV_VECTOR	is array(NATURAL range <>) of T_PB_IOBUS_PB_DEV;
 	type T_PB_IOBUS_DEV_PB_VECTOR	is array(NATURAL range <>) of T_PB_IOBUS_DEV_PB;
 	
-	constant T_PB_IOBUS_PB_DEV_Z : T_PB_IOBUS_PB_DEV := ((others => 'Z'), (others => 'Z'), others => 'Z');
-	constant T_PB_IOBUS_DEV_PB_Z : T_PB_IOBUS_DEV_PB := ((others => 'Z'), 'Z', (others => 'Z'));
+	constant C_PB_IOBUS_PB_DEV_Z : T_PB_IOBUS_PB_DEV := ((others => 'Z'), (others => 'Z'), others => 'Z');
+	constant C_PB_IOBUS_DEV_PB_Z : T_PB_IOBUS_DEV_PB := ((others => 'Z'), 'Z', (others => 'Z'));
 
 	-- private functions (must be declared public to be useable in public constants)
 	-- ===========================================================================
 --	constant C_PB_MAX_LONGNAME_LENGTH			: POSITIVE				:= 64;
-	constant C_PB_MAX_SHORTNAME_LENGTH		: POSITIVE				:= 32;
+	constant C_PB_MAX_SHORTNAME_LENGTH		: POSITIVE				:= 8;
 
 --	subtype T_PB_LONGNAME					is STRING(1 to C_PB_MAX_LONGNAME_LENGTH);
 	subtype T_PB_SHORTNAME				is STRING(1 to C_PB_MAX_SHORTNAME_LENGTH);
@@ -97,17 +98,17 @@ package pb is
 	function pb_ShortName(name : string)	return T_PB_SHORTNAME;
 	
 	-- PicoBlaze device description
-	constant C_PB_MAX_REGISTER_FIELDS					: POSITIVE				:= 32;
-	constant C_PB_MAX_REGISTERS								: POSITIVE				:= 32;
+	constant C_PB_MAX_REGISTER_FIELDS					: POSITIVE				:= 16;
+	constant C_PB_MAX_REGISTERS								: POSITIVE				:= 16;
 	constant C_PB_MAX_REGISTER_FIELD_MAPPINGS	: POSITIVE				:= 32;
-	constant C_PB_MAX_MAPPINGS								: POSITIVE				:= 32;
-	constant C_PB_MAX_DEVICES									: POSITIVE				:= 32;
-	constant C_PB_MAX_BUSSES									: POSITIVE				:= 12;
+	constant C_PB_MAX_MAPPINGS								: POSITIVE				:= 16;
+	constant C_PB_MAX_DEVICES									: POSITIVE				:= 12;
+	constant C_PB_MAX_BUSSES									: POSITIVE				:= 4;
 	
 	subtype T_PB_REGISTER_FIELD_INDEX					is NATURAL range 0 to (C_PB_MAX_REGISTER_FIELDS - 1);
 	subtype T_PB_REGISTER_INDEX								is NATURAL range 0 to (C_PB_MAX_REGISTERS - 1);
 	subtype T_PB_REGISTER_FIELD_MAPPING_INDEX	is NATURAL range 0 to (C_PB_MAX_REGISTER_FIELD_MAPPINGS - 1);
-	subtype T_PB_PORTNUMBER_MAPPING_INDEX			is NATURAL range 0 to (C_PB_MAX_MAPPINGS - 1);
+	subtype T_PB_PORTNUMBER_ASSOCIATION_INDEX is NATURAL range 0 to (C_PB_MAX_MAPPINGS - 1);
 	subtype T_PB_DEVICE_INSTANCE_INDEX				is NATURAL range 0 to (C_PB_MAX_DEVICES - 1);
 	subtype T_PB_BUS_INDEX										is NATURAL range 0 to (C_PB_MAX_BUSSES - 1);
 
@@ -207,20 +208,31 @@ package pb is
 	
 	type T_PB_MAPPING_KIND is (PB_MAPPING_KIND_EMPTY, PB_MAPPING_KIND_WRITE, PB_MAPPING_KIND_WRITEK, PB_MAPPING_KIND_READ);
 
-	type T_PB_PORTNUMBER_MAPPING is record
+	type T_PB_PORTNUMBER_ASSOCIATION is record
 		PortNumber	: T_UINT_8;
 		RegID				: T_PB_REGISTER_INDEX;
 		RegNumber		: T_UINT_8;
 		MappingKind	: T_PB_MAPPING_KIND;
 	end record;
-	
-	type T_PB_PORTNUMBER_MAPPING_VECTOR		is array(NATURAL range <>) of T_PB_PORTNUMBER_MAPPING;
 
-	constant C_PB_PORTNUMBER_MAPPING_EMPTY : T_PB_PORTNUMBER_MAPPING := (
+	type T_PB_PORTNUMBER_MAPPING is record
+		PortNumber	: T_UINT_8;
+		RegNumber		: T_UINT_8;
+	end record;
+	
+	type T_PB_PORTNUMBER_ASSOCIATION_VECTOR is array(NATURAL range <>) of T_PB_PORTNUMBER_ASSOCIATION;
+	type T_PB_PORTNUMBER_MAPPING_VECTOR     is array(NATURAL range <>) of T_PB_PORTNUMBER_MAPPING;
+
+	constant T_PB_PORTNUMBER_ASSOCIATION_EMPTY : T_PB_PORTNUMBER_ASSOCIATION := (
 		PortNumber =>		0,
 		RegID =>				0,
 		RegNumber =>		0,
 		MappingKind =>	PB_MAPPING_KIND_EMPTY
+	);
+
+	constant C_PB_PORTNUMBER_MAPPING_EMPTY : T_PB_PORTNUMBER_MAPPING := (
+		PortNumber =>		0,
+		RegNumber =>		0
 	);
 
 	type T_PB_DEVICE_INSTANCE is record
@@ -228,19 +240,19 @@ package pb is
 		DeviceShort				: T_PB_SHORTNAME;
 		Device						: T_PB_DEVICE;
 		BusShort					: T_PB_SHORTNAME;
-		MappingCount			: T_PB_PORTNUMBER_MAPPING_INDEX;
-		Mappings					: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_MAPPING_INDEX);
+		MappingCount			: T_PB_PORTNUMBER_ASSOCIATION_INDEX;
+		Mappings					: T_PB_PORTNUMBER_ASSOCIATION_VECTOR(T_PB_PORTNUMBER_ASSOCIATION_INDEX);
 	end record;
 	
 	type T_PB_DEVICE_DESCRIPTION is record
 		DeviceShort					: T_PB_SHORTNAME;
 		BusShort						: T_PB_SHORTNAME;
-		ReadMappings				: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_MAPPING_INDEX);
-		ReadMappingCount		: T_PB_PORTNUMBER_MAPPING_INDEX;
-		WriteMappings				: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_MAPPING_INDEX);
-		WriteMappingCount		: T_PB_PORTNUMBER_MAPPING_INDEX;
-		WriteKMappings			: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_MAPPING_INDEX);
-		WriteKMappingCount	: T_PB_PORTNUMBER_MAPPING_INDEX;
+		ReadMappings				: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_ASSOCIATION_INDEX);
+		ReadMappingCount		: T_PB_PORTNUMBER_ASSOCIATION_INDEX;
+		WriteMappings				: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_ASSOCIATION_INDEX);
+		WriteMappingCount		: T_PB_PORTNUMBER_ASSOCIATION_INDEX;
+		WriteKMappings			: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_ASSOCIATION_INDEX);
+		WriteKMappingCount	: T_PB_PORTNUMBER_ASSOCIATION_INDEX;
 	end record;
 
 	type T_PB_DEVICE_INSTANCE_VECTOR	is array (NATURAL range <>) of T_PB_DEVICE_INSTANCE;
@@ -251,7 +263,7 @@ package pb is
 		Device =>				C_PB_DEVICE_EMPTY,
 		BusShort =>			C_PB_SHORTNAME_EMPTY,
 		MappingCount =>	0,
-		Mappings =>			(others => C_PB_PORTNUMBER_MAPPING_EMPTY)
+		Mappings =>			(others => T_PB_PORTNUMBER_ASSOCIATION_EMPTY)
 	);
 
 	function pb_CreateReadonlyField(NameLong : STRING; NameShort : STRING; Length : T_UINT_8; Encoding : STRING := ""; AutoClear : BOOLEAN := FALSE) return T_PB_REGISTER_FIELD;
@@ -331,6 +343,7 @@ package pb is
 	function pb_ResizeVec(RegisterFields : T_PB_REGISTER_FIELD_VECTOR; Size : NATURAL := 0) return T_PB_REGISTER_FIELD_VECTOR;
 	function pb_ResizeVec(Registers : T_PB_REGISTER_VECTOR; Size : NATURAL := 0) return T_PB_REGISTER_VECTOR;
 	function pb_ResizeVec(Busses : T_PB_BUS_VECTOR; Size : NATURAL := 0) return T_PB_BUS_VECTOR;
+	function pb_ResizeVec(Mappings : T_PB_PORTNUMBER_ASSOCIATION_VECTOR; Size : NATURAL := 0) return T_PB_PORTNUMBER_ASSOCIATION_VECTOR;
 	function pb_ResizeVec(Mappings : T_PB_PORTNUMBER_MAPPING_VECTOR; Size : NATURAL := 0) return T_PB_PORTNUMBER_MAPPING_VECTOR;
 	function pb_ResizeVec(DeviceInstances : T_PB_DEVICE_INSTANCE_VECTOR; Size : NATURAL := 0) return T_PB_DEVICE_INSTANCE_VECTOR;
 	
@@ -674,12 +687,12 @@ package body pb is
 	end function;
 
 	-- private function
-	function pb_CreateMapping(Device : T_PB_DEVICE; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_PORTNUMBER_MAPPING_VECTOR is
-		variable Result					: T_PB_PORTNUMBER_MAPPING_VECTOR(T_PB_PORTNUMBER_MAPPING_INDEX);
+	function pb_CreateMapping(Device : T_PB_DEVICE; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_PORTNUMBER_ASSOCIATION_VECTOR is
+		variable Result					: T_PB_PORTNUMBER_ASSOCIATION_VECTOR(T_PB_PORTNUMBER_ASSOCIATION_INDEX);
 		variable Reg						: T_PB_REGISTER;
 		variable j							: T_UINT_8;
 	begin
-		Result := (others => C_PB_PORTNUMBER_MAPPING_EMPTY);
+		Result := (others => T_PB_PORTNUMBER_ASSOCIATION_EMPTY);
 		if ((PB_VERBOSE or PB_REPORT) = TRUE) then
 			report "Creating PortNumber mapping for device " & str_trim(Device.DeviceShort) & " with " & INTEGER'image(Device.RegisterCount) & " registers:" severity NOTE;
 		end if;
@@ -774,7 +787,7 @@ package body pb is
 	end function;
 	
 	function pb_CreateDeviceInstance(Device : T_PB_DEVICE; BusShort : STRING; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_DEVICE_INSTANCE is
-		constant Mappings		: T_PB_PORTNUMBER_MAPPING_VECTOR		:= pb_CreateMapping(Device, MappingStart, KMappingStart);
+		constant Mappings		: T_PB_PORTNUMBER_ASSOCIATION_VECTOR		:= pb_CreateMapping(Device, MappingStart, KMappingStart);
 		variable Result			: T_PB_DEVICE_INSTANCE;
 	begin
 --		Result.DeviceName		:= Device.DeviceName;
@@ -787,7 +800,7 @@ package body pb is
 	end function;
 	
 	function pb_CreateDeviceInstance(Device : T_PB_DEVICE; InstanceNumber : T_UINT_8; BusShort : STRING; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_DEVICE_INSTANCE is
-		constant Mappings		: T_PB_PORTNUMBER_MAPPING_VECTOR		:= pb_CreateMapping(Device, MappingStart, KMappingStart);
+		constant Mappings		: T_PB_PORTNUMBER_ASSOCIATION_VECTOR		:= pb_CreateMapping(Device, MappingStart, KMappingStart);
 		variable Result			: T_PB_DEVICE_INSTANCE;
 	begin
 --		Result.DeviceName		:= pb_LongName(str_trim(Device.DeviceName) & INTEGER'image(InstanceNumber));
@@ -800,7 +813,7 @@ package body pb is
 	end function;
 	
 	function pb_CreateDeviceInstance(Device : T_PB_DEVICE; NameLong : STRING; NameShort : STRING; BusShort : STRING; MappingStart : T_UINT_8; KMappingStart : T_UINT_8 := T_UINT_8'high) return T_PB_DEVICE_INSTANCE is
-		constant Mappings		: T_PB_PORTNUMBER_MAPPING_VECTOR		:= pb_CreateMapping(Device, MappingStart, KMappingStart);
+		constant Mappings		: T_PB_PORTNUMBER_ASSOCIATION_VECTOR		:= pb_CreateMapping(Device, MappingStart, KMappingStart);
 		variable Result			: T_PB_DEVICE_INSTANCE;
 	begin
 --		Result.DeviceName		:= pb_LongName(NameLong);
@@ -998,8 +1011,14 @@ package body pb is
 		return Busses & T_PB_BUS_VECTOR'(Busses'length to high => C_PB_BUS_EMPTY);
 	end function;
 	
+	function pb_ResizeVec(Mappings : T_PB_PORTNUMBER_ASSOCIATION_VECTOR; Size : NATURAL := 0) return T_PB_PORTNUMBER_ASSOCIATION_VECTOR is
+		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_PORTNUMBER_ASSOCIATION_INDEX'high);
+	begin
+		return Mappings & T_PB_PORTNUMBER_ASSOCIATION_VECTOR'(Mappings'length to high => T_PB_PORTNUMBER_ASSOCIATION_EMPTY);
+	end function;
+	
 	function pb_ResizeVec(Mappings : T_PB_PORTNUMBER_MAPPING_VECTOR; Size : NATURAL := 0) return T_PB_PORTNUMBER_MAPPING_VECTOR is
-		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_PORTNUMBER_MAPPING_INDEX'high);
+		constant high : T_UINT_8 := ite(Size /= 0, (Size - 1), T_PB_PORTNUMBER_ASSOCIATION_INDEX'high);
 	begin
 		return Mappings & T_PB_PORTNUMBER_MAPPING_VECTOR'(Mappings'length to high => C_PB_PORTNUMBER_MAPPING_EMPTY);
 	end function;
@@ -1092,6 +1111,7 @@ package body pb is
 	end procedure;
 	
 	-- PicoBlaze AddressDecoder functions
+	-- TODO: it could use a lighter data structure without RegID and RegisterKind
 	function pb_FilterMappings(DeviceInstance : T_PB_DEVICE_INSTANCE; MappingKind : T_PB_MAPPING_KIND) return T_PB_PORTNUMBER_MAPPING_VECTOR is
 		variable Result				: T_PB_PORTNUMBER_MAPPING_VECTOR(0 to DeviceInstance.MappingCount - 1);
 		variable ResultCount	: NATURAL;
@@ -1100,7 +1120,8 @@ package body pb is
 		ResultCount	:= 0;
 		for i in 0 to DeviceInstance.MappingCount - 1 loop
 			if (DeviceInstance.Mappings(i).MappingKind = MappingKind) then
-				Result(ResultCount)	:= DeviceInstance.Mappings(i);
+				Result(ResultCount).PortNumber := DeviceInstance.Mappings(i).PortNumber;
+				Result(ResultCount).RegNumber  := DeviceInstance.Mappings(i).RegNumber;
 				ResultCount					:= ResultCount + 1;
 			end if;
 		end loop;
@@ -1236,7 +1257,7 @@ package body pb is
 
 		variable psmLine				: LINE;
 		variable DeviceInstance	: T_PB_DEVICE_INSTANCE;
-		variable Mapping				: T_PB_PORTNUMBER_MAPPING;
+		variable Mapping				: T_PB_PORTNUMBER_ASSOCIATION;
 
 		type T_USAGE_TRACKING is record
 			DeviceInstanceID	: T_UINT_8;
@@ -1446,7 +1467,7 @@ package body pb is
 		variable tokenLine			: LINE;
 		variable DeviceInstance	: T_PB_DEVICE_INSTANCE;
 		variable Device					: T_PB_DEVICE;
-		variable Mapping				: T_PB_PORTNUMBER_MAPPING;
+		variable Mapping				: T_PB_PORTNUMBER_ASSOCIATION;
 		
 		variable PortNumber_slv	: T_SLV_8;
 

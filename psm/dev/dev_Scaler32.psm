@@ -10,9 +10,9 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Scaler32_Wait
-;		__dev_Scaler32_Begin
-;		__dev_Scaler32_End
+;		__DEV_Scaler32_Wait
+;		__DEV_Scaler32_Begin
+;		__DEV_Scaler32_End
 ;
 ; Interrupt Handlers:
 ;		__ISR_Scaler32
@@ -42,18 +42,18 @@ CONSTANT SCALER32_STATUS_DONE,						01		;
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Scaler32_Wait begin
+;PRAGMA function __DEV_Scaler32_Wait begin
 ;;		Requires:
 ;;			
 ;;		Returns:
 ;;			
-__dev_Scaler32_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER32_REG_STATUS	; Read computation status
+__DEV_Scaler32_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER32_REG_STATUS	; Read computation status
 															TEST		REG_TMP_0,		SCALER32_STATUS_DONE
 															RETURN	NZ
-															JUMP 		__dev_Scaler32_Wait
+															JUMP 		__DEV_Scaler32_Wait
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Scaler32_Begin begin
+;PRAGMA function __DEV_Scaler32_Begin begin
 ;;		Requires:
 ;;			Arg0 : Input value(7:0)
 ;;			Arg1 : Input value(15:8)
@@ -63,7 +63,7 @@ __dev_Scaler32_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER32_REG_STATUS	; Read com
 ;;			Tmp1 : Div(7:0)
 ;;		Returns:
 ;;			
-__dev_Scaler32_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER32_REG_A0			;	Write arg0 to Reg A0
+__DEV_Scaler32_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER32_REG_A0			;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_SCALER32_REG_A1			;	Write arg1 to Reg A1
 															OUTPUT	REG_ARG_2,		OPORT_SCALER32_REG_A2			;	Write arg2 to Reg A2
 															OUTPUT	REG_ARG_3,		OPORT_SCALER32_REG_A3			;	Write arg3 to Reg A3
@@ -72,7 +72,7 @@ __dev_Scaler32_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER32_REG_A0			;	Write arg
 															RETURN
 ;PRAGMA function end
 ;
-;PRAGMA function __dev_Scaler32_End begin
+;PRAGMA function __DEV_Scaler32_End begin
 ;;		Requires:
 ;;			
 ;;		Returns:
@@ -81,7 +81,7 @@ __dev_Scaler32_Begin:					OUTPUT	REG_ARG_0,		OPORT_SCALER32_REG_A0			;	Write arg
 ;;			Arg2 : Scaled value(23:16)
 ;;			Arg3 : Scaled value(31:24)
 ;;		
-__dev_Scaler32_End:						INPUT		REG_ARG_0,		IPORT_SCALER32_REG_R0			;	Write Reg R0 to arg0
+__DEV_Scaler32_End:						INPUT		REG_ARG_0,		IPORT_SCALER32_REG_R0			;	Write Reg R0 to arg0
 															INPUT		REG_ARG_1,		IPORT_SCALER32_REG_R1			;	Write Reg R1 to arg1
 															INPUT		REG_ARG_2,		IPORT_SCALER32_REG_R2			;	Write Reg R2 to arg2
 															INPUT		REG_ARG_3,		IPORT_SCALER32_REG_R3			;	Write Reg R3 to arg3

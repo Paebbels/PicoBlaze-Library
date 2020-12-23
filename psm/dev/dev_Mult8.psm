@@ -10,10 +10,10 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Mult8_Mult8
+;		__DEV_Mult8_Mult8
 ;
 ; Aliases:
-;		__dev_Mult_Mult8
+;		__DEV_Mult_Mult8
 ;   
 ; License:
 ; ==============================================================================
@@ -35,7 +35,7 @@
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Mult8_Mult8 begin
+;PRAGMA function __DEV_Mult8_Mult8 begin
 ;;		Requires:
 ;;			Arg0 : Factor A
 ;;			Arg1 : Factor B
@@ -43,8 +43,8 @@
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			
-__dev_Mult_Mult8:
-__dev_Mult8_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT8_OPERANDA0		;	Write arg0 to Reg A0
+__DEV_Mult_Mult8:
+__DEV_Mult8_Mult8:						OUTPUT	REG_ARG_0,		OPORT_MULT8_OPERANDA0		;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_MULT8_OPERANDB0		;	Write arg1 to Reg B0
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP
 															LOAD		REG_ARG_0,		REG_ARG_0								; NOP

@@ -10,14 +10,14 @@
 ; Description:
 ; ------------------------------------
 ;	public functions:
-;		__dev_Div32_Wait
-;		__dev_Div32_Div8_Begin
-;		__dev_Div32_Div8_End
+;		__DEV_Div32_Wait
+;		__DEV_Div32_Div8_Begin
+;		__DEV_Div32_Div8_End
 ;
 ; Aliases
-;		__dev_Div_Wait
-;		__dev_Div_Div8_Begin
-;		__dev_Div_Div8_End
+;		__DEV_Div_Wait
+;		__DEV_Div_Div8_Begin
+;		__DEV_Div_Div8_End
 ;
 ; Interrupt Handlers
 ;		__ISR_Div8
@@ -47,19 +47,19 @@ CONSTANT DIV8_STATUS_DONE,						01		;
 ;
 ; Co-Processor macros
 ; ===============================================
-;PRAGMA function __dev_Div8_Wait begin
+;PRAGMA function __DEV_Div8_Wait begin
 ;;		Requires:
 ;;		Returns:
 ;;		Uses:
 ;;			Tmp0
-__dev_Div_Wait:
-__dev_Div8_Wait:							INPUT		REG_TMP_0,		IPORT_DIV8_STATUS			; Read computation status
+__DEV_Div_Wait:
+__DEV_Div8_Wait:							INPUT		REG_TMP_0,		IPORT_DIV8_STATUS			; Read computation status
 															TEST		REG_TMP_0,		DIV8_STATUS_DONE
 															RETURN	C
-															JUMP 		__dev_Div8_Wait
+															JUMP 		__DEV_Div8_Wait
 ;PRAGMA function end
 
-;PRAGMA function __dev_Div8_Div8_Begin begin
+;PRAGMA function __DEV_Div8_Div8_Begin begin
 ;;		Requires:
 ;;			Arg0 : Factor A
 ;;			Arg1 : Factor B
@@ -67,14 +67,14 @@ __dev_Div8_Wait:							INPUT		REG_TMP_0,		IPORT_DIV8_STATUS			; Read computation
 ;;			Arg0 : Product R(7:0)
 ;;			Arg1 : Product R(15:8)
 ;;			
-__dev_Div_Div8_Begin:
-__dev_Div8_Div8_Begin:				OUTPUT	REG_ARG_0,		OPORT_DIV8_OPERANDA0	;	Write arg0 to Reg A0
+__DEV_Div_Div8_Begin:
+__DEV_Div8_Div8_Begin:				OUTPUT	REG_ARG_0,		OPORT_DIV8_OPERANDA0	;	Write arg0 to Reg A0
 															OUTPUT	REG_ARG_1,		OPORT_DIV8_OPERANDB0	;	Write arg1 to Reg B0
 ;PRAGMA function end						
 ;		
-;PRAGMA function __dev_Div8_Div8_End begin
-__dev_Div_Div8_End:
-__dev_Div8_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV8_RESULT0		;	Write Reg R0 to arg0
+;PRAGMA function __DEV_Div8_Div8_End begin
+__DEV_Div_Div8_End:
+__DEV_Div8_Div8_End:					INPUT		REG_ARG_0,		IPORT_DIV8_RESULT0		;	Write Reg R0 to arg0
 															RETURN
 ;PRAGMA function end
 ;

@@ -45,10 +45,10 @@ CONSTANT SCALER16_STATUS_DONE,						01		;
 ;;			
 ;;		Returns:
 ;;			
-__dev_Scaler16_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER16_REG_STATUS	; Read computation status
+__DEV_Scaler16_Wait:					INPUT		REG_TMP_0,		IPORT_SCALER16_REG_STATUS	; Read computation status
 															TEST		REG_TMP_0,		SCALER16_STATUS_DONE
 															RETURN	NZ
-															JUMP 		__dev_Scaler16_Wait
+															JUMP 		__DEV_Scaler16_Wait
 ;PRAGMA function end
 ;
 ;PRAGMA function _cp_scaler16_begin begin

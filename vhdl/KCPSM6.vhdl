@@ -655,13 +655,13 @@ attribute hblknm of             pc_mode2_lut : label is "kcpsm6_vector1";
 --	
 begin
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Perform check of generic to report error as soon as possible.
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Perform check of generic to report error as soon as possible.
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   assert ((scratch_pad_memory_size = 64) 
        or (scratch_pad_memory_size = 128)
@@ -669,18 +669,18 @@ begin
   report "Invalid 'scratch_pad_memory_size'. Please set to 64, 128 or 256."
   severity FAILURE;
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- State Machine and Control 
-  --
-  --
-  --     1 x LUT6
-  --     4 x LUT6_2
-  --     9 x FD
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- State Machine and Control 
+	--
+	--
+	--     1 x LUT6
+	--     4 x LUT6_2
+	--     9 x FD
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   reset_lut: LUT6_2
   generic map (INIT => X"FFFFF55500000EEE")
@@ -783,23 +783,23 @@ begin
               C => clk);
 
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Decoders 
-  --
-  --
-  --     2 x LUT6
-  --    10 x LUT6_2
-  --     2 x FD
-  --     6 x FDR
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Decoders 
+	--
+	--
+	--     2 x LUT6
+	--    10 x LUT6_2
+	--     2 x FD
+	--     6 x FDR
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
-  --
-  -- Decoding for Program Counter and Stack
-  --
+	--
+	-- Decoding for Program Counter and Stack
+	--
 
   pc_move_is_valid_lut: LUT6
   generic map (INIT => X"5A3CFFFF00000000")
@@ -854,9 +854,9 @@ begin
             O5 => pop_stack,
             O6 => push_stack);
 
-  --
-  -- Decoding for ALU
-  --
+	--
+	-- Decoding for ALU
+	--
 
   alu_decode0_lut: LUT6_2
   generic map (INIT => X"03CA000004200000")
@@ -902,9 +902,9 @@ begin
             O5 => arith_logical_sel(1),
             O6 => arith_logical_sel(2));
 
-  --
-  -- Decoding for strobes and enables
-  --
+	--
+	-- Decoding for strobes and enables
+	--
 
   register_enable_type_lut: LUT6_2
   generic map (INIT => X"00013F3F0010F7CE")
@@ -986,18 +986,18 @@ begin
               R => active_interrupt,
               C => clk);
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Register bank control
-  --
-  --
-  --     2 x LUT6
-  --     1 x FDR
-  --     1 x FD
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Register bank control
+	--
+	--
+	--     2 x LUT6
+	--     1 x FDR
+	--     1 x FD
+	--
+	-------------------------------------------------------------------------------------------
+	--
   regbank_type_lut: LUT6
   generic map (INIT => X"0080020000000000")
   port map( I0 => instruction(12),
@@ -1032,21 +1032,21 @@ begin
   sx_addr(3 downto 0) <= instruction(11 downto 8);
   sy_addr <= bank & instruction(7 downto 4);
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Flags
-  --
-  --
-  --     3 x LUT6
-  --     5 x LUT6_2
-  --     3 x FD
-  --     2 x FDRE
-  --     2 x XORCY
-  --     5 x MUXCY
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Flags
+	--
+	--
+	--     3 x LUT6
+	--     5 x LUT6_2
+	--     3 x FD
+	--     2 x FDRE
+	--     2 x XORCY
+	--     5 x MUXCY
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   arith_carry_xorcy: XORCY
   port map( LI => '0',
@@ -1202,17 +1202,17 @@ begin
               R => internal_reset,
               C => clk);
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- 12-bit Program Address Generation 
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- 12-bit Program Address Generation 
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
-  --
-  -- Prepare 12-bit vector from the sX and sY register outputs.
-  --
+	--
+	-- Prepare 12-bit vector from the sX and sY register outputs.
+	--
 
   register_vector <= sx(3 downto 0) & sy;
 
@@ -1220,41 +1220,41 @@ begin
   address_loop: for i in 0 to 11 generate
     attribute hblknm : string;                      
     attribute hblknm of            pc_flop : label is "kcpsm6_pc" & integer'image(i/4);	
-    attribute hblknm of return_vector_flop : label is "kcpsm6_stack_ram" & integer'image((i+4)/8);	  
+    attribute hblknm of return_vector_flop : label is "kcpsm6_stack_ram" & integer'image((i+4)/8);    
 
   begin
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Selection of vector to load program counter
-    --
-    -- instruction(12)
-    --              0  Constant aaa from instruction(11:0)
-    --              1  Return vector from stack 
-    --
-    -- 'aaa' is used during 'JUMP aaa', 'JUMP c, aaa', 'CALL aaa' and 'CALL c, aaa'.
-    -- Return vector is used during 'RETURN', 'RETURN c', 'RETURN&LOAD' and 'RETURNI'.
-    --
-    --     6 x LUT6_2
-    --     12 x FD
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Selection of vector to load program counter
+		--
+		-- instruction(12)
+		--              0  Constant aaa from instruction(11:0)
+		--              1  Return vector from stack 
+		--
+		-- 'aaa' is used during 'JUMP aaa', 'JUMP c, aaa', 'CALL aaa' and 'CALL c, aaa'.
+		-- Return vector is used during 'RETURN', 'RETURN c', 'RETURN&LOAD' and 'RETURNI'.
+		--
+		--     6 x LUT6_2
+		--     12 x FD
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
-    --
-    -- Pipeline output of the stack memory
-    --
+		--
+		-- Pipeline output of the stack memory
+		--
 
     return_vector_flop: FD
     port map (  D => stack_memory(i),
                 Q => return_vector(i),
                 C => clk);
 
-    --
-    -- Multiplex instruction constant address and output from stack.
-    -- 2 bits per LUT so only generate when 'i' is even.
-    --
+		--
+		-- Multiplex instruction constant address and output from stack.
+		-- 2 bits per LUT so only generate when 'i' is even.
+		--
 
     output_data: if (i rem 2)=0 generate
       attribute hblknm : string;                      
@@ -1274,36 +1274,36 @@ begin
 
     end generate output_data;
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Program Counter
-    --
-    -- Reset by internal_reset has highest priority.
-    -- Enabled by t_state(1) has second priority.
-    --
-    -- The function performed is defined by pc_mode(2:0).
-    --
-    -- pc_mode (2) (1) (0) 
-    --          0   0   1  pc+1 for normal program flow.
-    --          1   0   0  Forces interrupt vector value (+0) during active interrupt.
-    --                     The vector is defined by a generic with default value FF0 hex.
-    --          1   1   0  register_vector (+0) for 'JUMP (sX, sY)' and 'CALL (sX, sY)'.
-    --          0   1   0  pc_vector (+0) for 'JUMP/CALL aaa' and 'RETURNI'.
-    --          0   1   1  pc_vector+1 for 'RETURN'.
-    --
-    -- Note that pc_mode(0) is High during operations that require an increment to occur.
-    -- The LUT6 associated with the LSB must invert pc or pc_vector in these cases and 
-    -- pc_mode(0) also has to be connected to the start of the carry chain.
-    --
-    -- 3 Slices 
-    --     12 x LUT6
-    --     11 x MUXCY
-    --     12 x XORCY
-    --     12 x FDRE
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Program Counter
+		--
+		-- Reset by internal_reset has highest priority.
+		-- Enabled by t_state(1) has second priority.
+		--
+		-- The function performed is defined by pc_mode(2:0).
+		--
+		-- pc_mode (2) (1) (0) 
+		--          0   0   1  pc+1 for normal program flow.
+		--          1   0   0  Forces interrupt vector value (+0) during active interrupt.
+		--                     The vector is defined by a generic with default value FF0 hex.
+		--          1   1   0  register_vector (+0) for 'JUMP (sX, sY)' and 'CALL (sX, sY)'.
+		--          0   1   0  pc_vector (+0) for 'JUMP/CALL aaa' and 'RETURNI'.
+		--          0   1   1  pc_vector+1 for 'RETURN'.
+		--
+		-- Note that pc_mode(0) is High during operations that require an increment to occur.
+		-- The LUT6 associated with the LSB must invert pc or pc_vector in these cases and 
+		-- pc_mode(0) also has to be connected to the start of the carry chain.
+		--
+		-- 3 Slices 
+		--     12 x LUT6
+		--     11 x MUXCY
+		--     12 x XORCY
+		--     12 x FDRE
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
 
     pc_flop: FDRE
@@ -1320,10 +1320,10 @@ begin
       attribute hblknm of pc_muxcy : label is "kcpsm6_pc" & integer'image(i/4);	
     begin
 
-      --
-      -- Logic of LSB must invert selected value when pc_mode(0) is High.
-      -- The interrupt vector is defined by a generic.
-      --
+			--
+			-- Logic of LSB must invert selected value when pc_mode(0) is High.
+			-- The interrupt vector is defined by a generic.
+			--
 
       low_int_vector: if interrupt_vector(i)='0' generate
         attribute hblknm : string;                      
@@ -1359,9 +1359,9 @@ begin
 
       end generate high_int_vector;
 
-      --
-      -- pc_mode(0) connected to first MUXCY and carry input is '0'
-      --
+			--
+			-- pc_mode(0) connected to first MUXCY and carry input is '0'
+			--
 
       pc_xorcy: XORCY
       port map( LI => half_pc(i),
@@ -1381,10 +1381,10 @@ begin
       attribute hblknm of pc_xorcy : label is "kcpsm6_pc" & integer'image(i/4);	
     begin
 
-      --
-      -- Logic of upper section selects required value.
-      -- The interrupt vector is defined by a generic.
-      --
+			--
+			-- Logic of upper section selects required value.
+			-- The interrupt vector is defined by a generic.
+			--
 
       low_int_vector: if interrupt_vector(i)='0' generate
         attribute hblknm : string;                      
@@ -1420,18 +1420,18 @@ begin
 
       end generate high_int_vector;
 
-      --
-      -- Carry chain implementing remainder of increment function
-      --
+			--
+			-- Carry chain implementing remainder of increment function
+			--
       pc_xorcy: XORCY
       port map( LI => half_pc(i),
                 CI => carry_pc(i-1),
                  O => pc_value(i));
 
 
-      --
-      -- No MUXCY required at the top of the chain
-      --
+			--
+			-- No MUXCY required at the top of the chain
+			--
       mid_pc: if i<11 generate
         attribute hblknm : string;                      
         attribute hblknm of pc_muxcy : label is "kcpsm6_pc" & integer'image(i/4);	
@@ -1448,31 +1448,31 @@ begin
     end generate upper_pc;
 
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
   end generate address_loop;
 
 
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Stack 
-  --  Preserves upto 31 nested values of the Program Counter during CALL and RETURN.
-  --  Also preserves flags and bank selection during interrupt.
-  --
-  --     2 x RAM32M 
-  --     4 x FD
-  --     5 x FDR
-  --     1 x LUT6
-  --     4 x LUT6_2
-  --     5 x XORCY
-  --     5 x MUXCY
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Stack 
+	--  Preserves upto 31 nested values of the Program Counter during CALL and RETURN.
+	--  Also preserves flags and bank selection during interrupt.
+	--
+	--     2 x RAM32M 
+	--     4 x FD
+	--     5 x FDR
+	--     1 x LUT6
+	--     4 x LUT6_2
+	--     5 x XORCY
+	--     5 x MUXCY
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   shadow_carry_flag_flop: FD
   port map (  D => stack_carry_flag,
@@ -1628,13 +1628,13 @@ begin
   end generate stack_loop;
 
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- 8-bit Data Path 
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- 8-bit Data Path 
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   data_path_loop: for i in 0 to 7 generate
     attribute hblknm : string;                      
@@ -1643,22 +1643,22 @@ begin
     attribute hblknm of        alu_mux_lut : label is "kcpsm6_alu" & integer'image(i/4);	
   begin
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Selection of second operand to ALU and port_id
-    --
-    -- instruction(12)
-    --           0  Register sY
-    --           1  Constant kk 
-    --
-    --     4 x LUT6_2
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    --
-    -- 2 bits per LUT so only generate when 'i' is even
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Selection of second operand to ALU and port_id
+		--
+		-- instruction(12)
+		--           0  Register sY
+		--           1  Constant kk 
+		--
+		--     4 x LUT6_2
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		--
+		-- 2 bits per LUT so only generate when 'i' is even
+		--
 
     output_data: if (i rem 2)=0 generate
       attribute hblknm : string;                      
@@ -1678,22 +1678,22 @@ begin
 
     end generate output_data;
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Selection of out_port value
-    --
-    -- instruction(13)
-    --              0  Register sX
-    --              1  Constant kk from instruction(11:4)
-    --
-    --     4 x LUT6_2
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    --
-    -- 2 bits per LUT so only generate when 'i' is even
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Selection of out_port value
+		--
+		-- instruction(13)
+		--              0  Register sX
+		--              1  Constant kk from instruction(11:4)
+		--
+		--     4 x LUT6_2
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		--
+		-- 2 bits per LUT so only generate when 'i' is even
+		--
 
     second_operand: if (i rem 2)=0 generate
       attribute hblknm : string;                      
@@ -1713,33 +1713,33 @@ begin
 
     end generate second_operand;
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Arithmetic and Logical operations
-    --
-    -- Definition of....
-    --    ADD and SUB also used for ADDCY, SUBCY, COMPARE and COMPARECY.
-    --    LOAD, AND, OR and XOR also used for LOAD*, RETURN&LOAD, TEST and TESTCY.
-    --
-    -- arith_logical_sel (2) (1) (0)
-    --                    0   0   0  - LOAD
-    --                    0   0   1  - AND
-    --                    0   1   0  - OR
-    --                    0   1   1  - XOR
-    --                    1   X   0  - SUB
-    --                    1   X   1  - ADD
-    --
-    -- Includes pipeline stage.
-    --
-    -- 2 Slices
-    --     8 x LUT6_2
-    --     8 x MUXCY
-    --     8 x XORCY
-    --     8 x FD
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Arithmetic and Logical operations
+		--
+		-- Definition of....
+		--    ADD and SUB also used for ADDCY, SUBCY, COMPARE and COMPARECY.
+		--    LOAD, AND, OR and XOR also used for LOAD*, RETURN&LOAD, TEST and TESTCY.
+		--
+		-- arith_logical_sel (2) (1) (0)
+		--                    0   0   0  - LOAD
+		--                    0   0   1  - AND
+		--                    0   1   0  - OR
+		--                    0   1   1  - XOR
+		--                    1   X   0  - SUB
+		--                    1   X   1  - ADD
+		--
+		-- Includes pipeline stage.
+		--
+		-- 2 Slices
+		--     8 x LUT6_2
+		--     8 x MUXCY
+		--     8 x XORCY
+		--     8 x FD
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
     arith_logical_lut: LUT6_2
     generic map (INIT => X"69696E8ACCCC0000")
@@ -1762,9 +1762,9 @@ begin
       attribute hblknm of arith_logical_muxcy : label is "kcpsm6_add" & integer'image(i/4);	
       attribute hblknm of arith_logical_xorcy : label is "kcpsm6_add" & integer'image(i/4);	
     begin
-      --
-      -- Carry input to first MUXCY and XORCY
-      --
+			--
+			-- Carry input to first MUXCY and XORCY
+			--
       arith_logical_muxcy: MUXCY
       port map( DI => logical_carry_mask(i),
                 CI => arith_carry_in,
@@ -1783,9 +1783,9 @@ begin
       attribute hblknm of arith_logical_muxcy : label is "kcpsm6_add" & integer'image(i/4);	
       attribute hblknm of arith_logical_xorcy : label is "kcpsm6_add" & integer'image(i/4);	
     begin
-      --
-      -- Main carry chain  
-      --
+			--
+			-- Main carry chain  
+			--
       arith_logical_muxcy: MUXCY
       port map( DI => logical_carry_mask(i),
                 CI => carry_arith_logical(i-1),
@@ -1800,51 +1800,51 @@ begin
     end generate upper_arith_logical;
 
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Shift and Rotate operations
-    --
-    -- Definition of SL0, SL1, SLX, SLA, RL, SR0, SR1, SRX, SRA, and RR 
-    --
-    -- instruction (3) (2) (1) (0)
-    --              0   1   1   0  - SL0
-    --              0   1   1   1  - SL1
-    --              0   1   0   0  - SLX         
-    --              0   0   0   0  - SLA
-    --              0   0   1   0  - RL
-    --              1   1   1   0  - SR0
-    --              1   1   1   1  - SR1
-    --              1   0   1   0  - SRX
-    --              1   0   0   0  - SRA
-    --              1   1   0   0  - RR
-    --
-    -- instruction(3) 
-    --             0 - Left
-    --             1 - Right
-    --
-    -- instruction (2) (1)  Bit shifted in 
-    --              0   0   Carry_flag
-    --              0   1   sX(7)
-    --              1   0   sX(0)
-    --              1   1   instruction(0)
-    --
-    -- Includes pipeline stage.
-    --
-    --     4 x LUT6_2
-    --     1 x LUT6
-    --     8 x FD
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Shift and Rotate operations
+		--
+		-- Definition of SL0, SL1, SLX, SLA, RL, SR0, SR1, SRX, SRA, and RR 
+		--
+		-- instruction (3) (2) (1) (0)
+		--              0   1   1   0  - SL0
+		--              0   1   1   1  - SL1
+		--              0   1   0   0  - SLX         
+		--              0   0   0   0  - SLA
+		--              0   0   1   0  - RL
+		--              1   1   1   0  - SR0
+		--              1   1   1   1  - SR1
+		--              1   0   1   0  - SRX
+		--              1   0   0   0  - SRA
+		--              1   1   0   0  - RR
+		--
+		-- instruction(3) 
+		--             0 - Left
+		--             1 - Right
+		--
+		-- instruction (2) (1)  Bit shifted in 
+		--              0   0   Carry_flag
+		--              0   1   sX(7)
+		--              1   0   sX(0)
+		--              1   1   instruction(0)
+		--
+		-- Includes pipeline stage.
+		--
+		--     4 x LUT6_2
+		--     1 x LUT6
+		--     8 x FD
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
     low_hwbuild: if hwbuild(i)='0' generate
       attribute hblknm : string;                      
       attribute hblknm of shift_rotate_flop : label is "kcpsm6_sandr";	
     begin
-      --
-      -- Reset Flip-flop to form '0' for this bit of HWBUILD 
-      --
+			--
+			-- Reset Flip-flop to form '0' for this bit of HWBUILD 
+			--
       shift_rotate_flop: FDR
       port map ( D => shift_rotate_value(i),
                  Q => shift_rotate_result(i),
@@ -1857,9 +1857,9 @@ begin
       attribute hblknm : string;                      
       attribute hblknm of shift_rotate_flop : label is "kcpsm6_sandr";	
     begin
-      --
-      -- Set Flip-flop to form '1' for this bit of HWBUILD 
-      --
+			--
+			-- Set Flip-flop to form '1' for this bit of HWBUILD 
+			--
       shift_rotate_flop: FDS
       port map ( D => shift_rotate_value(i),
                  Q => shift_rotate_result(i),
@@ -1874,9 +1874,9 @@ begin
       attribute hblknm of shift_rotate_lut : label is "kcpsm6_sandr";
       attribute hblknm of    shift_bit_lut : label is "kcpsm6_decode1";
     begin
-      --
-      -- Select bit to be shifted or rotated into result
-      --
+			--
+			-- Select bit to be shifted or rotated into result
+			--
       shift_bit_lut: LUT6
       generic map (INIT => X"BFBC8F8CB3B08380")
       port map( I0 => instruction(0),
@@ -1887,9 +1887,9 @@ begin
                 I5 => sx(7),
                  O => shift_in_bit);
 
-      --
-      -- Define lower bits of result
-      --
+			--
+			-- Define lower bits of result
+			--
       shift_rotate_lut: LUT6_2
       generic map (INIT => X"FF00F0F0CCCCAAAA")
       port map( I0 => shift_in_bit,
@@ -1908,9 +1908,9 @@ begin
       attribute hblknm : string;                      
       attribute hblknm of shift_rotate_lut : label is "kcpsm6_sandr";
     begin
-      --
-      -- Define middle bits of result
-      --
+			--
+			-- Define middle bits of result
+			--
       shift_rotate_lut: LUT6_2
       generic map (INIT => X"FF00F0F0CCCCAAAA")
       port map( I0 => sx(i-1),
@@ -1928,9 +1928,9 @@ begin
       attribute hblknm : string;                      
       attribute hblknm of shift_rotate_lut : label is "kcpsm6_sandr";
     begin
-      --
-      -- Define upper bits of result
-      --
+			--
+			-- Define upper bits of result
+			--
       shift_rotate_lut: LUT6_2
       generic map (INIT => X"FF00F0F0CCCCAAAA")
       port map( I0 => sx(i-1),
@@ -1944,21 +1944,21 @@ begin
 
     end generate msb_shift_rotate;
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Multiplex outputs from ALU functions, scratch pad memory and input port.
-    --
-    -- alu_mux_sel (1) (0)  
-    --              0   0  Arithmetic and Logical Instructions
-    --              0   1  Shift and Rotate Instructions
-    --              1   0  Input Port
-    --              1   1  Scratch Pad Memory
-    --
-    --     8 x LUT6
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Multiplex outputs from ALU functions, scratch pad memory and input port.
+		--
+		-- alu_mux_sel (1) (0)  
+		--              0   0  Arithmetic and Logical Instructions
+		--              0   1  Shift and Rotate Instructions
+		--              1   0  Input Port
+		--              1   1  Scratch Pad Memory
+		--
+		--     8 x LUT6
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
     alu_mux_lut: LUT6
     generic map (INIT => X"FF00F0F0CCCCAAAA")
@@ -1970,24 +1970,24 @@ begin
               I5 => alu_mux_sel(1),
                O => alu_result(i));
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
-    -- Scratchpad Memory with output register.
-    --
-    -- The size of the scratch pad memory is defined by the 'scratch_pad_memory_size' generic.
-    -- The default size is 64 bytes the same as KCPSM3 but this can be increased to 128 or 256 
-    -- bytes at an additional cost of 2 and 6 Slices.
-    --
-    --
-    -- 8 x RAM256X1S (256 bytes).
-    -- 8 x RAM128X1S (128 bytes).
-    -- 2 x RAM64M    (64 bytes).
-    --
-    -- 8 x FD.
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
+		-- Scratchpad Memory with output register.
+		--
+		-- The size of the scratch pad memory is defined by the 'scratch_pad_memory_size' generic.
+		-- The default size is 64 bytes the same as KCPSM3 but this can be increased to 128 or 256 
+		-- bytes at an additional cost of 2 and 6 Slices.
+		--
+		--
+		-- 8 x RAM256X1S (256 bytes).
+		-- 8 x RAM128X1S (128 bytes).
+		-- 2 x RAM64M    (64 bytes).
+		--
+		-- 8 x FD.
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
 
     small_spm: if scratch_pad_memory_size = 64 generate
@@ -2078,28 +2078,28 @@ begin
 
     end generate large_spm;
 
-    --
-    -------------------------------------------------------------------------------------------
-    --
+		--
+		-------------------------------------------------------------------------------------------
+		--
 
   end generate data_path_loop;
 
 
 
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Two Banks of 16 General Purpose Registers.
-  --
-  -- sx_addr - Address for sX is formed by bank select and instruction[11:8]
-  -- sy_addr - Address for sY is formed by bank select and instruction[7:4]
-  --
-  -- 2 Slices
-  --     2 x RAM32M
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Two Banks of 16 General Purpose Registers.
+	--
+	-- sx_addr - Address for sX is formed by bank select and instruction[11:8]
+	-- sy_addr - Address for sY is formed by bank select and instruction[7:4]
+	--
+	-- 2 Slices
+	--     2 x RAM32M
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   lower_reg_banks : RAM32M
   generic map (INIT_A => X"0000000000000000", 
@@ -2144,25 +2144,25 @@ begin
 
 
 
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Connections to KCPSM6 outputs.
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Connections to KCPSM6 outputs.
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
 
   address <= pc;
   bram_enable <= t_state(2);
  
-  --
-  -------------------------------------------------------------------------------------------
-  --
-  -- Connections KCPSM6 Outputs.
-  --
-  -------------------------------------------------------------------------------------------
-  --
+	--
+	-------------------------------------------------------------------------------------------
+	--
+	-- Connections KCPSM6 Outputs.
+	--
+	-------------------------------------------------------------------------------------------
+	--
 
   port_id <= sy_or_kk;
 
@@ -2185,14 +2185,14 @@ begin
 --
 -------------------------------------------------------------------------------------------
 --
-  --All of this section is ignored during synthesis.
-  --synthesis translate off
+	--All of this section is ignored during synthesis.
+	--synthesis translate off
 
   simulation: process (clk, instruction, carry_flag, zero_flag, bank, interrupt_enable)
 
-  --
-  -- Variables for contents of each register in each bank
-  --
+	--
+	-- Variables for contents of each register in each bank
+	--
   variable bank_a_s0 : std_logic_vector(7 downto 0) := X"00";
   variable bank_a_s1 : std_logic_vector(7 downto 0) := X"00";
   variable bank_a_s2 : std_logic_vector(7 downto 0) := X"00";
@@ -2225,20 +2225,20 @@ begin
   variable bank_b_sd : std_logic_vector(7 downto 0) := X"00";
   variable bank_b_se : std_logic_vector(7 downto 0) := X"00";
   variable bank_b_sf : std_logic_vector(7 downto 0) := X"00";
-  --
-  -- Temporary variables for instruction decoding
-  --
+	--
+	-- Temporary variables for instruction decoding
+	--
   variable     sx_decode : string(1 to 2);   -- sX register specification
   variable     sy_decode : string(1 to 2);   -- sY register specification
   variable     kk_decode : string(1 to 2);   -- constant value kk, pp or ss
   variable    aaa_decode : string(1 to 3);   -- address value aaa
-  --
-  -----------------------------------------------------------------------------------------
-  --
-  -- Function to convert 4-bit binary nibble to hexadecimal character
-  --
-  -----------------------------------------------------------------------------------------
-  --
+	--
+	-----------------------------------------------------------------------------------------
+	--
+	-- Function to convert 4-bit binary nibble to hexadecimal character
+	--
+	-----------------------------------------------------------------------------------------
+	--
   function hexcharacter (nibble: std_logic_vector(3 downto 0))
   return character is
   variable hex: character;
@@ -2264,29 +2264,29 @@ begin
     end case;
     return hex;
   end hexcharacter;
-  --
-  -----------------------------------------------------------------------------------------
-  --
+	--
+	-----------------------------------------------------------------------------------------
+	--
   begin
      
-    -- decode first register sX
+		-- decode first register sX
     sx_decode(1) := 's';
     sx_decode(2) := hexcharacter(instruction(11 downto 8));             
 
-    -- decode second register sY
+		-- decode second register sY
     sy_decode(1) := 's';
     sy_decode(2) := hexcharacter(instruction(7 downto 4));  
 
-    -- decode constant value
+		-- decode constant value
     kk_decode(1) := hexcharacter(instruction(7 downto 4));
     kk_decode(2) := hexcharacter(instruction(3 downto 0));
 
-    -- address value
+		-- address value
     aaa_decode(1) := hexcharacter(instruction(11 downto 8));
     aaa_decode(2) := hexcharacter(instruction(7 downto 4));
     aaa_decode(3) := hexcharacter(instruction(3 downto 0));
 
-    -- decode instruction
+		-- decode instruction
     case instruction(17 downto 12) is
       when "000000" => kcpsm6_opcode <= "LOAD " & sx_decode & ", " & sy_decode & "        ";
       when "000001" => kcpsm6_opcode <= "LOAD " & sx_decode & ", " & kk_decode & "        ";
@@ -2383,7 +2383,7 @@ begin
 
 
 
-    -- Flag status information
+		-- Flag status information
     
     if zero_flag = '0' then
       kcpsm6_status(3 to 5) <= "NZ,";
@@ -2403,7 +2403,7 @@ begin
       kcpsm6_status(9 to 10) <= "IE";
     end if;
 
-    -- Operational status 
+		-- Operational status 
 
     if clk'event and clk = '1' then 
       if internal_reset = '1' then
@@ -2418,7 +2418,7 @@ begin
     end if;
 
 
-    -- Simulation of register contents
+		-- Simulation of register contents
     if clk'event and clk = '1' then 
       if register_enable = '1' then
         case sx_addr is
@@ -2458,7 +2458,7 @@ begin
         end case;
       end if;
 
-      --simulation of scratch pad memory contents
+			--simulation of scratch pad memory contents
       if spm_enable = '1' then
         case sy_or_kk is
           when "00000000" => sim_spm00 <= sx;
@@ -2723,9 +2723,9 @@ begin
 
     end if;
 
-    --
-    -- Assignment of internal register variables to active registers 
-    --
+		--
+		-- Assignment of internal register variables to active registers 
+		--
     if bank = '0' then
       kcpsm6_status(1 to 2) <= "A,";
       sim_s0 <= bank_a_s0;
@@ -2764,10 +2764,10 @@ begin
       sim_sF <= bank_b_sF;
     end if;
 
-    --
+		--
   end process simulation;
   
-  --synthesis translate on
+	--synthesis translate on
 --
 -- **************************
 -- * End of simulation code *
