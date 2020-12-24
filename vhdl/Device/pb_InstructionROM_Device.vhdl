@@ -47,6 +47,7 @@ use			PoC.vectors.all;
 use			PoC.strings.all;
 use			PoC.components.all;
 use			PoC.ocram.all;
+use			PoC.ocrom.all;
 
 library L_PicoBlaze;
 use			L_PicoBlaze.pb.all;
@@ -58,7 +59,8 @@ entity pb_InstructionROM_Device is
 		PAGES								: POSITIVE							:= 1;
 		SOURCE_DIRECTORY		: STRING								:= "";
 		DEVICE_INSTANCE			: T_PB_DEVICE_INSTANCE;
-		ENABLE_JTAG_LOADER	: BOOLEAN								:= FALSE
+		ENABLE_JTAG_LOADER      : BOOLEAN								:= FALSE;
+		ENABLE_AXI_LOADER       : BOOLEAN								:= FALSE
 	);
 	port (
 		Clock								: in	STD_LOGIC;
@@ -81,7 +83,7 @@ entity pb_InstructionROM_Device is
 		
 		PageNumber					: out	STD_LOGIC_VECTOR(2 downto 0)
 	);
-end;
+end entity;
 
 
 architecture rtl of pb_InstructionROM_Device is
@@ -118,16 +120,7 @@ architecture rtl of pb_InstructionROM_Device is
 	signal JTAGLoader_Address			: T_PB_ADDRESS;
 	signal JTAGLoader_WriteEnable	: STD_LOGIC;
 	signal JTAGLoader_DataOut			: T_PB_INSTRUCTION;
-	signal JTAGLoader_PB_Reset		: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
 	
-	signal Page_n_rst							: STD_LOGIC;
-	signal Page_0_rst							: STD_LOGIC;
-	signal Page_n_rst_d						: STD_LOGIC		:= '0';
-	signal Page_0_rst_d						: STD_LOGIC		:= '0';
-	signal Page_n_rst_re					: STD_LOGIC;
-	signal Page_0_rst_fe					: STD_LOGIC;
-	signal Reset_r								: STD_LOGIC		:= '0';
-
 begin
 	assert (PAGES <= 8) report "This ROM and JTAGLoader6 support 8 pages maximum." severity FAILURE;
 
@@ -141,7 +134,7 @@ begin
 		)
 		port map (
 			Clock							=> Clock,
-			Reset							=> Reset_r,
+			Reset							=> Reboot,
 
 			-- PicoBlaze interface
 			In_WriteStrobe		=> WriteStrobe,
@@ -160,7 +153,7 @@ begin
 	process(Clock)
 	begin
 		if rising_edge(Clock) then
-			if (Reset_r = '1') then
+			if (Reboot = '1') then
 				Reg_PageNumber		<= (others => '0');
 			elsif (AdrDec_we = '1') then
 				case AdrDec_WriteAddress(0 downto 0) is
@@ -179,26 +172,15 @@ begin
 		end case;
 	end process;
 	
-	Interrupt		<= '0';
-	Message			<= x"00";
+	Interrupt   <= '0';
+	Message     <= x"00";
 	
 	-- 
-	PageNumber				<= Reg_PageNumber(PageNumber'range);
-	Reg_PageNumber_us	<= unsigned(Reg_PageNumber(Reg_PageNumber_us'range));
+	PageNumber        <= Reg_PageNumber(PageNumber'range);
+	Reg_PageNumber_us <= unsigned(Reg_PageNumber(Reg_PageNumber_us'range));
 
-	Instruction		<= Page_Instructions(to_index(Reg_PageNumber_us, Page_Instructions'length));
+	Instruction       <= Page_Instructions(to_index(Reg_PageNumber_us, Page_Instructions'length));
 	
-	-- Reset control: keep PB in reset while programming, release after last ROM is written => reboot
-	Page_n_rst		<= JTAGLoader_PB_Reset(PAGES - 1);
-	Page_0_rst		<= JTAGLoader_PB_Reset(0);
-	Page_n_rst_d	<= Page_n_rst	when rising_edge(Clock);
-	Page_0_rst_d	<= Page_0_rst	when rising_edge(Clock);
-	Page_n_rst_re	<= not Page_n_rst_d and Page_n_rst;
-	Page_0_rst_fe	<= Page_0_rst_d and not Page_0_rst;
-	
-	Reset_r				<= ffrs(q => Reset_r, set => Page_n_rst_re, rst => Page_0_rst_fe) when rising_edge(Clock);
-	Reboot				<= Reset_r;
-
 	genTemplate : if (str_length(SOURCE_DIRECTORY) = 0) generate
 		genPage0 : if (TRUE) generate
 			constant PAGE_NUMBER		: NATURAL := 0;
@@ -415,16 +397,28 @@ begin
 		end generate;
 	end generate;
 	
-	genNoJTAGLoader : if (ENABLE_LOADER = FALSE) generate
+	genNoLoader : if ((ENABLE_JTAG_LOADER or ENABLE_AXI_LOADER) = FALSE) generate
 		JTAGLoader_Clock				<= '0';
 		JTAGLoader_Enable				<= (others => '0');
 		JTAGLoader_Address			<= (others => '0');
 		JTAGLoader_WriteEnable	<= '0';
 		JTAGLoader_DataOut			<= (others => '0');
+		
+		Reboot                  <= '0';
 	end generate;
-	genJTAGLoader : if (ENABLE_LOADER = TRUE) generate
+	genJTAGLoader : if (ENABLE_JTAG_LOADER = TRUE) generate
 		signal WorkAround_Enable			: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
 		signal WorkAround_DataIn			: T_PB_INSTRUCTION_VECTOR(PAGES - 1 downto 0);
+		
+		signal JTAGLoader_PB_Reset		: STD_LOGIC_VECTOR(PAGES - 1 downto 0);
+		
+		signal Page_n_rst							: STD_LOGIC;
+		signal Page_0_rst							: STD_LOGIC;
+		signal Page_n_rst_d						: STD_LOGIC		:= '0';
+		signal Page_0_rst_d						: STD_LOGIC		:= '0';
+		signal Page_n_rst_re					: STD_LOGIC;
+		signal Page_0_rst_fe					: STD_LOGIC;
+		signal Reset_r								: STD_LOGIC		:= '0';
 	begin
 		JTAGLoader : JTAGLoader6
 			generic map (
@@ -451,5 +445,251 @@ begin
 		-- work around for a bug in JTAGLoader.exe
 		WorkAround_DataIn		<= reverse(Pages_DataOut);
 		JTAGLoader_Enable		<= reverse(WorkAround_Enable);
+		
+		-- Reset control: keep PB in reset while programming, release after last ROM is written => reboot
+		Page_n_rst		<= JTAGLoader_PB_Reset(PAGES - 1);
+		Page_0_rst		<= JTAGLoader_PB_Reset(0);
+		Page_n_rst_d	<= Page_n_rst	when rising_edge(Clock);
+		Page_0_rst_d	<= Page_0_rst	when rising_edge(Clock);
+		Page_n_rst_re	<= not Page_n_rst_d and Page_n_rst;
+		Page_0_rst_fe	<= Page_0_rst_d and not Page_0_rst;
+		
+		Reset_r				<= ffrs(q => Reset_r, set => Page_n_rst_re, rst => Page_0_rst_fe) when rising_edge(Clock);
+		Reboot				<= Reset_r;
 	end generate;
-end;
+	genAXILoader : if (ENABLE_AXI_LOADER = TRUE) generate
+		component PB_JTAG_AXIMaster is
+			port (
+				aclk          : in  std_logic;
+				aresetn       : in  std_logic;
+				m_axi_awaddr  : out std_logic_vector(31 downto 0);
+				m_axi_awprot  : out std_logic_vector(2 downto 0);
+				m_axi_awvalid : out std_logic;
+				m_axi_awready : in  std_logic;
+				m_axi_wdata   : out std_logic_vector(31 downto 0);
+				m_axi_wstrb   : out std_logic_vector(3 downto 0);
+				m_axi_wvalid  : out std_logic;
+				m_axi_wready  : in  std_logic;
+				m_axi_bresp   : in  std_logic_vector(1 downto 0);
+				m_axi_bvalid  : in  std_logic;
+				m_axi_bready  : out std_logic;
+				m_axi_araddr  : out std_logic_vector(31 downto 0);
+				m_axi_arprot  : out std_logic_vector(2 downto 0);
+				m_axi_arvalid : out std_logic;
+				m_axi_arready : in  std_logic;
+				m_axi_rdata   : in  std_logic_vector(31 downto 0);
+				m_axi_rresp   : in  std_logic_vector(1 downto 0);
+				m_axi_rvalid  : in  std_logic;
+				m_axi_rready  : out std_logic
+			);
+		end component;
+	
+		component AXI_ILA is
+			port (
+				clk     : in  std_logic;
+				probe0  : in  std_logic_vector(1 downto 0);
+				probe1  : in  std_logic_vector(15 downto 0);
+				probe2  : in  std_logic_vector(1 downto 0);
+				probe3  : in  std_logic_vector(17 downto 0);
+				probe4  : in  std_logic_vector(1 downto 0);
+				probe5  : in  std_logic_vector(1 downto 0);
+				probe6  : in  std_logic_vector(15 downto 0);
+				probe7  : in  std_logic_vector(1 downto 0);
+				probe8  : in  std_logic_vector(17 downto 0)
+			);
+		end component;
+		
+		signal AXIMaster_WriteAddress_Valid      : std_logic;
+		signal AXIMaster_WriteAddress_Address    : std_logic_vector(31 downto 0);
+		signal WriteAddress_Ack                  : std_logic;
+		signal AXIMaster_WriteData_Valid         : std_logic;
+		signal AXIMaster_WriteData_Data          : std_logic_vector(31 downto 0);
+		signal WriteData_Ack                     : std_logic;
+		signal WriteResponse_Valid               : std_logic;
+		signal WriteResponse_Response            : std_logic_vector(1 downto 0);
+		signal AXIMaster_WriteResponse_Ack       : std_logic;
+		signal AXIMaster_ReadAddress_Valid       : std_logic;
+		signal AXIMaster_ReadAddress_Address     : std_logic_vector(31 downto 0);
+		signal ReadAddress_Ack                   : std_logic;
+		signal ReadData_Valid                    : std_logic;
+		signal ReadData_Data                     : std_logic_vector(31 downto 0);
+		signal ReadData_Response                 : std_logic_vector(1 downto 0);
+		signal AXIMaster_ReadData_Ack            : std_logic;
+		
+		signal ReadAddress_en                    : std_logic;
+		signal WriteAddress_en                   : std_logic;
+		signal WriteAddress_inc                  : std_logic;
+		signal Address_r                         : std_logic_vector(15 downto 0) := (others => '0');
+		signal WriteStatus_en                    : std_logic;
+		signal Status_r                          : std_logic_vector(0 downto 0)  := (others => '0');
+		
+		type T_STATE is (ST_IDLE, ST_READING_1, ST_READING_2, ST_WRITING_1, ST_WRITING_2, ST_RESPONDING);
+		signal CurrentState : T_STATE := ST_IDLE;
+		signal NextState    : T_STATE;
+		
+	begin
+		JTAG: pb_JTAG_AXIMaster
+			port map (
+				aclk          => Clock,
+				aresetn       => '1',
+				m_axi_awvalid => AXIMaster_WriteAddress_Valid,
+				m_axi_awaddr  => AXIMaster_WriteAddress_Address,
+				m_axi_awprot  => open,
+				m_axi_awready => WriteAddress_Ack,
+				
+				m_axi_wvalid  => AXIMaster_WriteData_Valid,
+				m_axi_wdata   => AXIMaster_WriteData_Data,
+				m_axi_wstrb   => open,
+				m_axi_wready  => WriteData_Ack,
+				
+				m_axi_bvalid  => WriteResponse_Valid,
+				m_axi_bresp   => WriteResponse_Response,
+				m_axi_bready  => AXIMaster_WriteResponse_Ack,
+				
+				m_axi_arvalid => AXIMaster_ReadAddress_Valid,
+				m_axi_araddr  => AXIMaster_ReadAddress_Address,
+				m_axi_arprot  => open,
+				m_axi_arready => ReadAddress_Ack,
+
+				m_axi_rvalid  => ReadData_Valid,
+				m_axi_rdata   => ReadData_Data,
+				m_axi_rresp   => ReadData_Response,
+				m_axi_rready  => AXIMaster_ReadData_Ack
+			);
+		
+		AXIDbg: AXI_ILA
+			port map (
+				clk     => Clock,
+				probe0  => WriteAddress_Ack & AXIMaster_WriteAddress_Valid,
+				probe1  => AXIMaster_WriteAddress_Address(15 downto 0),
+				probe2  => WriteData_Ack & AXIMaster_WriteData_Valid,
+				probe3  => AXIMaster_WriteData_Data(17 downto 0),
+				probe4  => AXIMaster_WriteResponse_Ack & WriteResponse_Valid,
+				probe5  => ReadAddress_Ack & AXIMaster_ReadAddress_Valid,
+				probe6  => AXIMaster_ReadAddress_Address(15 downto 0),
+				probe7  => AXIMaster_ReadData_Ack & ReadData_Valid,
+				probe8  => ReadData_Data(17 downto 0)
+			);
+		
+		JTAGLoader_Clock <= Clock;
+		
+		process(Clock)
+		begin
+			if rising_edge(Clock) then
+				CurrentState <= NextState;
+			end if;
+		end process;
+		
+		process(CurrentState, Pages_DataOut, Address_r,
+		        AXIMaster_WriteAddress_Valid, AXIMaster_WriteAddress_Address,
+		        AXIMaster_WriteData_Valid, AXIMaster_WriteData_Data,
+		        AXIMaster_WriteResponse_Ack,
+						AXIMaster_ReadAddress_Valid,
+						AXIMaster_ReadData_Ack)
+			constant PAGE_ADDRESS_BITS : positive := log2ceilnz(PAGES);
+		begin
+			NextState               <= CurrentState;
+		
+			JTAGLoader_Enable       <= bin2onehot(Address_r(JTAGLoader_Address'length + PAGE_ADDRESS_BITS - 1 downto JTAGLoader_Address'length));
+			JTAGLoader_WriteEnable  <= '0';
+			JTAGLoader_Address      <= Address_r(JTAGLoader_Address'range);
+			JTAGLoader_DataOut(15 downto 0)   <= AXIMaster_WriteData_Data(JTAGLoader_DataOut'high - 2 downto JTAGLoader_DataOut'low);
+			JTAGLoader_DataOut(17 downto 16)  <= AXIMaster_WriteAddress_Address(25 downto 24);
+			
+			WriteAddress_Ack        <= '0';
+			WriteData_Ack           <= '0';
+			WriteResponse_Valid     <= '0';
+			WriteResponse_Response  <= "00";
+			ReadAddress_Ack         <= '0';
+			ReadData_Valid          <= '0';
+			ReadData_Data           <= (31 downto 18 => '0') & Pages_DataOut(to_index(AXIMaster_ReadAddress_Address(JTAGLoader_Address'length + PAGE_ADDRESS_BITS - 1 downto JTAGLoader_Address'length)));
+			ReadData_Response       <= "00";
+		
+			WriteStatus_en          <= '0';
+			ReadAddress_en          <= '0';
+			WriteAddress_en         <= '0';
+			WriteAddress_inc        <= '0';
+		
+			case CurrentState is
+				when ST_IDLE =>
+					if (AXIMaster_ReadAddress_Valid = '1') then
+						ReadAddress_Ack         <= '1';
+						ReadAddress_en          <= '1';
+						
+						NextState <= ST_READING_1;
+					elsif ((AXIMaster_WriteAddress_Valid and AXIMaster_WriteData_Valid) = '1') then
+						if (AXIMaster_WriteAddress_Address = x"00010000") then
+							WriteAddress_Ack      <= '1';
+							WriteStatus_en        <= '1';
+							WriteData_Ack         <= '1';
+							NextState             <= ST_RESPONDING;	
+						else
+							WriteAddress_en       <= '1';
+							NextState             <= ST_WRITING_1;
+						end if;
+					end if;
+				
+				when ST_READING_1 =>
+					NextState                 <= ST_READING_2;
+				
+				when ST_READING_2 =>
+					ReadData_Valid            <= '1';
+					ReadData_Response         <= "00";
+					
+					if (AXIMaster_ReadData_Ack = '1') then
+						NextState               <= ST_IDLE;
+					end if;
+						
+				when ST_WRITING_1 =>
+					JTAGLoader_WriteEnable    <= '1';
+					WriteAddress_inc          <= '1';
+					
+					NextState                 <= ST_WRITING_2;
+						
+				when ST_WRITING_2 =>
+					JTAGLoader_WriteEnable    <= '1';
+					JTAGLoader_DataOut(15 downto 0)   <= AXIMaster_WriteData_Data(16 + JTAGLoader_DataOut'high - 2 downto 16 + JTAGLoader_DataOut'low);
+					JTAGLoader_DataOut(17 downto 16)  <= AXIMaster_WriteAddress_Address(29 downto 28);
+			
+					WriteAddress_Ack          <= '1';
+					WriteData_Ack             <= '1';
+					WriteResponse_Valid       <= '1';
+					WriteResponse_Response    <= "00";
+					
+					if (AXIMaster_WriteResponse_Ack = '1') then
+						NextState               <= ST_IDLE;
+					else
+						NextState               <= ST_RESPONDING;			
+					end if;
+				
+				when ST_RESPONDING =>
+					WriteResponse_Valid       <= '1';
+					WriteResponse_Response    <= "00";
+					
+					if (AXIMaster_WriteResponse_Ack = '1') then
+						NextState               <= ST_IDLE;
+					end if;
+				
+			end case;
+		end process;
+		
+		process(Clock)
+		begin
+			if rising_edge(Clock) then
+				if (ReadAddress_en = '1') then
+					Address_r     <= AXIMaster_ReadAddress_Address(Address_r'range);
+				elsif (WriteAddress_en = '1') then
+					Address_r     <= AXIMaster_WriteAddress_Address(Address_r'high downto Address_r'low + 1) & '0';
+				elsif (WriteAddress_inc = '1') then
+					Address_r(0)  <= '1';
+				end if;
+				
+				if (WriteStatus_en = '1') then
+					Status_r  <= AXIMaster_WriteData_Data(Status_r'range);
+				end if;
+			end if;
+		end process;
+		
+		Reboot  <= Status_r(0);
+	end generate;
+end architecture;
